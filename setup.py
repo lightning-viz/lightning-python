@@ -4,10 +4,7 @@
 '''The setup and build script for the lightning-python library.'''
 
 __author__ = 'github@mathisonian.com'
-__version__ = '0.0.1'
-
-
-from pip.req import parse_requirements
+__version__ = '0.0.1-4'
 
 
 
@@ -15,7 +12,7 @@ from pip.req import parse_requirements
 METADATA = dict(
   name = "lightning-python",
   version = __version__,
-  py_modules = ['lightning'],
+  packages = ['lightning'],
   author='Matthew Conlen',
   author_email='github@mathisonian.com',
   description='A Python client library for Lightning data vizualization notebooks',
@@ -26,12 +23,10 @@ METADATA = dict(
 
 # Extra package metadata to be used only if setuptools is installed
 
-# parse_requirements() returns generator of pip.req.InstallRequirement objects
-install_reqs = parse_requirements('requirements.txt')
 
 
 SETUPTOOLS_METADATA = dict(
-  install_requires = ['setuptools'] + [str(ir.req) for ir in install_reqs],
+  install_requires = ['setuptools', 'requests'],
   include_package_data = True
 )
 
