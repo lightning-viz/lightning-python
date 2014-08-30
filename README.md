@@ -51,13 +51,11 @@ from lightning import Lightning
 lgn = Lightning()
 lgn.create_session()
 
-point_data = {'points': # put point data here
+data = {
+    points: # point data,
+    timeseries: # timeseries data
 }
 
-viz = lgn.plot(data=point_data, type='roi')
-
-
-timeseries_data = # put timeseries data here
-viz.append_data(data=timeseries_data, field='timeseries')
+lgn.plot(data=timeseries_data, type='roi')
 
 ```
