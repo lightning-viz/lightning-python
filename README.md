@@ -3,7 +3,11 @@ python-lightning
 
 Python client for the lightning API
 
+## Installation
 
+```
+pip install lightning-python
+```
 
 ## Usage
 
