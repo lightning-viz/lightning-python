@@ -28,7 +28,7 @@ from lightning import Lightning
 lightning = Lightning()
 
 session_id = 14
-lightning.create_session(session_id)
+lightning.use_session(session_id)
 
 lightning.plot(data=[1,2,3,4,5,6,7,8,0,-2,2], type='line')
 
