@@ -6,6 +6,7 @@ from visualization import Visualization
 
 class Session(object):
     name = None
+    visualizations = []
 
     def __init__(self, host=None, id=None, json=None):
         self.host = host
@@ -21,25 +22,8 @@ class Session(object):
 
 
     def create_visualization(self, data=None, images=None, type=None):
-        viz = None
-        url = self.host + '/sessions/' + str(self.id) + '/visualizations'
-
-        if not images:
-            payload = {'data': data, 'type': type}
-            headers = {'Content-type': 'application/json', 'Accept': 'text/plain'}
-            
-            r = requests.post(url, data=json.dumps(payload), headers=headers)
-            viz = Visualization(session=self, json=r.json())
-        
-        else:
-            first_image, remaining_images = images[0], images[1:]
-            files = {'file': firstImage}
-            
-            r = requests.post(url, files=files, data={'type': type})
-            viz = Visualization(session=self, json=r.json())
-            for image in remaining_images:
-                viz.append_image(image)
-
+        viz = Visualization.create(session=session, data=data, images=images, type=type)
+        self.visualizations.append(viz)
         return viz
 
     @classmethod

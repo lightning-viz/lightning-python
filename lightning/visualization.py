@@ -37,3 +37,24 @@ class Visualization(object):
 
 
         
+    @classmethod
+    def create(cls, session=None, data=None, images=None, type=None):
+        url = session.host + '/sessions/' + str(session.id) + '/visualizations'
+
+        if not images:
+            payload = {'data': data, 'type': type}
+            headers = {'Content-type': 'application/json', 'Accept': 'text/plain'}
+            
+            r = requests.post(url, data=json.dumps(payload), headers=headers)
+            viz = cls(session=session, json=r.json())
+        
+        else:
+            first_image, remaining_images = images[0], images[1:]
+            files = {'file': firstImage}
+            
+            r = requests.post(url, files=files, data={'type': type})
+            viz = Visualization(session=session, json=r.json())
+            for image in remaining_images:
+                viz.append_image(image)
+
+        return viz
