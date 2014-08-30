@@ -54,12 +54,9 @@ lgn.create_session()
 
 point_data = {'points': # put point data here
 }
-viz = lgn.plot(data=point_data, type='roi')
-
-with open('timeseries-larger.json') as data_file:    
-    timeseries_data = json.load(data_file)
-
 timeseries_data = # put timeseries data here
+
+viz = lgn.plot(data=point_data, type='roi')
 viz.append_data(data=timeseries_data, field='timeseries')
 
 ```
