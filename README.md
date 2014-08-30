@@ -56,6 +56,6 @@ data = {
     timeseries: # timeseries data
 }
 
-lgn.plot(data=timeseries_data, type='roi')
+lgn.plot(data=data, type='roi')
 
 ```
