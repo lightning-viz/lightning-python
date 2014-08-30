@@ -22,7 +22,7 @@ class Session(object):
 
 
     def create_visualization(self, data=None, images=None, type=None):
-        viz = Visualization.create(session=session, data=data, images=images, type=type)
+        viz = Visualization.create(session=self, data=data, images=images, type=type)
         self.visualizations.append(viz)
         return viz
 
