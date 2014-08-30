@@ -12,10 +12,10 @@ Python client for the lightning API
 ```python
 from lightning import Lightning
 
-lng = Lightning()
-lng.create_session()
+lightning = Lightning()
+lightning.create_session()
 
-lng.plot(data=[1,2,3,4,5,6,7,8,0,-2,2], type='line')
+lightning.plot(data=[1,2,3,4,5,6,7,8,0,-2,2], type='line')
 
 ```
 
@@ -25,11 +25,11 @@ lng.plot(data=[1,2,3,4,5,6,7,8,0,-2,2], type='line')
 ```python
 from lightning import Lightning
 
-lng = Lightning()
+lightning = Lightning()
 
 session_id = 14
-lng.create_session(session_id)
+lightning.create_session(session_id)
 
-lng.plot(data=[1,2,3,4,5,6,7,8,0,-2,2], type='line')
+lightning.plot(data=[1,2,3,4,5,6,7,8,0,-2,2], type='line')
 
 ```
