@@ -47,7 +47,6 @@ lightning.plot(data=[1,2,3,4,5,6,7,8,0,-2,2], type='line')
 ```python
 
 from lightning import Lightning
-import json
 
 lgn = Lightning()
 lgn.create_session()
