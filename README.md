@@ -13,7 +13,7 @@ Python client for the lightning API
 from lightning import Lightning
 
 lightning = Lightning()
-lightning.create_session("provide an option session name")
+lightning.create_session("provide an optional session name")
 
 lightning.plot(data=[1,2,3,4,5,6,7,8,0,-2,2], type='line')
 
