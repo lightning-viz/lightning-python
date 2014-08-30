@@ -11,7 +11,7 @@ pip install lightning-python
 
 ## Usage
 
-### Example 1 - Creating a new session
+### Creating a new session
 
 ```python
 from lightning import Lightning
@@ -23,7 +23,7 @@ lightning.plot(data=[1,2,3,4,5,6,7,8,0,-2,2], type='line')
 
 ```
 
-### Example 2 - Using an existing session
+### Using an existing session
 
 
 ```python
@@ -35,5 +35,31 @@ session_id = 14
 lightning.use_session(session_id)
 
 lightning.plot(data=[1,2,3,4,5,6,7,8,0,-2,2], type='line')
+
+```
+
+## Examples
+
+### ROI
+
+#### Creates a new visualization with scatter plot and then appends time series data for each scatter point
+
+```python
+
+from lightning import Lightning
+import json
+
+lgn = Lightning()
+lgn.create_session()
+
+point_data = {'points': # put point data here
+}
+viz = lgn.plot(data=point_data, type='roi')
+
+with open('timeseries-larger.json') as data_file:    
+    timeseries_data = json.load(data_file)
+
+timeseries_data = # put timeseries data here
+viz.append_data(data=timeseries_data, field='timeseries')
 
 ```
