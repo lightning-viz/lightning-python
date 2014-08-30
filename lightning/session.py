@@ -14,8 +14,6 @@ class Session(object):
             self.id = json.get('id')
             self.name = json.get('name')
 
-        print self
-
     def __str__(self):
         if self.name:
             return self.name

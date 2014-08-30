@@ -15,11 +15,25 @@ class Visualization(object):
     def append_image(self, image):
         url = self.session.host + '/sessions/' + str(self.session.id) + '/visualizations' + str(self.id) + '/data/images'
         files = {'file': image}
-        r = requests.post(url, files=files)
+        return requests.post(url, files=files)
 
 
-    def append_data(self, data):
-        pass
+    def append_data(self, data=None, field=None):
+        payload = {'data': data, 'type': type}
+        headers = {'Content-type': 'application/json', 'Accept': 'text/plain'}        
+        url = self.session.host + '/sessions/' + str(self.session.id) + '/visualizations' + str(self.id) + '/data/'
+        if field:
+            url += field
+        return requests.post(url, data=json.dumps(payload), headers=headers)
 
-    def update_data(self, data):
-        pass
+
+    def update_data(self, data=None, field=None):
+        payload = {'data': data, 'type': type}
+        headers = {'Content-type': 'application/json', 'Accept': 'text/plain'}        
+        url = self.session.host + '/sessions/' + str(self.session.id) + '/visualizations' + str(self.id) + '/data/'
+        if field:
+            url += field
+        return requests.put(url, data=json.dumps(payload), headers=headers)
+
+
+        
