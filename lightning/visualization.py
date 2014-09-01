@@ -50,7 +50,7 @@ class Visualization(object):
         
         else:
             first_image, remaining_images = images[0], images[1:]
-            files = {'file': firstImage}
+            files = {'file': first_image}
             
             r = requests.post(url, files=files, data={'type': type})
             viz = Visualization(session=session, json=r.json())
