@@ -2,11 +2,10 @@ import requests
 import os
 import time
 import json
-from numpy import ndarray
+from numpy import ndarray, asarray, vstack
 from session import Session
 from matplotlib.pyplot import imsave
 from matplotlib.pyplot import cm
-import StringIO
 import io
 
 
@@ -16,7 +15,8 @@ class Lightning(object):
     host = "http://lightning.mathisonian.com"
 
     data_dict_inputs = {
-        'points': ['x', 'y']
+        'points': ['x', 'y'],
+        'colors': ['r', 'g', 'b']
     }
 
     def __new__(cls, *args, **kwargs):
@@ -57,6 +57,7 @@ class Lightning(object):
             return out
 
     def _ensure_dict_or_list(self, x):
+
         if isinstance(x, dict):
             return x
 
@@ -65,7 +66,7 @@ class Lightning(object):
 
         try:
             # Convert Numpy arrays to lists
-            return x.toList()
+            return x.tolist()
         except Exception:
             pass
 
@@ -87,7 +88,17 @@ class Lightning(object):
 
         return imfile.getvalue()
 
+    def _check_colors(self, clrs):
+        clrs = asarray(clrs)
+        if clrs.ndim != 2:
+            raise Exception("Color array must be two dimensional")
+        elif clrs.shape[1] != 3:
+            raise Exception("Colors must be three-dimensional")
+        else:
+            return clrs
+
     def image(self, imagedata, type=None):
+
         if not type:
             raise Exception("Must provide a plot type")
 
@@ -108,7 +119,19 @@ class Lightning(object):
 
         return self.session.create_visualization(images=out, type=type)
 
+    def scatter(self, x, y, clrs=None):
+
+        x = asarray(x)
+        y = asarray(y)
+        points = vstack([x, y]).T
+
+        if clrs is not None:
+            return self.plot(points=points, colors=self._check_colors(clrs), type='scatter')
+        else:
+            return self.plot(points=points, type="scatter")
+
     def plot(self, type=None, **kwargs):
+
         if not type:
             raise Exception("Must provide a plot type")
 
