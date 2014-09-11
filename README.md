@@ -64,7 +64,7 @@ lgn.plot(data=data, type='roi')
 
 Generate a few random images and show as a gallery
 
-``python
+```python
 
 from lightning import Lightning
 from numpy import random
@@ -77,3 +77,4 @@ img2 = random.rand(256,256,3)
 
 lgn.image([img1,img2], type='gallery')
 
+```
