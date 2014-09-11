@@ -42,7 +42,7 @@ lightning.plot(data=[1,2,3,4,5,6,7,8,0,-2,2], type='line')
 
 ### ROI
 
-#### Creates a new visualization with scatter plot and then appends time series data for each scatter point
+Creates a new visualization with scatter plot and then appends time series data for each scatter point
 
 ```python
 
@@ -59,3 +59,21 @@ data = {
 lgn.plot(data=data, type='roi')
 
 ```
+
+### Image
+
+Generate a few random images and show as a gallery
+
+``python
+
+from lightning import Lightning
+from numpy import random
+
+lgn = Lightning()
+lgn.create_session()
+
+img1 = random.rand(256,256)
+img2 = random.rand(256,256,3)
+
+lgn.image([img1,img2], type='gallery')
+
