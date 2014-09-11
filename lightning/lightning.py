@@ -2,9 +2,12 @@ import requests
 import os
 import time
 import json
+from numpy import ndarray
 from session import Session
-
-
+from matplotlib.pyplot import imsave
+from matplotlib.pyplot import cm
+import StringIO
+import io
 
 
 class Lightning(object):
@@ -30,7 +33,28 @@ class Lightning(object):
         self.session = Session(host=self.host, id=session_id)
         return self.session
 
+    def _check_unkeyed_arrays(self, key, val):
 
+        if not key in self.data_dict_inputs:
+            return val
+
+        if not isinstance(val, list):
+            raise Exception("Must provide a list")
+
+        if len(val) == 0:
+            return val
+
+        if isinstance(val[0], dict) and isinstance(val[-1], dict):
+            return val
+
+        if isinstance(val[0], list) and isinstance(val[-1], list):
+            # if both the first and last elements are lists
+            out = []
+            mapping = self.data_dict_inputs[key]
+            for l in val:
+                out.append(dict(zip(mapping, l)))
+
+            return out
 
     def _ensure_dict_or_list(self, x):
         if isinstance(x, dict):
@@ -45,40 +69,44 @@ class Lightning(object):
         except Exception:
             pass
 
-
         # add other data type conversions here
-
         raise Exception("Could not convert to correct data type")
 
+    def _array_to_im(self, im):
 
-    def _check_unkeyed_arrays(self, key, val):
+        imfile = io.BytesIO()
+        if im.ndim == 3:
+            # if 3D, show as RGB
+            imsave(imfile, im, format="png")
+        else:
+            # if 2D, show as grayscale
+            imsave(imfile, im, format="png", cmap=cm.gray)
 
-        if not key in self.data_dict_inputs:
-            return val
+        if im.ndim > 3:
+            raise Exception("Images must be 2 or 3 dimensions")
 
+        return imfile.getvalue()
 
-        if not isinstance(val, list):
-            raise Exception("Must provide a list")
+    def image(self, imagedata, type=None):
+        if not type:
+            raise Exception("Must provide a plot type")
 
+        out = []
+        # an array means a single image for image display
+        if isinstance(imagedata, ndarray):
+            out.append(self._array_to_im(imagedata))
+            if type == "gallery" or type == "volume":
+                raise Exception("must provide multiple images for gallery or volume")
+        # a list means a set of images for gallery or volume display
+        elif isinstance(imagedata, list):
+            if type == "image":
+                raise Exception("can only display one image")
+            for im in imagedata:
+                out.append(self._array_to_im(im))
+        else:
+            raise Exception("Could not parse image format, must be list or ndarray")
 
-        if len(val) == 0:
-            return val
-
-        
-        if isinstance(val[0], dict) and isinstance(val[-1], dict):
-            return val
-
-        
-        if isinstance(val[0], list) and isinstance(val[-1], list):
-            # if both the first and last elements are lists
-            out = []
-            mapping = self.data_dict_inputs[key]
-            for l in val:
-                out.append(dict(zip(mapping, l)))
-
-            return out
-
-
+        return self.session.create_visualization(images=out, type=type)
 
     def plot(self, type=None, **kwargs):
         if not type:
@@ -95,4 +123,7 @@ class Lightning(object):
                 data[key] = self._check_unkeyed_arrays(key, d)
 
             return self.session.create_visualization(data=data, type=type)
+
+
+        
 
