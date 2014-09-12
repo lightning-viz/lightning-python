@@ -2,7 +2,7 @@ import requests
 import os
 import time
 import json
-from numpy import ndarray, asarray, vstack
+from numpy import ndarray, asarray, vstack, transpose, nonzero, concatenate, atleast_2d, ones, int
 from session import Session
 from matplotlib.pyplot import imsave
 from matplotlib.pyplot import cm
@@ -16,7 +16,9 @@ class Lightning(object):
 
     data_dict_inputs = {
         'points': ['x', 'y'],
-        'colors': ['r', 'g', 'b']
+        'colors': ['r', 'g', 'b'],
+        'links': ['source', 'target', 'value'],
+        'nodes': ['group']
     }
 
     def __new__(cls, *args, **kwargs):
@@ -97,10 +99,7 @@ class Lightning(object):
         else:
             return clrs
 
-    def image(self, imagedata, type=None):
-
-        if not type:
-            raise Exception("Must provide a plot type")
+    def image(self, imagedata, type="image"):
 
         out = []
         # an array means a single image for image display
@@ -119,8 +118,22 @@ class Lightning(object):
 
         return self.session.create_visualization(images=out, type=type)
 
+    def network(self, mat, labels=None):
+
+        # determine links from nonzero entries
+        inds = nonzero(mat)
+        links = concatenate((transpose(nonzero(mat)), atleast_2d(mat[inds]).T), axis=1)
+
+        if labels is None:
+            labels = ones((1, mat.shape[0])).T
+        else:
+            labels = labels.astype(int).reshape(labels.size, 1)
+
+        return self.plot(links=links, nodes=labels, type="force-directed-network")
+
     def scatter(self, x, y, clrs=None):
 
+        # concatenate x and y coordinates
         x = asarray(x)
         y = asarray(y)
         points = vstack([x, y]).T
