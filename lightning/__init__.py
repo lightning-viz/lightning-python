@@ -1,2 +1,3 @@
 
-from lightning import Lightning
+from lightning import Lightning, Session
+from visualization import Visualization

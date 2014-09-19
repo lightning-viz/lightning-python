@@ -22,7 +22,7 @@ var/
 .installed.cfg
 *.egg
 .pypirc
-test*
+
 
 # Installer logs
 pip-log.txt
