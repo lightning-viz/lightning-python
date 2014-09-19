@@ -69,6 +69,7 @@ class Lightning(object):
         try:
             # Convert Numpy arrays to lists
             return x.tolist()
+
         except Exception:
             pass
 
