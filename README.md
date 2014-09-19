@@ -1,7 +1,7 @@
 python-lightning
 ================
 
-Python client for the lightning API
+Python client for the [lightning](https://github.com/mathisonian/lightning) API
 
 ## Installation
 
@@ -17,6 +17,7 @@ pip install lightning-python
 from lightning import Lightning
 
 lightning = Lightning()
+lightning.host = "http://my-lightning-instance.herokuapp.com"
 lightning.create_session("provide an optional session name")
 
 lightning.plot(data=[1,2,3,4,5,6,7,8,0,-2,2], type='line')
@@ -30,6 +31,7 @@ lightning.plot(data=[1,2,3,4,5,6,7,8,0,-2,2], type='line')
 from lightning import Lightning
 
 lightning = Lightning()
+lightning.host = "http://my-lightning-instance.herokuapp.com"
 
 session_id = 14
 lightning.use_session(session_id)
@@ -49,6 +51,8 @@ Creates a new visualization with scatter plot and then appends time series data 
 from lightning import Lightning
 
 lgn = Lightning()
+lightning.host = "http://my-lightning-instance.herokuapp.com"
+
 lgn.create_session()
 
 data = {
@@ -70,6 +74,8 @@ from lightning import Lightning
 from numpy import random
 
 lgn = Lightning()
+lightning.host = "http://my-lightning-instance.herokuapp.com"
+
 lgn.create_session()
 
 img1 = random.rand(256,256)
