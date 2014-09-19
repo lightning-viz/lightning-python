@@ -1,5 +1,5 @@
 from lightning import Lightning, Session, Visualization
-from random import randrange
+from random import randrange, uniform
 from numpy import random
 
 
@@ -53,4 +53,25 @@ class TestLightningAPIClient:
         img1 = random.rand(256, 256)
         img2 = random.rand(256, 256)
 
-        lightning.image([img1, img2], type='gallery')
+        viz = lightning.image([img1, img2], type='gallery')
+
+        assert isinstance(viz, Visualization)
+        assert hasattr(viz, 'id')
+
+
+
+    def test_create_roi(self):        
+
+
+        points = [{ 'x': randrange(100), 'y': randrange(100), 'i': i} for i in xrange(50)]
+        timeseries = [[uniform(-1, 1) for _ in xrange(1000)] for _ in xrange(50)]
+
+        data = {
+            'points': points,
+            'timeseries': timeseries
+        }
+
+        viz = lightning.plot(data=data, type='roi')
+
+        assert isinstance(viz, Visualization)
+        assert hasattr(viz, 'id')
