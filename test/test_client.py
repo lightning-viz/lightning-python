@@ -1,8 +1,11 @@
 from lightning import Lightning, Session, Visualization
 from random import randrange
+from numpy import random
+
 
 lightning = Lightning()
 lightning.host = 'http://localhost:3000'
+
 
 class TestLightningAPIClient:
 
@@ -42,3 +45,12 @@ class TestLightningAPIClient:
 
         assert isinstance(viz, Visualization)
         assert hasattr(viz, 'id')
+
+
+
+    def test_create_image(self):
+
+        img1 = random.rand(256, 256)
+        img2 = random.rand(256, 256)
+
+        lightning.image([img1, img2], type='gallery')

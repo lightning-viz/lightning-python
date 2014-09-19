@@ -46,8 +46,13 @@ class Visualization(object):
             headers = {'Content-type': 'application/json', 'Accept': 'text/plain'}
             
             r = requests.post(url, data=json.dumps(payload), headers=headers)
+
+            if not r.status_code == requests.codes.ok:
+                raise Exception('Problem uploading data')
+
             viz = cls(session=session, json=r.json())
-        
+
+
         else:
             if not type:
                 if len(images) > 1:
@@ -60,6 +65,10 @@ class Visualization(object):
             files = {'file': first_image}
             
             r = requests.post(url, files=files, data={'type': type})
+
+            if not r.status_code == requests.codes.ok:
+                raise Exception('Problem uploading images')
+
             viz = Visualization(session=session, json=r.json())
             for image in remaining_images:
                 viz.append_image(image)
