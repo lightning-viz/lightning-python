@@ -12,7 +12,7 @@ import io
 class Lightning(object):
     _instance = None
     
-    host = "http://lightning.mathisonian.com"
+    host = "http://localhost:3000"
 
     data_dict_inputs = {
         'points': ['x', 'y'],
