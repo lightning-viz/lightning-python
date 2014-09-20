@@ -76,3 +76,14 @@ class TestLightningAPIClient:
 
         assert isinstance(viz, Visualization)
         assert hasattr(viz, 'id')
+
+
+
+    def test_create_line(self):
+
+        timeseries = [[randrange(100) for x in xrange(50)] for _ in xrange(6)]
+
+        viz = lightning.plot('stacked-line', data=timeseries)
+
+        assert isinstance(viz, Visualization)
+        assert hasattr(viz, 'id')
