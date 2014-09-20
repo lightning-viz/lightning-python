@@ -84,3 +84,20 @@ img2 = random.rand(256,256,3)
 lgn.image([img1,img2], type='gallery')
 
 ```
+
+## running tests
+
+
+(you will need to have [pytest](http://pytest.org/latest/) installed)
+
+
+Clone this repo and install the library locally:
+
+`pip install -e .` 
+
+
+The tests expect a lightning server to be running locally.
+
+Then run pytests:
+
+`py.test`
