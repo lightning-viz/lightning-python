@@ -4,13 +4,14 @@ from numpy import random
 
 
 lightning = Lightning()
-lightning.host = 'http://localhost:3000'
 
 
 class TestLightningAPIClient:
 
-    def test_create_session(self):
-        
+    def test_create_session(self, host):
+
+        lightning.host = host
+
         session = lightning.create_session()
         
         assert isinstance(session, Session)

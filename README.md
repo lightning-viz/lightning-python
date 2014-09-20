@@ -93,11 +93,26 @@ lgn.image([img1,img2], type='gallery')
 
 Clone this repo and install the library locally:
 
-`pip install -e .` 
+```sh
+$ pip install -e .
+``` 
 
 
-The tests expect a lightning server to be running locally.
+The tests need to be run against a lightning server. By default they expect
+this to be found at `http://localhost:3000`.
 
-Then run pytests:
+To run the tests:
 
-`py.test`
+```
+$ py.test
+```
+
+or with against a custom host url
+
+
+```
+$ py.test --host=http://mylightninghost.herokuapp.com
+```
+
+
+
