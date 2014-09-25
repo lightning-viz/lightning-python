@@ -1,3 +1,3 @@
-
-from lightning import Lightning, Session
-from visualization import Visualization
+from .main import Lightning
+from .session import Session
+from .visualization import Visualization
