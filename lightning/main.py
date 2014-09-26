@@ -10,9 +10,6 @@ import io
 
 
 class Lightning(object):
-    _instance = None
-    
-    host = "http://localhost:3000"
 
     data_dict_inputs = {
         'points': ['x', 'y'],
@@ -21,11 +18,10 @@ class Lightning(object):
         'nodes': ['group']
     }
 
-    def __new__(cls, *args, **kwargs):
-        if not cls._instance:
-            cls._instance = super(Lightning, cls).__new__(
-                                cls, *args, **kwargs)
-        return cls._instance
+    def __init__(self, host="http://localhost:3000", ipython=False):
+        self.host = host
+        self.ipython = ipython
+
 
     def create_session(self, name=None):
         self.session = Session.create(self.host, name=name)
@@ -151,7 +147,7 @@ class Lightning(object):
 
         if 'data' in kwargs:
             data = kwargs['data']
-            return self.session.create_visualization(data=self._ensure_dict_or_list(data), type=type)
+            return self.session.create_visualization(data=self._ensure_dict_or_list(data), type=type, ipython=self.ipython)
 
         else:
             data = {}
@@ -159,7 +155,7 @@ class Lightning(object):
                 d = self._ensure_dict_or_list(kwargs[key])
                 data[key] = self._check_unkeyed_arrays(key, d)
 
-            return self.session.create_visualization(data=data, type=type)
+            return self.session.create_visualization(data=data, type=type, ipython=self.ipython)
 
 
         

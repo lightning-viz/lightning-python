@@ -21,8 +21,8 @@ class Session(object):
         return str(self.id)
 
 
-    def create_visualization(self, data=None, images=None, type=None):
-        viz = Visualization.create(session=self, data=data, images=images, type=type)
+    def create_visualization(self, data=None, images=None, type=None, ipython=False):
+        viz = Visualization.create(session=self, data=data, images=images, type=type, ipython=ipython)
         self.visualizations.append(viz)
         return viz
 
