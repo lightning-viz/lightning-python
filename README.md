@@ -16,8 +16,7 @@ pip install lightning-python
 ```python
 from lightning import Lightning
 
-lightning = Lightning()
-lightning.host = "http://my-lightning-instance.herokuapp.com"
+lightning = Lightning(host="http://my-lightning-instance.herokuapp.com")
 lightning.create_session("provide an optional session name")
 
 lightning.plot(data=[1,2,3,4,5,6,7,8,0,-2,2], type='line')
@@ -30,8 +29,7 @@ lightning.plot(data=[1,2,3,4,5,6,7,8,0,-2,2], type='line')
 ```python
 from lightning import Lightning
 
-lightning = Lightning()
-lightning.host = "http://my-lightning-instance.herokuapp.com"
+lightning = Lightning(host="http://my-lightning-instance.herokuapp.com")
 
 session_id = 14
 lightning.use_session(session_id)
@@ -39,6 +37,22 @@ lightning.use_session(session_id)
 lightning.plot(data=[1,2,3,4,5,6,7,8,0,-2,2], type='line')
 
 ```
+
+### Using with iPython
+
+```python
+from lightning import Lightning
+
+lightning = Lightning(host="http://my-lightning-instance.herokuapp.com", ipython=True)
+
+session_id = 14
+lightning.use_session(session_id)
+
+lightning.plot(data=[1,2,3,4,5,6,7,8,0,-2,2], type='line')
+
+```
+
+
 
 ## Examples
 
@@ -50,8 +64,7 @@ Creates a new visualization with scatter plot and then appends time series data 
 
 from lightning import Lightning
 
-lgn = Lightning()
-lightning.host = "http://my-lightning-instance.herokuapp.com"
+lgn = Lightning(host="http://my-lightning-instance.herokuapp.com")
 
 lgn.create_session()
 
@@ -73,8 +86,7 @@ Generate a few random images and show as a gallery
 from lightning import Lightning
 from numpy import random
 
-lgn = Lightning()
-lightning.host = "http://my-lightning-instance.herokuapp.com"
+lgn = Lightning(host="http://my-lightning-instance.herokuapp.com")
 
 lgn.create_session()
 
