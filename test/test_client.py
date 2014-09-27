@@ -87,3 +87,15 @@ class TestLightningAPIClient:
 
         assert isinstance(viz, Visualization)
         assert hasattr(viz, 'id')
+
+
+
+    def test_ipython_support(self):
+
+        lightning.ipython = True
+        x = [randrange(100) for x in xrange(50)]
+
+        viz = lightning.plot('line', data=x)
+
+        assert isinstance(viz, Visualization)
+        assert hasattr(viz, 'id')

@@ -37,11 +37,23 @@ class Visualization(object):
 
 
     def get_permalink(self):
-        self.session.host + '/visualizations/' + str(self.id) + '/'
+        return self.session.host + '/visualizations/' + str(self.id)
 
-        
+
+    def get_embed_link(self):
+        return self.get_permalink() + '/embed'
+
+
+    def get_html(self):
+        import urllib2
+
+        response = urllib2.urlopen(self.get_embed_link())
+
+        return response.read()
+
+
     @classmethod
-    def create(cls, session=None, data=None, images=None, type=None, ipython=False):
+    def create(cls, session=None, data=None, images=None, type=None):
         url = session.host + '/sessions/' + str(session.id) + '/visualizations'
 
         if not images:
@@ -76,9 +88,5 @@ class Visualization(object):
             for image in remaining_images:
                 viz.append_image(image)
 
-
-        if ipython:
-            from IPython.display import HTML
-            HTML('<iframe src=' + self.get_permalink() + ' width=800 height=350></iframe>')
 
         return viz
