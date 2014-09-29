@@ -2,7 +2,7 @@ import requests
 import os
 import time
 import json
-from numpy import ndarray, asarray, vstack, transpose, nonzero, concatenate, atleast_2d, ones, int
+from numpy import ndarray, asarray, vstack, transpose, nonzero, concatenate, atleast_2d, ones, int, zeros
 from session import Session
 from visualization import Visualization
 from matplotlib.pyplot import imsave
@@ -25,7 +25,6 @@ class Lightning(object):
         if ipython:
             self.enable_ipython()
 
-
     def enable_ipython(self, **kwargs):
         '''
         ipython code inspired by code powering similar functionality in mpld3:
@@ -38,15 +37,11 @@ class Lightning(object):
         formatter.for_type(Visualization,
                            lambda viz, kwds=kwargs: viz.get_html())
 
-
-
     def disable_ipython(self):
         from IPython.core.getipython import get_ipython
         ip = get_ipython()
         formatter = ip.display_formatter.formatters['text/html']
         formatter.type_printers.pop(Visualization, None)
-
-
 
     def create_session(self, name=None):
         self.session = Session.create(self.host, name=name)
@@ -78,6 +73,16 @@ class Lightning(object):
                 out.append(dict(zip(mapping, l)))
 
             return out
+
+    def _check_colors(self, clrs):
+    
+        clrs = asarray(clrs)
+        if clrs.ndim != 2:
+            raise Exception("Color array must be two dimensional")
+        elif clrs.shape[1] != 3:
+            raise Exception("Colors must be three-dimensional")
+        else:
+            return clrs
 
     def _ensure_dict_or_list(self, x):
 
@@ -112,23 +117,33 @@ class Lightning(object):
 
         return imfile.getvalue()
 
-    def _check_colors(self, clrs):
-        clrs = asarray(clrs)
-        if clrs.ndim != 2:
-            raise Exception("Color array must be two dimensional")
-        elif clrs.shape[1] != 3:
-            raise Exception("Colors must be three-dimensional")
+    def _mat_to_links(self, mat, labels):
+
+        # get nonzero entries as list with the source, target, and value as columns
+        inds = nonzero(mat)
+        links = concatenate((transpose(nonzero(mat)), atleast_2d(mat[inds]).T), axis=1)
+
+        # pick group assignments (default is all 1s)
+        n = mat.shape[0]
+        if labels is None:
+            nodes = zeros((1, n)).T
         else:
-            return clrs
+            if labels.size != n:
+                raise Exception("Must provide label for each row")
+            nodes = labels.astype(int).reshape(labels.size, 1)
+
+        return links, nodes
 
     def image(self, imagedata, type="image"):
 
         out = []
+
         # an array means a single image for image display
         if isinstance(imagedata, ndarray):
             out.append(self._array_to_im(imagedata))
             if type == "gallery" or type == "volume":
                 raise Exception("must provide multiple images for gallery or volume")
+
         # a list means a set of images for gallery or volume display
         elif isinstance(imagedata, list):
             if type == "image":
@@ -142,16 +157,15 @@ class Lightning(object):
 
     def network(self, mat, labels=None):
 
-        # determine links from nonzero entries
-        inds = nonzero(mat)
-        links = concatenate((transpose(nonzero(mat)), atleast_2d(mat[inds]).T), axis=1)
+        links, nodes = self._mat_to_links(mat, labels)
 
-        if labels is None:
-            labels = ones((1, mat.shape[0])).T
-        else:
-            labels = labels.astype(int).reshape(labels.size, 1)
+        return self.plot(links=links, nodes=nodes, type="force-directed-network")
 
-        return self.plot(links=links, nodes=labels, type="force-directed-network")
+    def matrix(self, mat, labels=None):
+
+        links, nodes = self._mat_to_links(mat, labels)
+
+        return self.plot(links=links, nodes=nodes, type="matrix")
 
     def scatter(self, x, y, clrs=None):
 
