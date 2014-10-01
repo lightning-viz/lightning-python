@@ -52,6 +52,9 @@ lightning.plot(data=[1,2,3,4,5,6,7,8,0,-2,2], type='line')
 
 ```
 
+![ipython-example](http://i.gif.fm/6ZTdQ.png)
+
+
 
 
 ## Examples
