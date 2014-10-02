@@ -3,6 +3,7 @@ import os
 import time
 import json
 from visualization import Visualization
+import webbrowser
 
 class Session(object):
     name = None
@@ -25,6 +26,11 @@ class Session(object):
         viz = Visualization.create(session=self, data=data, images=images, type=type)
         self.visualizations.append(viz)
         return viz
+
+
+    def open(self):
+        webbrowser.open(self.host + '/sessions/' + str(self.id) + '/feed/')
+
 
     @classmethod
     def create(cls, host, name=None):

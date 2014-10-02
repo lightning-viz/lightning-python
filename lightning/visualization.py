@@ -2,6 +2,7 @@ import requests
 import os
 import time
 import json
+import webbrowser
 
 
 class Visualization(object):
@@ -50,6 +51,10 @@ class Visualization(object):
         response = urllib2.urlopen(self.get_embed_link())
 
         return response.read()
+
+
+    def open(self):
+        webbrowser.open(self.session.host + '/visualizations/' + str(self.id) + '/')
 
 
     @classmethod
