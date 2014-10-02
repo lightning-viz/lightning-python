@@ -99,3 +99,34 @@ class TestLightningAPIClient:
 
         assert isinstance(viz, Visualization)
         assert hasattr(viz, 'id')
+
+
+
+    def test_create_map(self):
+
+
+        mapDict = {
+            'MI': 1.0,
+            'NY': 0.75,
+            'CA': 0.33,
+            'OH': 0.5
+        }
+
+        viz = lightning.plot('map', data=mapDict)
+
+        assert isinstance(viz, Visualization)
+        assert hasattr(viz, 'id')
+
+
+
+    def test_create_matrix(self):
+
+        import numpy as np
+
+        mat = np.array([[1, 2, 3, 4], [5, 6, 7, 8], [9, 10, 11, 12], [13, 14, 15, 16]])
+        viz = lightning.matrix(mat)
+
+        assert isinstance(viz, Visualization)
+        assert hasattr(viz, 'id')
+
+
