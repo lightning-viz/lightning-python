@@ -134,3 +134,13 @@ class TestLightningAPIClient:
         assert hasattr(viz, 'id')
 
 
+    def test_create_network(self):
+
+        import numpy as np
+
+        mat = np.array([[random.uniform(0, 15) if random.random() > 0.8 else 0 for _ in xrange(15)] for _ in xrange(15)])
+        viz = lightning.network(mat)
+
+        assert isinstance(viz, Visualization)
+        assert hasattr(viz, 'id')
+
