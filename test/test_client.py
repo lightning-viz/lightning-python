@@ -102,21 +102,25 @@ class TestLightningAPIClient:
 
 
 
-    def test_create_map(self):
+    def test_create_us_map(self):
 
-
-        mapDict = {
-            'MI': 1.0,
-            'NY': 0.75,
-            'CA': 0.33,
-            'OH': 0.5
-        }
+        states = ["NA", "AK", "AL", "AR", "AZ", "CA", "CO","CT","DC","DE","FL","GA","HI","IA","ID","IL","IN","KS","KY","LA","MA","MD","ME","MI","MN","MO","MS","MT","NC","ND","NE","NH","NJ","NM","NV","NY","OH","OK","OR","PA","RI","SC","SD","TN","TX","UT","VA","VI","VT","WA","WI","WV","WY"]
+        mapDict = dict((state, random.random()) for state in states)
 
         viz = lightning.plot('map', data=mapDict)
 
         assert isinstance(viz, Visualization)
         assert hasattr(viz, 'id')
 
+    def test_create_world_map(self):
+
+        countries = ["USA", "MEX", "CAN", "GER", "AUS", "BRA", "ARG", "PER", "SPA", "POR", "FRA", "ITA", "RUS", "CHN", "IND"]
+        mapDict = dict((country, random.random()) for country in countries)
+
+        viz = lightning.plot('map', data=mapDict)
+
+        assert isinstance(viz, Visualization)
+        assert hasattr(viz, 'id')
 
 
     def test_create_matrix(self):
