@@ -16,7 +16,7 @@ class Visualization(object):
     def append_image(self, image):
         url = self.session.host + '/sessions/' + str(self.session.id) + '/visualizations/' + str(self.id) + '/data/images'
         files = {'file': image}
-        return requests.post(url, files=files)
+        return requests.post(url, files=files, data={'type': 'image'})
 
 
     def append_data(self, data=None, field=None):
