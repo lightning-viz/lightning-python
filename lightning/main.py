@@ -15,6 +15,7 @@ class Lightning(object):
     data_dict_inputs = {
         'points': ['x', 'y', 'i'],
         'colors': ['r', 'g', 'b'],
+        'labels': ['k'],
         'links': ['source', 'target', 'value'],
         'nodes': ['group']
     }
