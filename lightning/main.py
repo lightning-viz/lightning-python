@@ -168,11 +168,30 @@ class Lightning(object):
 
         return self.session.create_visualization(images=out, type=type)
 
-    def network(self, mat, labels=None):
+    def forcenetwork(self, mat, labels=None):
 
         links, nodes = self._mat_to_links(mat, labels)
 
-        return self.plot(links=links, nodes=nodes, type="force-directed-network")
+        return self.plot(links=links, nodes=nodes, type='force-directed-network')
+
+    def spatialnetwork(self, mat, x, y, imagedata=None, bundling=False):
+
+        points = self._vecs_to_points(x, y)
+
+        links, nodes = self._mat_to_links(mat)
+
+        if bundling:
+            plottype = 'force-bundle'
+        else:
+            plottype = 'node-link'
+
+        viz = self.plot(links=links, points=points, type=plottype)
+
+        if imagedata is not None:
+            viz.append_image(self._array_to_im(imagedata))
+        
+        return viz
+
     def roi(self, x, y, data):
 
         points = self._vecs_to_points(x, y)
@@ -189,10 +208,7 @@ class Lightning(object):
 
     def scatter(self, x, y, clrs=None):
 
-        # concatenate x and y coordinates
-        x = asarray(x)
-        y = asarray(y)
-        points = vstack([x, y]).T
+        points = self._vecs_to_points(x, y)
 
         if clrs is not None:
             clrs = self._check_colors(clrs)
