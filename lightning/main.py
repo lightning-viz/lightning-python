@@ -2,7 +2,8 @@ import requests
 import os
 import time
 import json
-from numpy import ndarray, asarray, vstack, transpose, nonzero, concatenate, atleast_2d, ones, int, zeros
+from numpy import ndarray, asarray, vstack, transpose, nonzero, \
+    concatenate, atleast_2d, ones, int, zeros, hstack, newaxis
 from session import Session
 from visualization import Visualization
 from matplotlib.pyplot import imsave
@@ -78,12 +79,15 @@ class Lightning(object):
     def _check_colors(self, clrs):
     
         clrs = asarray(clrs)
-        if clrs.ndim != 2:
-            raise Exception("Color array must be two dimensional")
+        if clrs.ndim == 2 and clrs.shape[1] == 1:
+            clrs = clrs.flatten()
+        if clrs.ndim == 2 and clrs.shape[0] == 1:
+            clrs = clrs.flatten()
+        if clrs.ndim == 1:
+            clrs = clrs[:,newaxis]
         elif clrs.shape[1] != 3:
-            raise Exception("Colors must be three-dimensional")
-        else:
-            return clrs
+            raise Exception("Color array must have three values per point")
+        return clrs
 
     def _ensure_dict_or_list(self, x):
 
@@ -191,7 +195,11 @@ class Lightning(object):
         points = vstack([x, y]).T
 
         if clrs is not None:
-            return self.plot(points=points, colors=self._check_colors(clrs), type='scatter')
+            clrs = self._check_colors(clrs)
+            if clrs.shape[1] == 1:
+                return self.plot(points=points, labels=clrs, type='scatter')
+            else:
+                return self.plot(points=points, colors=clrs, type='scatter')
         else:
             return self.plot(points=points, type="scatter")
 
@@ -209,7 +217,6 @@ class Lightning(object):
             for key in kwargs:
                 d = self._ensure_dict_or_list(kwargs[key])
                 data[key] = self._check_unkeyed_arrays(key, d)
-
             return self.session.create_visualization(data=data, type=type)
 
 
