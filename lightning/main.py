@@ -13,7 +13,7 @@ import io
 class Lightning(object):
 
     data_dict_inputs = {
-        'points': ['x', 'y'],
+        'points': ['x', 'y', 'i'],
         'colors': ['r', 'g', 'b'],
         'links': ['source', 'target', 'value'],
         'nodes': ['group']
