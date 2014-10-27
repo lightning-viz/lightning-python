@@ -117,7 +117,15 @@ class Lightning(object):
 
         return imfile.getvalue()
 
-    def _mat_to_links(self, mat, labels):
+    def _vecs_to_points(self, x, y):
+        
+        x = asarray(x)
+        y = asarray(y)
+        points = vstack([x, y, range(0,len(x))]).T
+
+        return points
+
+    def _mat_to_links(self, mat, labels=None):
 
         # get nonzero entries as list with the source, target, and value as columns
         inds = nonzero(mat)
@@ -160,6 +168,13 @@ class Lightning(object):
         links, nodes = self._mat_to_links(mat, labels)
 
         return self.plot(links=links, nodes=nodes, type="force-directed-network")
+    def roi(self, x, y, data):
+
+        points = self._vecs_to_points(x, y)
+
+        timeseries = self._ensure_dict_or_list(data)
+
+        return self.plot(points=points, timeseries=timeseries, type='roi')
 
     def matrix(self, mat, labels=None):
 
