@@ -12,12 +12,13 @@ class Visualization(object):
         self.session = session
         self.id = json.get('id')
 
+    def clean(data):
+        raise NotImplementedError
 
     def append_image(self, image):
         url = self.session.host + '/sessions/' + str(self.session.id) + '/visualizations/' + str(self.id) + '/data/images'
         files = {'file': image}
         return requests.post(url, files=files, data={'type': 'image'})
-
 
     def append_data(self, data=None, field=None):
         payload = {'data': data}
@@ -72,14 +73,12 @@ class Visualization(object):
 
             viz = cls(session=session, json=r.json())
 
-
         else:
             if not type:
                 if len(images) > 1:
                     type = 'volume'
                 else:
                     type = 'image'
-
 
             first_image, remaining_images = images[0], images[1:]
             files = {'file': first_image}
@@ -93,5 +92,5 @@ class Visualization(object):
             for image in remaining_images:
                 viz.append_image(image)
 
-
         return viz
+
