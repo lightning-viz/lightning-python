@@ -4,6 +4,14 @@ from lightning.types.utils import array_to_lines, vecs_to_points, check_colors, 
 
 
 @viztype
+class Generic(Base):
+
+    @staticmethod
+    def clean(data):
+        return {'data': data}
+
+
+@viztype
 class Scatter(Base):
 
     _name = 'scatter'
@@ -82,8 +90,8 @@ class ForceNetwork(Base):
     _name = 'force-directed-network'
     _func = 'forcenetwork'
 
-    @classmethod
-    def clean(cls, mat, labels=None):
+    @staticmethod
+    def clean(mat, labels=None):
 
         links, nodes = mat_to_links(mat, labels)
         return {'links': links, 'nodes': nodes}
@@ -94,8 +102,8 @@ class SpatialNetwork(Base):
     _name = 'node-link'
     _func = 'spatialnetwork'
 
-    @classmethod
-    def clean(cls, mat, x, y, imagedata=None):
+    @staticmethod
+    def clean(mat, x, y, imagedata=None):
 
         points = vecs_to_points(x, y)
         links, nodes = mat_to_links(mat)

@@ -38,9 +38,9 @@ class Lightning(object):
 
     def plot(self, type=None, **kwargs):
 
-        from lightning.types.base import Base
+        from types.plots import Generic
         
-        viz = Base.baseplot(self.session, type=type, **kwargs)
+        viz = Generic.baseplot(self.session, type=type, **kwargs)
         self.session.visualizations.append(viz)
         return viz
 
