@@ -1,5 +1,6 @@
 from lightning import Visualization
 
+
 class Base(Visualization):
 
     _name = 'base'
@@ -11,10 +12,6 @@ class Base(Visualization):
         'links': ['source', 'target', 'value'],
         'nodes': ['group']
     }
-
-    @classmethod
-    def clean(cls, data):
-        return {'data': data}
 
     @classmethod
     def check_unkeyed_arrays(cls, key, val):
@@ -73,7 +70,7 @@ class Base(Visualization):
         """
 
         datadict = cls.clean(*args, **kwargs)
-        print(datadict)
+
         if 'data' in datadict:
             data = datadict['data']
             data = cls.ensure_dict_or_list(data)

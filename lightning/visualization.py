@@ -1,19 +1,13 @@
 import requests
-import os
-import time
 import json
 import webbrowser
 
 
 class Visualization(object):
 
-
     def __init__(self, session=None, json=None):
         self.session = session
         self.id = json.get('id')
-
-    def clean(data):
-        raise NotImplementedError
 
     def append_image(self, image):
         url = self.session.host + '/sessions/' + str(self.session.id) + '/visualizations/' + str(self.id) + '/data/images'
@@ -28,7 +22,6 @@ class Visualization(object):
             url += field
         return requests.post(url, data=json.dumps(payload), headers=headers)
 
-
     def update_data(self, data=None, field=None):
         payload = {'data': data}
         headers = {'Content-type': 'application/json', 'Accept': 'text/plain'}        
@@ -37,14 +30,11 @@ class Visualization(object):
             url += field
         return requests.put(url, data=json.dumps(payload), headers=headers)
 
-
     def get_permalink(self):
         return self.session.host + '/visualizations/' + str(self.id)
 
-
     def get_embed_link(self):
         return self.get_permalink() + '/embed'
-
 
     def get_html(self):
         import urllib2
@@ -53,10 +43,8 @@ class Visualization(object):
 
         return response.read()
 
-
     def open(self):
         webbrowser.open(self.session.host + '/visualizations/' + str(self.id) + '/')
-
 
     @classmethod
     def create(cls, session=None, data=None, images=None, type=None):

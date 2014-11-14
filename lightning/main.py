@@ -1,14 +1,6 @@
-import requests
-import os
-import time
-import json
-from numpy import ndarray, asarray, vstack, transpose, nonzero, \
-    concatenate, atleast_2d, ones, int, zeros, hstack, newaxis
 from session import Session
 from visualization import Visualization
-from matplotlib.pyplot import imsave
-from matplotlib.pyplot import cm
-import io
+
 
 class Lightning(object):
 
@@ -19,10 +11,10 @@ class Lightning(object):
             self.enable_ipython()
 
     def enable_ipython(self, **kwargs):
-        '''
+        """
         ipython code inspired by code powering similar functionality in mpld3:
         https://github.com/jakevdp/mpld3/blob/master/mpld3/_display.py#L357
-        '''
+        """
 
         from IPython.core.getipython import get_ipython
         ip = get_ipython()

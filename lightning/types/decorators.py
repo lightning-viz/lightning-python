@@ -24,7 +24,7 @@ def imgtype(ImgType):
         self.session.visualizations.append(img)
         return img
 
-    if not hasattr(ImgType,'_func'):
+    if not hasattr(ImgType, '_func'):
         func = ImgType._name
     else:
         func = ImgType._func
