@@ -88,7 +88,7 @@ class Base(Visualization):
     @classmethod
     def baseplot(cls, session, type, *args, **kwargs):
         """
-        Base method for plotting data.
+        Base method for plotting data and images.
 
         Applies a plot-type specific cleaning operation to generate
         a dictionary with the data, then creates a visualization with the data. 
@@ -96,8 +96,10 @@ class Base(Visualization):
         positional and keyword arguments, which will be handled by the clean
         method of the given plot type.
 
-        If the dictionary contains images, they will be extracted
-        and appended separately from the rest of the data.
+        If the dictionary contains only images, or only non-image data, 
+        they will be passed on their own. If the dictionary contains
+        both images and non-image data, the images will be appended
+        to the visualization.
         """
 
         if not type:
@@ -105,28 +107,18 @@ class Base(Visualization):
 
         data = cls.clean_data(*args, **kwargs)
         
-        if 'images' in data:
+        if 'images' in data and len(data) > 1:
             images = data['images']
             del data['images']
             viz = cls.create(session, data=data, type=type)
             viz.append_image(images)
+        elif 'images' in data:
+            images = data['images']
+            viz = cls.create(session, images=images, type=type)
         else:
             viz = cls.create(session, data=data, type=type)
 
         return viz
-
-    @classmethod
-    def baseimage(cls, session, type, *args, **kwargs):
-        """
-        Base method for showing images.
-
-        Applies an image-type specific cleaning operation, then creates
-        a visualization with the images. Expects a session and a type,
-        followed by all image-type specific positional and keyword arguments.
-        """
-
-        images = cls.clean_data(*args, **kwargs)['images']
-        return cls.create(session, images=images, type=type)
 
     def update(self, *args, **kwargs):
         """

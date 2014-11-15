@@ -17,19 +17,3 @@ def viztype(VizType):
 
     setattr(Lightning, func, plotter)
     return VizType
-
-
-def imgtype(ImgType):
-
-    def plotter(self, *args, **kwargs):
-        img = ImgType.baseimage(self.session, ImgType._name, *args, **kwargs)
-        self.session.visualizations.append(img)
-        return img
-
-    if not hasattr(ImgType, '_func'):
-        func = ImgType._name
-    else:
-        func = ImgType._func
-
-    setattr(Lightning, func, plotter)
-    return ImgType

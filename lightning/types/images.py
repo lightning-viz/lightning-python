@@ -1,9 +1,9 @@
 from lightning.types.base import Base
-from lightning.types.decorators import imgtype
+from lightning.types.decorators import viztype
 from lightning.types.utils import array_to_im
 
 
-@imgtype
+@viztype
 class Image(Base):
     _name = 'image'
     @staticmethod
@@ -14,7 +14,7 @@ class Image(Base):
         return {'images': out}
 
 
-@imgtype
+@viztype
 class Volume(Base):
 
     _name = 'volume'
@@ -28,7 +28,7 @@ class Volume(Base):
         return {'images': out}
 
 
-@imgtype
+@viztype
 class Gallery(Base):
 
     _name = 'gallery'
