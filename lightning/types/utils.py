@@ -60,6 +60,7 @@ def array_to_im(im):
     from matplotlib.pyplot import cm
     import io
 
+    im = asarray(im)
     imfile = io.BytesIO()
     if im.ndim == 3:
         # if 3D, show as RGB
