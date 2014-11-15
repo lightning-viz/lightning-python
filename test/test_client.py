@@ -1,6 +1,6 @@
 from lightning import Lightning, Session, Visualization
 from random import randrange, uniform
-from numpy import random
+from numpy import random, ceil, array
 
 
 lightning = Lightning()
@@ -29,10 +29,13 @@ class TestLightningAPIClient:
 
     def test_create_scatter(self):
 
-        x = [randrange(100) for x in xrange(50)]
-        y = [randrange(100) for y in xrange(50)]
+        x = random.randn(100)
+        y = random.randn(100)
+        c = ceil(random.rand(100)*10)
 
-        viz = lightning.scatter(x, y)
+        viz = lightning.scatter(x, y, clrs=c)
+
+        print(viz)
 
         assert isinstance(viz, Visualization)
         assert hasattr(viz, 'id')
@@ -40,66 +43,56 @@ class TestLightningAPIClient:
 
     def test_create_line(self):
 
-        x = [randrange(100) for x in xrange(50)]
+        x = random.randn(100)
 
-        viz = lightning.plot('line', data=x)
+        viz = lightning.line(x)
 
         assert isinstance(viz, Visualization)
         assert hasattr(viz, 'id')
-
 
 
     def test_create_image(self):
 
-        img1 = random.rand(256, 256)
-        img2 = random.rand(256, 256)
+        img1 = random.rand(256, 256, 3)
+        img2 = random.rand(256, 256, 3)
 
-        viz = lightning.image([img1, img2], type='gallery')
+        viz = lightning.gallery([img1, img2])
 
         assert isinstance(viz, Visualization)
         assert hasattr(viz, 'id')
-
 
 
     def test_create_roi(self):        
 
+        x = random.randn(50)
+        y = random.randn(50)
+        timeseries = random.randn(50,1000)
 
-        points = [{ 'x': randrange(100), 'y': randrange(100), 'i': i} for i in xrange(50)]
-        timeseries = [[uniform(-1, 1) for _ in xrange(1000)] for _ in xrange(50)]
-
-        data = {
-            'points': points,
-            'timeseries': timeseries
-        }
-
-        viz = lightning.plot(data=data, type='roi')
+        viz = lightning.roi(x, y, timeseries)
 
         assert isinstance(viz, Visualization)
         assert hasattr(viz, 'id')
 
 
+    def test_create_stacked_line(self):
 
-    def test_create_line(self):
+        timeseries = random.randn(6, 100)
 
-        timeseries = [[randrange(100) for x in xrange(50)] for _ in xrange(6)]
-
-        viz = lightning.plot('stacked-line', data=timeseries)
+        viz = lightning.stackedline(timeseries)
 
         assert isinstance(viz, Visualization)
         assert hasattr(viz, 'id')
-
 
 
     def test_ipython_support(self):
 
         lightning.ipython = True
-        x = [randrange(100) for x in xrange(50)]
+        x = random.randn(100)
 
-        viz = lightning.plot('line', data=x)
+        viz = lightning.line(x)
 
         assert isinstance(viz, Visualization)
         assert hasattr(viz, 'id')
-
 
 
     def test_create_us_map(self):
@@ -107,7 +100,7 @@ class TestLightningAPIClient:
         states = ["NA", "AK", "AL", "AR", "AZ", "CA", "CO","CT","DC","DE","FL","GA","HI","IA","ID","IL","IN","KS","KY","LA","MA","MD","ME","MI","MN","MO","MS","MT","NC","ND","NE","NH","NJ","NM","NV","NY","OH","OK","OR","PA","RI","SC","SD","TN","TX","UT","VA","VI","VT","WA","WI","WV","WY"]
         mapDict = dict((state, random.random()) for state in states)
 
-        viz = lightning.plot('map', data=mapDict)
+        viz = lightning.plot(type='map', data=mapDict)
 
         assert isinstance(viz, Visualization)
         assert hasattr(viz, 'id')
@@ -117,7 +110,7 @@ class TestLightningAPIClient:
         countries = ["USA", "MEX", "CAN", "GER", "AUS", "BRA", "ARG", "PER", "SPA", "POR", "FRA", "ITA", "RUS", "CHN", "IND"]
         mapDict = dict((country, random.random()) for country in countries)
 
-        viz = lightning.plot('map', data=mapDict)
+        viz = lightning.plot(type='map', data=mapDict)
 
         assert isinstance(viz, Visualization)
         assert hasattr(viz, 'id')
@@ -125,9 +118,7 @@ class TestLightningAPIClient:
 
     def test_create_matrix(self):
 
-        import numpy as np
-
-        mat = np.array([[1, 2, 3, 4], [5, 6, 7, 8], [9, 10, 11, 12], [13, 14, 15, 16]])
+        mat = random.randn(10,10)
         viz = lightning.matrix(mat)
 
         assert isinstance(viz, Visualization)
@@ -136,10 +127,8 @@ class TestLightningAPIClient:
 
     def test_create_network(self):
 
-        import numpy as np
-
-        mat = np.array([[random.uniform(0, 15) if random.random() > 0.8 else 0 for _ in xrange(15)] for _ in xrange(15)])
-        viz = lightning.network(mat)
+        mat = array([[random.uniform(0, 15) if random.random() > 0.8 else 0 for _ in xrange(15)] for _ in xrange(15)])
+        viz = lightning.forcenetwork(mat)
 
         assert isinstance(viz, Visualization)
         assert hasattr(viz, 'id')
