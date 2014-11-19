@@ -131,4 +131,9 @@ class Base(Visualization):
         data = self.clean_data(*args, **kwargs)
         self.update_data(data=data)
 
+    def append(self, *args, **kwargs):
+
+        data = self.clean_data(*args, **kwargs)
+        self.append_data(data=data)
+
 
