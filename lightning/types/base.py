@@ -131,4 +131,17 @@ class Base(Visualization):
         data = self.clean_data(*args, **kwargs)
         self.update_data(data=data)
 
+    def append(self, *args, **kwargs):
+
+        """
+        Base method for appending data.
+
+        Applies a plot-type specific cleaning operation, then
+        appends data to the visualization.
+        """
+
+        data = self.clean_data(*args, **kwargs)
+        self.append_data(data=data)
+
+
 
