@@ -74,11 +74,11 @@ class TestLightningAPIClient:
         assert hasattr(viz, 'id')
 
 
-    def test_create_stacked_line(self):
+    def test_create_line_stacked(self):
 
         timeseries = random.randn(6, 100)
 
-        viz = lightning.stackedline(timeseries)
+        viz = lightning.linestacked(timeseries)
 
         assert isinstance(viz, Visualization)
         assert hasattr(viz, 'id')
@@ -125,10 +125,14 @@ class TestLightningAPIClient:
         assert hasattr(viz, 'id')
 
 
-    def test_create_network(self):
+    def test_create_force(self):
 
         mat = array([[random.uniform(0, 15) if random.random() > 0.8 else 0 for _ in xrange(15)] for _ in xrange(15)])
-        viz = lightning.forcenetwork(mat)
+        viz = lightning.force(mat)
+
+        assert isinstance(viz, Visualization)
+        assert hasattr(viz, 'id')
+
     def test_create_graph(self):
 
         mat = array([[random.uniform(0, 15) if random.random() > 0.8 else 0 for _ in xrange(15)] for _ in xrange(15)])

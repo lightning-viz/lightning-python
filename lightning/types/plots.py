@@ -72,10 +72,10 @@ class Line(Base):
         
 
 @viztype
-class StackedLine(Base):
+class LineStacked(Base):
 
-    _name = 'stacked-line'
-    _func = 'stackedline'
+    _name = 'line-stacked'
+    _func = 'linestacked'
 
     @staticmethod
     def clean(data):
@@ -85,10 +85,10 @@ class StackedLine(Base):
 
 
 @viztype
-class ForceNetwork(Base):
+class Force(Base):
 
-    _name = 'force-directed-network'
-    _func = 'forcenetwork'
+    _name = 'force'
+    _func = 'force'
 
     @staticmethod
     def clean(mat, labels=None):
@@ -97,10 +97,10 @@ class ForceNetwork(Base):
         return {'links': links, 'nodes': nodes}
 
 @viztype
-class SpatialNetwork(Base):
+class Graph(Base):
 
-    _name = 'node-link'
-    _func = 'spatialnetwork'
+    _name = 'graph'
+    _func = 'graph'
 
     @staticmethod
     def clean(mat, x, y, imagedata=None, clrs=None):
