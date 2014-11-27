@@ -129,6 +129,13 @@ class TestLightningAPIClient:
 
         mat = array([[random.uniform(0, 15) if random.random() > 0.8 else 0 for _ in xrange(15)] for _ in xrange(15)])
         viz = lightning.forcenetwork(mat)
+    def test_create_graph(self):
+
+        mat = array([[random.uniform(0, 15) if random.random() > 0.8 else 0 for _ in xrange(15)] for _ in xrange(15)])
+        x = random.randn(15)
+        y = random.randn(15)
+        
+        viz = lightning.graph(mat, x, y)
 
         assert isinstance(viz, Visualization)
         assert hasattr(viz, 'id')
