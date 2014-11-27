@@ -26,6 +26,13 @@ def vecs_to_points(x, y):
         
     x = asarray(x)
     y = asarray(y)
+
+    if x.ndim > 1 or y.ndim > 1:
+        raise Exception('x and y vectors must be one-dimensional')
+
+    if len(x) != len(y):
+        raise Exception('x and y vectors must be the same length')
+
     points = vstack([x, y, range(0,len(x))]).T
 
     return points
