@@ -31,6 +31,26 @@ class Scatter(Base):
 
 
 @viztype
+class ScatterStreaming(Base):
+
+    _name = 'scatter-streaming'
+    _func = 'scatterstreaming'
+
+    @staticmethod
+    def clean(x, y, clrs=None):
+        
+        points = vecs_to_points(x, y)
+        if clrs is not None:
+            clrs = check_colors(clrs)
+            if clrs.shape[1] == 1:
+                return {'points': points, 'labels': clrs}
+            else:
+                return {'points': points, 'colors': clrs}
+        else:
+            return {'points': points}
+
+
+@viztype
 class ROI(Base):
 
     _name = 'roi'
