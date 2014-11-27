@@ -103,13 +103,22 @@ class SpatialNetwork(Base):
     _func = 'spatialnetwork'
 
     @staticmethod
-    def clean(mat, x, y, imagedata=None):
+    def clean(mat, x, y, imagedata=None, clrs=None):
 
         points = vecs_to_points(x, y)
         links, nodes = mat_to_links(mat)
 
+        outdict = {'links': links, 'points': points}
+
+        if clrs is not None:
+            clrs = check_colors(clrs)
+            if clrs.shape[1] == 1:
+                outdict['labels'] = clrs
+            else:
+                outdict['colors'] = clrs
+
         if imagedata is not None:
             images = array_to_im(imagedata)
-            return {'links': links, 'points': points, 'images': images}
-        else:
-            return {'links': links, 'points': points}
+            outdict['images'] = images
+
+        return outdict
