@@ -9,8 +9,13 @@ class Visualization(object):
         self.session = session
         self.id = json.get('id')
 
+
+    def _format_url(self, url):
+        return url + '?host=' + self.session.host
+
     def append_image(self, image):
         url = self.session.host + '/sessions/' + str(self.session.id) + '/visualizations/' + str(self.id) + '/data/images'
+        url = self._format_url(url)
         files = {'file': image}
         return requests.post(url, files=files, data={'type': 'image'})
 
@@ -20,6 +25,8 @@ class Visualization(object):
         url = self.session.host + '/sessions/' + str(self.session.id) + '/visualizations/' + str(self.id) + '/data/'
         if field:
             url += field
+
+        url = self._format_url(url)
         return requests.post(url, data=json.dumps(payload), headers=headers)
 
     def update_data(self, data=None, field=None):
@@ -28,13 +35,15 @@ class Visualization(object):
         url = self.session.host + '/sessions/' + str(self.session.id) + '/visualizations/' + str(self.id) + '/data/'
         if field:
             url += field
+
+        url = self._format_url(url)
         return requests.put(url, data=json.dumps(payload), headers=headers)
 
     def get_permalink(self):
         return self.session.host + '/visualizations/' + str(self.id)
 
     def get_embed_link(self):
-        return self.get_permalink() + '/embed'
+        return self._format_url(self.get_permalink() + '/embed')
 
     def get_html(self):
         import urllib2
