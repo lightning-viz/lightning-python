@@ -90,6 +90,17 @@ class Line(Base):
         data = array_to_lines(data)
         return {'data': data}
         
+@viztype
+class LineStreaming(Base):
+
+    _name = 'line-streaming'
+    _func = 'linestreaming'
+
+    @staticmethod
+    def clean(data):
+
+        data = array_to_lines(data)
+        return {'data': data}
 
 @viztype
 class LineStacked(Base):
