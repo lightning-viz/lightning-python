@@ -4,7 +4,7 @@
 '''The setup and build script for the lightning-python library.'''
 
 __author__ = 'github@mathisonian.com'
-__version__ = '0.2.0'
+__version__ = '0.3.0'
 
 
 
