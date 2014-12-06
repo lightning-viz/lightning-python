@@ -1,6 +1,7 @@
 import requests
 import json
 import webbrowser
+import urllib
 
 
 class Visualization(object):
@@ -11,7 +12,10 @@ class Visualization(object):
 
 
     def _format_url(self, url):
-        return url + '?host=' + self.session.host
+        if not url.endswith('/'):
+            url += '/'
+
+        return url + '?host=' + urllib.quote(self.session.host)
 
     def append_image(self, image):
         url = self.session.host + '/sessions/' + str(self.session.id) + '/visualizations/' + str(self.id) + '/data/images'
