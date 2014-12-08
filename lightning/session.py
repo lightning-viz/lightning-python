@@ -8,9 +8,11 @@ class Session(object):
     name = None
     visualizations = []
 
-    def __init__(self, host=None, id=None, json=None):
+    def __init__(self, host=None, id=None, json=None, auth=None):
         self.host = host
         self.id = id
+        self.auth = auth
+
         if json:
             self.id = json.get('id')
             self.name = json.get('name')
@@ -29,7 +31,7 @@ class Session(object):
         webbrowser.open(self.host + '/sessions/' + str(self.id) + '/feed/')
 
     @classmethod
-    def create(cls, host, name=None):
+    def create(cls, host, name=None, auth=None):
         url = host + '/sessions/'
 
         payload = {}
@@ -38,5 +40,5 @@ class Session(object):
 
         headers = {'Content-type': 'application/json', 'Accept': 'text/plain'}
 
-        r = requests.post(url, data=json.dumps(payload), headers=headers)
-        return cls(host=host, json=r.json())
+        r = requests.post(url, data=json.dumps(payload), headers=headers, auth=auth)
+        return cls(host=host, json=r.json(), auth=auth)

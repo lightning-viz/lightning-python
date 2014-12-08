@@ -60,14 +60,14 @@ class Visualization(object):
         webbrowser.open(self.session.host + '/visualizations/' + str(self.id) + '/')
 
     @classmethod
-    def create(cls, session=None, data=None, images=None, type=None):
+    def create(cls, session=None, data=None, images=None, type=None, auth=None):
         url = session.host + '/sessions/' + str(session.id) + '/visualizations'
 
         if not images:
             payload = {'data': data, 'type': type}
             headers = {'Content-type': 'application/json', 'Accept': 'text/plain'}
-            
-            r = requests.post(url, data=json.dumps(payload), headers=headers)
+
+            r = requests.post(url, data=json.dumps(payload), headers=headers, auth=session.auth)
 
             if not r.status_code == requests.codes.ok:
                 raise Exception('Problem uploading data')
@@ -84,7 +84,7 @@ class Visualization(object):
             first_image, remaining_images = images[0], images[1:]
             files = {'file': first_image}
             
-            r = requests.post(url, files=files, data={'type': type})
+            r = requests.post(url, files=files, data={'type': type}, auth=session.auth)
 
             if not r.status_code == requests.codes.ok:
                 raise Exception('Problem uploading images')

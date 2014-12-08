@@ -4,8 +4,13 @@ from visualization import Visualization
 
 class Lightning(object):
 
-    def __init__(self, host="http://localhost:3000", ipython=False):
+    def __init__(self, host="http://localhost:3000", ipython=False, auth=None):
         self.host = host
+
+        self.auth = auth
+        if auth is not None:
+            if isinstance(auth, tuple):
+                self.set_basic_auth(auth[0], auth[1])
 
         if ipython:
             self.enable_ipython()
@@ -29,12 +34,17 @@ class Lightning(object):
         formatter.type_printers.pop(Visualization, None)
 
     def create_session(self, name=None):
-        self.session = Session.create(self.host, name=name)
+        self.session = Session.create(self.host, name=name, auth=self.auth)
         return self.session
 
     def use_session(self, session_id):
-        self.session = Session(host=self.host, id=session_id)
+        self.session = Session(host=self.host, id=session_id, auth=self.auth)
         return self.session
+
+    def set_basic_auth(self, username, password):
+        from requests.auth import HTTPBasicAuth
+        self.auth = HTTPBasicAuth(username, password)
+
 
     def plot(self, type=None, **kwargs):
 
