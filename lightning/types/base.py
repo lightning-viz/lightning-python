@@ -1,4 +1,5 @@
 from lightning import Visualization
+import requests
 
 
 class Base(Visualization):
@@ -132,7 +133,6 @@ class Base(Visualization):
         self.update_data(data=data)
 
     def append(self, *args, **kwargs):
-
         """
         Base method for appending data.
 
@@ -142,6 +142,21 @@ class Base(Visualization):
 
         data = self.clean_data(*args, **kwargs)
         self.append_data(data=data)
+
+    def get_user_data(self):
+        """
+        Base method for retrieving user data from a viz.
+        
+        """
+
+        url = self.session.host + '/sessions/' + str(self.session.id) + '/visualizations/' + str(self.id) + '/settings/'
+        r = requests.get(url)
+        if r.status_code == 200:
+            content = r.json()
+        else:
+            raise Exception('Error retrieving user data from server')
+
+        return content
 
 
 
