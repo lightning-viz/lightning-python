@@ -10,7 +10,6 @@ class Visualization(object):
         self.session = session
         self.id = json.get('id')
 
-
     def _format_url(self, url):
         if not url.endswith('/'):
             url += '/'
@@ -89,7 +88,7 @@ class Visualization(object):
             if not r.status_code == requests.codes.ok:
                 raise Exception('Problem uploading images')
 
-            viz = Visualization(session=session, json=r.json())
+            viz = cls(session=session, json=r.json())
             for image in remaining_images:
                 viz.append_image(image)
 
