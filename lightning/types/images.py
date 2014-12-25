@@ -1,7 +1,6 @@
 from lightning.types.base import Base
 from lightning.types.decorators import viztype
 from lightning.types.utils import array_to_im
-import requests
 
 
 @viztype
