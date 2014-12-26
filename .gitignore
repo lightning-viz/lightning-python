@@ -52,7 +52,8 @@ coverage.xml
 *.pot
 
 # Sphinx documentation
-docs/_build/
+doc/build/
+doc/source/generated/
 
 # IDE files
 .idea/
