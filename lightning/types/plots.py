@@ -1,7 +1,7 @@
 from lightning.types.base import Base
 from lightning.types.decorators import viztype
 from lightning.types.utils import array_to_lines, vecs_to_points, check_color, check_1d, \
-    mat_to_links, array_to_im
+    mat_to_links, array_to_im, add_property
 
 
 @viztype
@@ -43,20 +43,10 @@ class Scatter(Base):
         points = vecs_to_points(x, y)
         outdict = {'points': points}
 
-        if color is not None:
-            c = check_color(color)
-            outdict['color'] = c
-        if label is not None:
-            l = check_1d(label, "label")
-            outdict['label'] = l
-        if size is not None:
-            s = check_1d(size, "size")
-            outdict['size'] = s
-        if alpha is not None:
-            a = check_1d(alpha, "alpha")
-            if any(map(lambda d: d <= 0, a)):
-                raise Exception('Alpha cannot be 0 or negative')
-            outdict['alpha'] = a
+        outdict = add_property(outdict, color, 'color')
+        outdict = add_property(outdict, label, 'label')
+        outdict = add_property(outdict, size, 'size')
+        outdict = add_property(outdict, alpha, 'alpha')
 
         return outdict
 
@@ -94,15 +84,9 @@ class ScatterStreaming(Base):
         points = vecs_to_points(x, y)
         outdict = {'points': points}
 
-        if color is not None:
-            c = check_color(color)
-            outdict['color'] = c
-        if label is not None:
-            l = check_1d(label, "label")
-            outdict['label'] = l
-        if size is not None:
-            s = check_1d(size, "size")
-            outdict['size'] = s
+        outdict = add_property(outdict, color, 'color')
+        outdict = add_property(outdict, label, 'label')
+        outdict = add_property(outdict, size, 'size')
 
         return outdict
 
@@ -112,16 +96,18 @@ class ROI(Base):
     _name = 'roi'
 
     @staticmethod
-    def clean(x, y, timeseries, clrs=None):
+    def clean(x, y, timeseries, color=None, label=None, size=None, alpha=None):
 
         points = vecs_to_points(x, y)
         timeseries = array_to_lines(timeseries)
-        if clrs is not None:
-            clrs = check_color(clrs)
-            return {'points': points, 'timeseries': timeseries, 'colors': clrs}
-        else:
-            return {'points': points, 'timeseries': timeseries}
+        outdict = {'points': points, 'timeseries': timeseries}
 
+        outdict = add_property(outdict, color, 'color')
+        outdict = add_property(outdict, label, 'label')
+        outdict = add_property(outdict, size, 'size')
+        outdict = add_property(outdict, alpha, 'alpha')
+
+        return outdict
 
 @viztype
 class Matrix(Base):

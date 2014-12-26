@@ -1,12 +1,36 @@
 from numpy import asarray, vstack, newaxis, zeros, nonzero, concatenate, transpose, atleast_2d, size
 
 
+def add_property(d, prop, name):
+
+    if prop is not None:
+        p = check_property(prop, name)
+        d[name] = p
+
+    return d
+
+
+def check_property(prop, name):
+    """
+    Check and parse a property with either a specific checking function
+    or a generic parser
+    """
+
+    checkers = {
+        'color': check_color,
+        'alpha': check_alpha
+    }
+
+    if name in checkers:
+        return checkers[name](prop)
+    else:
+        return check_1d(prop, name)
+
+
 def check_color(c):
     """
     Check and parse color specs as either a single [r,g,b] or a list of
     [[r,g,b],[r,g,b]...]
-
-    Always return a list.
     """
 
     c = asarray(c)
@@ -19,6 +43,18 @@ def check_color(c):
         if c.shape[1] != 3:
             raise Exception("Color array must have three values per point")
     return c
+
+
+def check_alpha(a):
+    """
+    Check and parse alpha specs as either a single [x] or a list of [x,x,x...]
+    """
+
+    a = check_1d(a, "alpha")
+    if any(map(lambda d: d <= 0, a)):
+        raise Exception('Alpha cannot be 0 or negative')
+
+    return a
 
 
 def check_1d(x, name):
