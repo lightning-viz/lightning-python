@@ -18,7 +18,18 @@ class Scatter(Base):
 
     @staticmethod
     def clean(x, y, clrs=None):
-        
+        """
+        Create a scatter plot.
+
+        Parameters
+        ----------
+        x : array
+            x values to plot
+        y : array
+            y values to plot
+        clrs : array
+            Array of colors, can be rgb triplets or group labels
+        """
         points = vecs_to_points(x, y)
         if clrs is not None:
             clrs = check_colors(clrs)
