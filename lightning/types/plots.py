@@ -164,3 +164,31 @@ class Graph(Base):
             outdict['images'] = images
 
         return outdict
+
+
+@viztype
+class GraphBundled(Base):
+
+    _name = 'graph-bundled'
+    _func = 'graphbundled'
+
+    @staticmethod
+    def clean(mat, x, y, imagedata=None, clrs=None):
+
+        points = vecs_to_points(x, y)
+        links, nodes = mat_to_links(mat)
+
+        outdict = {'links': links, 'points': points}
+
+        if clrs is not None:
+            clrs = check_colors(clrs)
+            if clrs.shape[1] == 1:
+                outdict['labels'] = clrs
+            else:
+                outdict['colors'] = clrs
+
+        if imagedata is not None:
+            images = array_to_im(imagedata)
+            outdict['images'] = images
+
+        return outdict
