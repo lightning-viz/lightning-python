@@ -22,9 +22,11 @@ def viztype(VizType):
 
     # crazy hack to give the dynamically generated function the correct signature
     # based on: http://emptysqua.re/blog/copying-a-python-functions-signature/
+    # NOTE currently only handles functions with keyword arguments with defaults of None
     argspec = inspect.getargspec(VizType.clean)
     formatted_args = inspect.formatargspec(*argspec)
-    fndef = 'lambda self, %s: plotter(self,%s' % (formatted_args.lstrip('(').rstrip(')'), formatted_args[1:])
+    fndef = 'lambda self, %s: plotter(self,%s' % (formatted_args.lstrip('(').rstrip(')'),
+                                                  formatted_args[1:].replace('=None', ''))
     fake_fn = eval(fndef, {'plotter': plotter})
     plotter = wraps(VizType.clean)(fake_fn)
 
