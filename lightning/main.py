@@ -6,8 +6,8 @@ class Lightning(object):
 
     def __init__(self, host="http://localhost:3000", ipython=False, auth=None):
         self.host = host
-
         self.auth = auth
+
         if auth is not None:
             if isinstance(auth, tuple):
                 self.set_basic_auth(auth[0], auth[1])
@@ -48,7 +48,11 @@ class Lightning(object):
     def set_basic_auth(self, username, password):
         from requests.auth import HTTPBasicAuth
         self.auth = HTTPBasicAuth(username, password)
+        return self
 
+    def set_host(self, host):
+        self.host = host
+        return self
 
     def plot(self, type=None, **kwargs):
 
@@ -57,6 +61,7 @@ class Lightning(object):
         viz = Generic.baseplot(self.session, type=type, **kwargs)
         self.session.visualizations.append(viz)
         return viz
+
 
 
 
