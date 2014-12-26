@@ -1,18 +1,39 @@
-from numpy import asarray, vstack, newaxis, zeros, nonzero, concatenate, transpose, atleast_2d
+from numpy import asarray, vstack, newaxis, zeros, nonzero, concatenate, transpose, atleast_2d, size
 
-def check_colors(clrs):
-    
-    clrs = asarray(clrs)
-    if clrs.ndim == 2 and clrs.shape[1] == 1:
-        clrs = clrs.flatten()
-    if clrs.ndim == 2 and clrs.shape[0] == 1:
-        clrs = clrs.flatten()
-    if clrs.ndim == 1:
-        clrs = clrs[:,newaxis]
-    elif clrs.shape[1] != 3:
-        raise Exception("Color array must have three values per point")
 
-    return clrs
+def check_color(c):
+    """
+    Check and parse color specs as either a single [r,g,b] or a list of
+    [[r,g,b],[r,g,b]...]
+
+    Always return a list.
+    """
+
+    c = asarray(c)
+    if c.ndim == 1:
+        c = c.flatten()
+        c = c[newaxis, :]
+        if c.shape[1] != 3:
+            raise Exception("Color must have three values per point")
+    elif c.ndim == 2:
+        if c.shape[1] != 3:
+            raise Exception("Color array must have three values per point")
+    return c
+
+
+def check_1d(x, name):
+    """
+    Check and parse a one-dimensional spec as either a single [x] or a list of [x,x,x...]
+    """
+
+    x = asarray(x)
+    if size(x) == 1:
+        x = asarray([x])
+    if x.ndim == 2:
+        raise Exception("Property: %s must be one-dimensional" % name)
+    x = x.flatten()
+
+    return x
 
 
 def array_to_lines(data):
@@ -30,10 +51,10 @@ def vecs_to_points(x, y):
     if x.ndim > 1 or y.ndim > 1:
         raise Exception('x and y vectors must be one-dimensional')
 
-    if len(x) != len(y):
+    if size(x) != size(y):
         raise Exception('x and y vectors must be the same length')
 
-    points = vstack([x, y, range(0,len(x))]).T
+    points = vstack([x, y]).T
 
     return points
 

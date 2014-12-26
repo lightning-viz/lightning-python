@@ -7,9 +7,6 @@ class Base(Visualization):
     _name = 'base'
 
     data_dict_inputs = {
-        'points': ['x', 'y', 'i'],
-        'colors': ['r', 'g', 'b'],
-        'labels': ['k'],
         'links': ['source', 'target', 'value'],
         'nodes': ['group']
     }
@@ -17,7 +14,7 @@ class Base(Visualization):
     @classmethod
     def check_unkeyed_arrays(cls, key, val):
 
-        if not key in cls.data_dict_inputs:
+        if key not in cls.data_dict_inputs:
             return val
 
         if not isinstance(val, list):
@@ -107,6 +104,7 @@ class Base(Visualization):
             raise Exception("Must provide a plot type")
 
         data = cls.clean_data(*args, **kwargs)
+        print(data)
         
         if 'images' in data and len(data) > 1:
             images = data['images']
