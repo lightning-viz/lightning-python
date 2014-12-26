@@ -15,6 +15,10 @@ class Lightning(object):
         if ipython:
             self.enable_ipython()
 
+    def __repr__(self):
+        s = 'Lightning at host: %s' % self.host
+        return s
+
     def enable_ipython(self, **kwargs):
         """
         ipython code inspired by code powering similar functionality in mpld3:
