@@ -95,7 +95,7 @@ def vecs_to_points(x, y):
     return points
 
 
-def mat_to_links(mat, labels=None):
+def mat_to_links(mat):
 
     # get nonzero entries as list with the source, target, and value as columns
     
@@ -106,16 +106,7 @@ def mat_to_links(mat, labels=None):
     inds = nonzero(mat)
     links = concatenate((transpose(nonzero(mat)), atleast_2d(mat[inds]).T), axis=1)
 
-    # pick group assignments (default is all 1s)
-    n = mat.shape[0]
-    if labels is None:
-        nodes = zeros((1, n)).T
-    else:
-        if labels.size != n:
-            raise Exception("Must provide label for each row")
-        nodes = labels.astype(int).reshape(labels.size, 1)
-
-    return links, nodes
+    return links
 
 
 def array_to_im(im):

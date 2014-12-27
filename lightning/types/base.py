@@ -6,10 +6,7 @@ class Base(Visualization):
 
     _name = 'base'
 
-    data_dict_inputs = {
-        'links': ['source', 'target', 'value'],
-        'nodes': ['group']
-    }
+    data_dict_inputs = {}
 
     @classmethod
     def check_unkeyed_arrays(cls, key, val):

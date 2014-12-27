@@ -1,6 +1,6 @@
 from lightning.types.base import Base
 from lightning.types.decorators import viztype
-from lightning.types.utils import array_to_lines, vecs_to_points, check_color, check_1d, \
+from lightning.types.utils import array_to_lines, vecs_to_points, \
     mat_to_links, array_to_im, add_property
 
 
@@ -24,19 +24,19 @@ class Scatter(Base):
 
         Parameters
         ----------
-        x, y : array-like
+        x, y : array-like, each (n,)
             Input data
 
-        color : array-like, optional
+        color : array-like, optional, singleton or (n,3)
             Single rgb value or array to set colors
 
-        label : array-like, optional
+        label : array-like, optional, singleton or (n,)
             Single integer or array to set colors via groups
 
-        size : array-like, optional
+        size : array-like, optional, singleton or (n,)
             Single size or array to set point sizes
 
-        alpha : array-like, optional
+        alpha : array-like, optional, singleton or (n,)
             Single alpha value or array to set fill and stroke opacity
         """
 
@@ -68,16 +68,16 @@ class ScatterStreaming(Base):
 
         Parameters
         ----------
-        x, y : array-like
+        x, y : array-like, each (n,)
             Input data
 
-        color : array-like, optional
+        color : array-like, optional, singleton or (n,3)
             Single rgb value or array to set colors
 
-        label : array-like, optional
+        label : array-like, optional, singleton or (n,)
             Single integer or array to set colors via groups
 
-        size : array-like, optional
+        size : array-like, optional, singleton or (n,)
             Single size or array to set point sizes
         """
         
@@ -96,10 +96,33 @@ class ROI(Base):
     _name = 'roi'
 
     @staticmethod
-    def clean(x, y, timeseries, color=None, label=None, size=None, alpha=None):
+    def clean(x, y, series, color=None, label=None, size=None, alpha=None):
+        """
+        Create a linked scatter / line plot.
+
+        In this visualization, each point in the scatter plot is linked to a line.
+        Hovering over points in the scatter plot will show the corresponding line.
+
+        Parameters
+        ----------
+        x, y : array-like, each (n,)
+            Input data for scatter plot as x,y coordinates
+
+        t : array-like
+            Input data for line plot
+
+        color : array-like, optional, singleton or (n,3)
+            Single rgb value or array to set point colors
+
+        label : array-like, optional, singleton or (n,)
+            Single integer or array to set point colors via group labels
+
+        size : array-like, optional, singleton or (n,)
+            Single size or array to set point sizes
+        """
 
         points = vecs_to_points(x, y)
-        timeseries = array_to_lines(timeseries)
+        timeseries = array_to_lines(series)
         outdict = {'points': points, 'timeseries': timeseries}
 
         outdict = add_property(outdict, color, 'color')
@@ -115,9 +138,9 @@ class Matrix(Base):
     _name = 'matrix'
 
     @staticmethod
-    def clean(mat, labels=None):
+    def clean(matrix, label=None):
 
-        links, nodes = mat_to_links(mat, labels)
+        links, nodes = mat_to_links(matrix)
         return {'links': links, 'nodes': nodes}
 
 
@@ -127,9 +150,9 @@ class Line(Base):
     _name = 'line'
 
     @staticmethod
-    def clean(data):
+    def clean(series):
         
-        data = array_to_lines(data)
+        data = array_to_lines(series)
         return {'data': data}
         
 @viztype
@@ -139,9 +162,9 @@ class LineStreaming(Base):
     _func = 'linestreaming'
 
     @staticmethod
-    def clean(data):
+    def clean(series):
 
-        data = array_to_lines(data)
+        data = array_to_lines(series)
         return {'data': data}
 
 @viztype
@@ -151,9 +174,9 @@ class LineStacked(Base):
     _func = 'linestacked'
 
     @staticmethod
-    def clean(data):
+    def clean(series):
 
-        data = array_to_lines(data)
+        data = array_to_lines(series)
         return {'data': data}
 
 
@@ -164,10 +187,36 @@ class Force(Base):
     _func = 'force'
 
     @staticmethod
-    def clean(mat, labels=None):
+    def clean(matrix, color=None, label=None, size=None):
+        """
+        Create a force-directed network from a connectivity matrix.
 
-        links, nodes = mat_to_links(mat, labels)
-        return {'links': links, 'nodes': nodes}
+        Parameters
+        ----------
+        matrix : array-like, (n,n)
+            Input data with connectivity matrix. Can be binary or continuous-valued
+            for weighted edges.
+
+        color : array-like, optional, singleton or (n,3)
+            Single rgb value or array to set node colors
+
+        label : array-like, optional, singleton or (n,)
+            Single integer or array to set node colors via group labels
+
+        size : array-like, optional, singleton or (n,)
+            Single size or array to set node sizes
+        """
+
+        links = mat_to_links(matrix)
+        nodes = range(0, matrix.shape[0])
+
+        outdict = {'links': links, 'nodes': nodes}
+
+        outdict = add_property(outdict, color, 'color')
+        outdict = add_property(outdict, label, 'label')
+        outdict = add_property(outdict, size, 'size')
+
+        return outdict
 
 @viztype
 class Graph(Base):
@@ -176,19 +225,37 @@ class Graph(Base):
     _func = 'graph'
 
     @staticmethod
-    def clean(mat, x, y, imagedata=None, clrs=None):
+    def clean(x, y, matrix, color=None, label=None, size=None, imagedata=None):
+        """
+        Create a node-link graph from a set of points and a connectivity matrix.
 
-        points = vecs_to_points(x, y)
-        links, nodes = mat_to_links(mat)
+        Parameters
+        ----------
+        x,y : array-like, each (n,)
+            Input data for nodes (x,y coordinates)
 
-        outdict = {'links': links, 'points': points}
+        matrix : array, (n,n)
+            Input data with connectivity matrix. Can be binary or continuous-valued
+            (for weighted edges).
 
-        if clrs is not None:
-            clrs = check_color(clrs)
-            if clrs.shape[1] == 1:
-                outdict['labels'] = clrs
-            else:
-                outdict['colors'] = clrs
+        color : array-like, optional, singleton or (n,) or (n,3)
+            Single rgb value or array to set node colors
+
+        label : array-like, optional, singleton or (n,)
+            Single integer or array to set node colors via group labels
+
+        size : array-like, optional, singleton or (n,)
+            Single size or array to set node sizes
+        """
+
+        links = mat_to_links(matrix)
+        nodes = vecs_to_points(x, y)
+
+        outdict = {'links': links, 'nodes': nodes}
+
+        outdict = add_property(outdict, color, 'color')
+        outdict = add_property(outdict, label, 'label')
+        outdict = add_property(outdict, size, 'size')
 
         if imagedata is not None:
             images = array_to_im(imagedata)
@@ -204,19 +271,16 @@ class GraphBundled(Base):
     _func = 'graphbundled'
 
     @staticmethod
-    def clean(mat, x, y, imagedata=None, clrs=None):
+    def clean(x, y, matrix, color=None, label=None, size=None, imagedata=None):
 
         points = vecs_to_points(x, y)
-        links, nodes = mat_to_links(mat)
+        links = mat_to_links(matrix)
 
         outdict = {'links': links, 'points': points}
 
-        if clrs is not None:
-            clrs = check_color(clrs)
-            if clrs.shape[1] == 1:
-                outdict['labels'] = clrs
-            else:
-                outdict['colors'] = clrs
+        outdict = add_property(outdict, color, 'color')
+        outdict = add_property(outdict, label, 'label')
+        outdict = add_property(outdict, size, 'size')
 
         if imagedata is not None:
             images = array_to_im(imagedata)
