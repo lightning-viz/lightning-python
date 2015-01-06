@@ -58,6 +58,11 @@ class Visualization(object):
     def open(self):
         webbrowser.open(self.session.host + '/visualizations/' + str(self.id) + '/')
 
+    def delete(self):
+        url = self.get_permalink()
+        return requests.delete(url)
+
+
     @classmethod
     def create(cls, session=None, data=None, images=None, type=None, auth=None):
         url = session.host + '/sessions/' + str(session.id) + '/visualizations'
