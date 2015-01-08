@@ -1,6 +1,6 @@
 from lightning import Lightning, Session, Visualization
 from random import randrange, uniform
-from numpy import random, ceil, array
+from numpy import random, ceil, array, clip
 
 
 lightning = Lightning()
@@ -31,11 +31,11 @@ class TestLightningAPIClient:
 
         x = random.randn(100)
         y = random.randn(100)
-        c = ceil(random.rand(100)*10)
+        l = ceil(random.rand(100) * 5)
+        s = random.rand(100) * 10 + 10
+        a = clip(random.rand(100) + 0.1, 0, 1)
 
-        viz = lightning.scatter(x, y, clrs=c)
-
-        print(viz)
+        viz = lightning.scatter(x, y, label=l, size=s, alpha=a)
 
         assert isinstance(viz, Visualization)
         assert hasattr(viz, 'id')
@@ -43,9 +43,10 @@ class TestLightningAPIClient:
 
     def test_create_line(self):
 
-        x = random.randn(100)
+        series = random.randn(5,100)
+        s = random.rand(5) * 5 + 5
 
-        viz = lightning.line(x)
+        viz = lightning.line(series, size=4)
 
         assert isinstance(viz, Visualization)
         assert hasattr(viz, 'id')
@@ -53,8 +54,8 @@ class TestLightningAPIClient:
 
     def test_create_image(self):
 
-        img1 = random.rand(256, 256, 3)
-        img2 = random.rand(256, 256, 3)
+        img1 = random.rand(128, 256, 3)
+        img2 = random.rand(128, 256, 3)
 
         viz = lightning.gallery([img1, img2])
 
@@ -62,26 +63,27 @@ class TestLightningAPIClient:
         assert hasattr(viz, 'id')
 
 
-    def test_create_roi(self):        
+    def test_create_scatter_line(self):        
 
         x = random.randn(50)
         y = random.randn(50)
-        timeseries = random.randn(50,1000)
+        series = random.randn(50,1000)
+        l = ceil(random.rand(50) * 5)
 
-        viz = lightning.roi(x, y, timeseries)
-
-        assert isinstance(viz, Visualization)
-        assert hasattr(viz, 'id')
-
-
-    def test_create_line_stacked(self):
-
-        timeseries = random.randn(6, 100)
-
-        viz = lightning.linestacked(timeseries)
+        viz = lightning.scatterline(x, y, series, label=l)
 
         assert isinstance(viz, Visualization)
         assert hasattr(viz, 'id')
+
+
+    # def test_create_line_stacked(self):
+
+    #     series = random.randn(6, 100)
+
+    #     viz = lightning.linestacked(series)
+
+    #     assert isinstance(viz, Visualization)
+    #     assert hasattr(viz, 'id')
 
 
     def test_ipython_support(self):
@@ -116,13 +118,13 @@ class TestLightningAPIClient:
         assert hasattr(viz, 'id')
 
 
-    def test_create_matrix(self):
+    # def test_create_matrix(self):
 
-        mat = random.randn(10,10)
-        viz = lightning.matrix(mat)
+    #     mat = random.randn(10,10)
+    #     viz = lightning.matrix(mat)
 
-        assert isinstance(viz, Visualization)
-        assert hasattr(viz, 'id')
+    #     assert isinstance(viz, Visualization)
+    #     assert hasattr(viz, 'id')
 
 
     def test_create_force(self):
@@ -139,7 +141,7 @@ class TestLightningAPIClient:
         x = random.randn(15)
         y = random.randn(15)
         
-        viz = lightning.graph(mat, x, y)
+        viz = lightning.graph(x, y, mat)
 
         assert isinstance(viz, Visualization)
         assert hasattr(viz, 'id')
