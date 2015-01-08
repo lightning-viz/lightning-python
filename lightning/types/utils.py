@@ -1,4 +1,4 @@
-from numpy import asarray, vstack, newaxis, zeros, nonzero, concatenate, transpose, atleast_2d, size
+from numpy import asarray, array, ndarray, vstack, newaxis, nonzero, concatenate, transpose, atleast_2d, size
 
 
 def add_property(d, prop, name):
@@ -18,13 +18,17 @@ def check_property(prop, name):
 
     checkers = {
         'color': check_color,
-        'alpha': check_alpha
+        'alpha': check_alpha,
+        'size': check_size,
+        'index': check_index,
     }
 
     if name in checkers:
         return checkers[name](prop)
-    else:
+    elif isinstance(prop, list) or isinstance(prop, ndarray):
         return check_1d(prop, name)
+    else:
+        return prop
 
 
 def check_color(c):
@@ -45,9 +49,33 @@ def check_color(c):
     return c
 
 
+def check_size(s):
+    """
+    Check and parse size specs as either a single [s] or a list of [s,s,s,...]
+    """
+
+    s = check_1d(s, "size")
+    if any(map(lambda d: d <= 0, s)):
+        raise Exception('Size cannot be 0 or negative')
+
+    return s
+
+
+def check_index(i):
+    """
+    Checks and parses an index spec, must be a one-dimensional array [i0, i1, ...]
+    """
+
+    i = asarray(i)
+    if (i.ndim > 1) or (size(i) < 1):
+        raise Exception("Index must be one-dimensional and non-singleton")
+
+    return i
+
+
 def check_alpha(a):
     """
-    Check and parse alpha specs as either a single [x] or a list of [x,x,x...]
+    Check and parse alpha specs as either a single [a] or a list of [a,a,a,...]
     """
 
     a = check_1d(a, "alpha")
@@ -93,6 +121,16 @@ def vecs_to_points(x, y):
     points = vstack([x, y]).T
 
     return points
+
+
+def mat_to_array(mat):
+
+    mat = asarray(mat)
+
+    if mat.ndim < 2:
+        raise Exception('Matrix input must be two-dimensional')
+
+    return mat
 
 
 def mat_to_links(mat):
