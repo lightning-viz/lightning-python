@@ -1,7 +1,7 @@
 from lightning.types.base import Base
 from lightning.types.decorators import viztype
 from lightning.types.utils import array_to_lines, vecs_to_points, \
-    mat_to_links, array_to_im, add_property
+    mat_to_links, array_to_im, add_property, mat_to_array
 
 
 @viztype
@@ -91,9 +91,10 @@ class ScatterStreaming(Base):
         return outdict
 
 @viztype
-class ROI(Base):
+class ScatterLine(Base):
 
-    _name = 'roi'
+    _name = 'scatter-line'
+    _func = 'scatterline'
 
     @staticmethod
     def clean(x, y, series, color=None, label=None, size=None, alpha=None):
@@ -122,8 +123,8 @@ class ROI(Base):
         """
 
         points = vecs_to_points(x, y)
-        timeseries = array_to_lines(series)
-        outdict = {'points': points, 'timeseries': timeseries}
+        series = array_to_lines(series)
+        outdict = {'points': points, 'series': series}
 
         outdict = add_property(outdict, color, 'color')
         outdict = add_property(outdict, label, 'label')
@@ -138,10 +139,55 @@ class Matrix(Base):
     _name = 'matrix'
 
     @staticmethod
+    def clean(matrix, colormap=None):
+        """
+        Visualize a matrix or table as a heat map.
+
+        Parameters
+        ----------
+        matrix : array-like
+            Two-dimensional array of matrix data
+
+        colormap : string
+            Specification of color map, only colorbrewer types supported
+        """
+
+        matrix = mat_to_array(matrix)
+        outdict = {'matrix': matrix}
+
+        outdict = add_property(outdict, colormap, 'colormap')
+
+        return outdict
+
+@viztype
+class Adjacency(Base):
+
+    _name = 'adjacency'
+
+    @staticmethod
     def clean(matrix, label=None):
 
-        links, nodes = mat_to_links(matrix)
-        return {'links': links, 'nodes': nodes}
+        """
+        Visualize an adjacency matrix.
+
+
+
+        Parameters
+        ----------
+        matrix : array-like
+            Two-dimensional array of matrix data
+
+        colormap : string
+            Specification of color map, only colorbrewer types supported
+        """
+
+        links = mat_to_links(matrix)
+        nodes = range(0, matrix.shape[0])
+        outdict = {'links': links, 'nodes': nodes}
+
+        outdict = add_property(outdict, label, 'label')
+
+        return outdict
 
 
 @viztype
@@ -150,10 +196,40 @@ class Line(Base):
     _name = 'line'
 
     @staticmethod
-    def clean(series):
+    def clean(series, index=None, color=None, label=None, size=None):
+        """
+        Create a line plot.
+
+        Can plot a single series as a line, or multiple series as multiple lines.
+
+        Parameters
+        ----------
+        series : array-like, (n,m)
+            Input data for line plot, typically n series each of length m.
+            Can also pass a list where each individual series is of a different length.
+
+        index : array-like, (m,)
+            Specify index for the x-axis of the line plot.
+
+        color : array-like, optional, singleton or (n,3)
+            Single rgb value or array to set line colors
+
+        label : array-like, optional, singleton or (n,)
+            Single integer or array to set line colors via group labels
+
+        size : array-like, optional, singleton or (n,)
+            Single size or array to set line thickness
+        """
         
-        data = array_to_lines(series)
-        return {'data': data}
+        series = array_to_lines(series)
+        outdict = {'series': series}
+
+        outdict = add_property(outdict, color, 'color')
+        outdict = add_property(outdict, size, 'size')
+        outdict = add_property(outdict, label, 'label')
+        outdict = add_property(outdict, index, 'index')
+
+        return outdict
         
 @viztype
 class LineStreaming(Base):
@@ -272,11 +348,33 @@ class GraphBundled(Base):
 
     @staticmethod
     def clean(x, y, matrix, color=None, label=None, size=None, imagedata=None):
+        """
+        Create a node-link graph with bundled edges
+        from a set of points and a connectivity matrix.
+
+        Parameters
+        ----------
+        x,y : array-like, each (n,)
+            Input data for nodes (x,y coordinates)
+
+        matrix : array, (n,n)
+            Input data with connectivity matrix. Can be binary or continuous-valued
+            (for weighted edges).
+
+        color : array-like, optional, singleton or (n,) or (n,3)
+            Single rgb value or array to set node colors
+
+        label : array-like, optional, singleton or (n,)
+            Single integer or array to set node colors via group labels
+
+        size : array-like, optional, singleton or (n,)
+            Single size or array to set node sizes
+        """
 
         points = vecs_to_points(x, y)
         links = mat_to_links(matrix)
 
-        outdict = {'links': links, 'points': points}
+        outdict = {'links': links, 'nodes': points}
 
         outdict = add_property(outdict, color, 'color')
         outdict = add_property(outdict, label, 'label')
