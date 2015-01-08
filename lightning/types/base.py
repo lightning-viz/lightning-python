@@ -104,8 +104,7 @@ class Base(Visualization):
             raise Exception("Must provide a plot type")
 
         data = cls.clean_data(*args, **kwargs)
-        print(data)
-        
+
         if 'images' in data and len(data) > 1:
             images = data['images']
             del data['images']
