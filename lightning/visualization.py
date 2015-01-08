@@ -16,6 +16,12 @@ class Visualization(object):
 
         return url + '?host=' + urllib.quote(self.session.host)
 
+    def update_image(self, image):
+        url = self.session.host + '/sessions/' + str(self.session.id) + '/visualizations/' + str(self.id) + '/data/images'
+        url = self._format_url(url)
+        files = {'file': image}
+        return requests.put(url, files=files, data={'type': 'image'})
+
     def append_image(self, image):
         url = self.session.host + '/sessions/' + str(self.session.id) + '/visualizations/' + str(self.id) + '/data/images'
         url = self._format_url(url)
