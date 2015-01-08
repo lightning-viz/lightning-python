@@ -127,7 +127,12 @@ class Base(Visualization):
         """
 
         data = self.clean_data(*args, **kwargs)
-        self.update_data(data=data)
+        if 'images' in data:
+            images = data['images']
+            for img in images:
+                self.update_image(img)
+        else:
+            self.update_data(data=data)
 
     def append(self, *args, **kwargs):
         """
@@ -138,7 +143,12 @@ class Base(Visualization):
         """
 
         data = self.clean_data(*args, **kwargs)
-        self.append_data(data=data)
+        if 'images' in data:
+            images = data['images']
+            for img in images:
+                self.append_image(img)
+        else:
+            self.append_data(data=data)
 
     def get_user_data(self):
         """
