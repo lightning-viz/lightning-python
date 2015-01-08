@@ -79,11 +79,6 @@ class Visualization(object):
             viz = cls(session=session, json=r.json())
 
         else:
-            if not type:
-                if len(images) > 1:
-                    type = 'volume'
-                else:
-                    type = 'image'
 
             first_image, remaining_images = images[0], images[1:]
             files = {'file': first_image}
