@@ -41,6 +41,9 @@ class Base(Visualization):
         if isinstance(x, list):
             return x
 
+        if isinstance(x, str):
+            return x
+
         try:
             # Convert Numpy arrays to lists
             return x.tolist()
