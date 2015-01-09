@@ -230,30 +230,6 @@ class Line(Base):
         outdict = add_property(outdict, index, 'index')
 
         return outdict
-        
-@viztype
-class LineStreaming(Base):
-
-    _name = 'line-streaming'
-    _func = 'linestreaming'
-
-    @staticmethod
-    def clean(series):
-
-        data = array_to_lines(series)
-        return {'data': data}
-
-@viztype
-class LineStacked(Base):
-
-    _name = 'line-stacked'
-    _func = 'linestacked'
-
-    @staticmethod
-    def clean(series):
-
-        data = array_to_lines(series)
-        return {'data': data}
 
 
 @viztype
@@ -339,37 +315,6 @@ class Graph(Base):
 
         return outdict
 
-@viztype
-class Map(Base):
-
-    _name = 'map'
-
-    @staticmethod
-    def clean(regions, values):
-        """
-        Create a chloropleth map of the world or United States.
-
-        Inputs are weights for each region, which will be used to color regions.
-        Regions are either strings of length two (for a US map) or three (for world map).
-
-        Parameters
-        ----------
-        regions : string or list
-            String identifiers for map regions, either length two strings (for states
-            in a US map) or length three strings (for countries in a world map)
-
-        weights : scalar or list
-            Values to use to color each region
-        """
-
-        regions = list_to_regions(regions)
-        outdict = {'regions': regions}
-
-        outdict = add_property(outdict, values, 'values')
-
-        print(outdict)
-
-        return outdict
 
 @viztype
 class GraphBundled(Base):
@@ -414,5 +359,37 @@ class GraphBundled(Base):
         if imagedata is not None:
             images = array_to_im(imagedata)
             outdict['images'] = images
+
+        return outdict
+
+@viztype
+class Map(Base):
+
+    _name = 'map'
+
+    @staticmethod
+    def clean(regions, values):
+        """
+        Create a chloropleth map of the world or United States.
+
+        Inputs are weights for each region, which will be used to color regions.
+        Regions are either strings of length two (for a US map) or three (for world map).
+
+        Parameters
+        ----------
+        regions : string or list
+            String identifiers for map regions, either length two strings (for states
+            in a US map) or length three strings (for countries in a world map)
+
+        weights : scalar or list
+            Values to use to color each region
+        """
+
+        regions = list_to_regions(regions)
+        outdict = {'regions': regions}
+
+        outdict = add_property(outdict, values, 'values')
+
+        print(outdict)
 
         return outdict
