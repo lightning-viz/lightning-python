@@ -52,7 +52,16 @@ class TestLightningAPIClient:
         assert hasattr(viz, 'id')
 
 
-    def test_create_image(self):
+    def test_create_images(self):
+
+        img1 = random.rand(128, 256, 3)
+
+        viz = lightning.image(img1)
+
+        assert isinstance(viz, Visualization)
+        assert hasattr(viz, 'id')
+
+    def test_create_gallery(self):
 
         img1 = random.rand(128, 256, 3)
         img2 = random.rand(128, 256, 3)
@@ -63,17 +72,17 @@ class TestLightningAPIClient:
         assert hasattr(viz, 'id')
 
 
-    # def test_create_scatter_line(self):        
+    def test_create_scatter_line(self):        
 
-    #     x = random.randn(50)
-    #     y = random.randn(50)
-    #     series = random.randn(50,1000)
-    #     l = ceil(random.rand(50) * 5)
+        x = random.randn(50)
+        y = random.randn(50)
+        series = random.randn(50,1000)
+        l = ceil(random.rand(50) * 5)
 
-    #     viz = lightning.scatterline(x, y, series, label=l)
+        viz = lightning.scatterline(x, y, series, label=l)
 
-    #     assert isinstance(viz, Visualization)
-    #     assert hasattr(viz, 'id')
+        assert isinstance(viz, Visualization)
+        assert hasattr(viz, 'id')
 
 
     # def test_create_line_stacked(self):
@@ -100,9 +109,9 @@ class TestLightningAPIClient:
     def test_create_us_map(self):
 
         states = ["NA", "AK", "AL", "AR", "AZ", "CA", "CO","CT","DC","DE","FL","GA","HI","IA","ID","IL","IN","KS","KY","LA","MA","MD","ME","MI","MN","MO","MS","MT","NC","ND","NE","NH","NJ","NM","NV","NY","OH","OK","OR","PA","RI","SC","SD","TN","TX","UT","VA","VI","VT","WA","WI","WV","WY"]
-        mapDict = dict((state, random.random()) for state in states)
+        values = random.randn(len(states))
 
-        viz = lightning.plot(type='map', data=mapDict)
+        viz = lightning.map(states,values, colormap="Blues")
 
         assert isinstance(viz, Visualization)
         assert hasattr(viz, 'id')
@@ -110,9 +119,9 @@ class TestLightningAPIClient:
     def test_create_world_map(self):
 
         countries = ["USA", "MEX", "CAN", "GER", "AUS", "BRA", "ARG", "PER", "SPA", "POR", "FRA", "ITA", "RUS", "CHN", "IND"]
-        mapDict = dict((country, random.random()) for country in countries)
+        values = random.randn(len(countries))
 
-        viz = lightning.plot(type='map', data=mapDict)
+        viz = lightning.map(countries, values, colormap="Purples")
 
         assert isinstance(viz, Visualization)
         assert hasattr(viz, 'id')
@@ -138,7 +147,7 @@ class TestLightningAPIClient:
 
     def test_create_force(self):
 
-        mat = array([[random.uniform(0, 25) if random.random() > 0.9 else 0 for _ in xrange(25)] for _ in xrange(25)])
+        mat = array([[random.uniform(0, 25) if random.random() > 0.95 else 0 for _ in xrange(25)] for _ in xrange(25)])
         viz = lightning.force(mat)
 
         assert isinstance(viz, Visualization)
