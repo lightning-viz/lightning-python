@@ -63,17 +63,17 @@ class TestLightningAPIClient:
         assert hasattr(viz, 'id')
 
 
-    def test_create_scatter_line(self):        
+    # def test_create_scatter_line(self):        
 
-        x = random.randn(50)
-        y = random.randn(50)
-        series = random.randn(50,1000)
-        l = ceil(random.rand(50) * 5)
+    #     x = random.randn(50)
+    #     y = random.randn(50)
+    #     series = random.randn(50,1000)
+    #     l = ceil(random.rand(50) * 5)
 
-        viz = lightning.scatterline(x, y, series, label=l)
+    #     viz = lightning.scatterline(x, y, series, label=l)
 
-        assert isinstance(viz, Visualization)
-        assert hasattr(viz, 'id')
+    #     assert isinstance(viz, Visualization)
+    #     assert hasattr(viz, 'id')
 
 
     # def test_create_line_stacked(self):
@@ -117,19 +117,28 @@ class TestLightningAPIClient:
         assert isinstance(viz, Visualization)
         assert hasattr(viz, 'id')
 
+    def test_create_adjacency(self):
 
-    # def test_create_matrix(self):
+        mat = random.randn(10,10)
+        mat[mat<0.8] = 0
+        l = ceil(random.rand(10)*4)
 
-    #     mat = random.randn(10,10)
-    #     viz = lightning.matrix(mat)
+        viz = lightning.adjacency(mat, label=l)
 
-    #     assert isinstance(viz, Visualization)
-    #     assert hasattr(viz, 'id')
+        assert isinstance(viz, Visualization)
+        assert hasattr(viz, 'id')
 
+    def test_create_matrix(self):
+
+        mat = random.randn(10,10)
+        viz = lightning.matrix(mat)
+
+        assert isinstance(viz, Visualization)
+        assert hasattr(viz, 'id')
 
     def test_create_force(self):
 
-        mat = array([[random.uniform(0, 15) if random.random() > 0.8 else 0 for _ in xrange(15)] for _ in xrange(15)])
+        mat = array([[random.uniform(0, 25) if random.random() > 0.9 else 0 for _ in xrange(25)] for _ in xrange(25)])
         viz = lightning.force(mat)
 
         assert isinstance(viz, Visualization)
@@ -137,9 +146,9 @@ class TestLightningAPIClient:
 
     def test_create_graph(self):
 
-        mat = array([[random.uniform(0, 15) if random.random() > 0.8 else 0 for _ in xrange(15)] for _ in xrange(15)])
-        x = random.randn(15)
-        y = random.randn(15)
+        mat = array([[random.uniform(0, 25) if random.random() > 0.9 else 0 for _ in xrange(25)] for _ in xrange(25)])
+        x = random.randn(25)
+        y = random.randn(25)
         
         viz = lightning.graph(x, y, mat)
 
