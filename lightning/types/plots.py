@@ -390,6 +390,4 @@ class Map(Base):
 
         outdict = add_property(outdict, values, 'values')
 
-        print(outdict)
-
         return outdict
