@@ -368,7 +368,7 @@ class Map(Base):
     _name = 'map'
 
     @staticmethod
-    def clean(regions, values):
+    def clean(regions, values, colormap=None):
         """
         Create a chloropleth map of the world or United States.
 
@@ -383,11 +383,15 @@ class Map(Base):
 
         weights : scalar or list
             Values to use to color each region
+
+        colormap : string
+            Specification of color map, only colorbrewer types supported
         """
 
         regions = list_to_regions(regions)
         outdict = {'regions': regions}
 
         outdict = add_property(outdict, values, 'values')
-
+        outdict = add_property(outdict, colormap, 'colormap')
+        
         return outdict
