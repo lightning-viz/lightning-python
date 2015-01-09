@@ -1,4 +1,4 @@
-from numpy import asarray, array, ndarray, vstack, newaxis, nonzero, concatenate, transpose, atleast_2d, size
+from numpy import asarray, array, ndarray, vstack, newaxis, nonzero, concatenate, transpose, atleast_2d, size, isscalar
 
 
 def add_property(d, prop, name):
@@ -25,7 +25,7 @@ def check_property(prop, name):
 
     if name in checkers:
         return checkers[name](prop)
-    elif isinstance(prop, list) or isinstance(prop, ndarray):
+    elif isinstance(prop, list) or isinstance(prop, ndarray) or isscalar(prop):
         return check_1d(prop, name)
     else:
         return prop
@@ -166,3 +166,16 @@ def array_to_im(im):
         raise Exception("Images must be 2 or 3 dimensions")
 
     return imfile.getvalue()
+
+
+def list_to_regions(reg):
+
+    if isinstance(reg, str):
+        return [reg]
+
+    if isinstance(reg, list):
+        checktwo = all(map(lambda x: len(x) == 2, reg))
+        checkthree = all(map(lambda x: len(x) == 3, reg))
+        if not (checktwo or checkthree):
+            raise Exception("All region names must be two letters (for US) or three letters (for world)")
+        return reg

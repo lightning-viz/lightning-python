@@ -1,7 +1,7 @@
 from lightning.types.base import Base
 from lightning.types.decorators import viztype
 from lightning.types.utils import array_to_lines, vecs_to_points, \
-    mat_to_links, array_to_im, add_property, mat_to_array
+    mat_to_links, array_to_im, add_property, mat_to_array, list_to_regions
 
 
 @viztype
@@ -339,6 +339,37 @@ class Graph(Base):
 
         return outdict
 
+@viztype
+class Map(Base):
+
+    _name = 'map'
+
+    @staticmethod
+    def clean(regions, values):
+        """
+        Create a chloropleth map of the world or United States.
+
+        Inputs are weights for each region, which will be used to color regions.
+        Regions are either strings of length two (for a US map) or three (for world map).
+
+        Parameters
+        ----------
+        regions : string or list
+            String identifiers for map regions, either length two strings (for states
+            in a US map) or length three strings (for countries in a world map)
+
+        weights : scalar or list
+            Values to use to color each region
+        """
+
+        regions = list_to_regions(regions)
+        outdict = {'regions': regions}
+
+        outdict = add_property(outdict, values, 'values')
+
+        print(outdict)
+
+        return outdict
 
 @viztype
 class GraphBundled(Base):
