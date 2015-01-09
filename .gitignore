@@ -35,6 +35,7 @@ htmlcov/
 .cache
 nosetests.xml
 coverage.xml
+.ipynb_checkpoints
 
 # Translations
 *.mo
