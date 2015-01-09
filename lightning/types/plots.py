@@ -393,5 +393,5 @@ class Map(Base):
 
         outdict = add_property(outdict, values, 'values')
         outdict = add_property(outdict, colormap, 'colormap')
-        
+
         return outdict
