@@ -30,9 +30,12 @@ Plots
 	scatter
 	line
 	linestacked
-	matrix
 	force
 	graph
+	graphbundled
+	matrix
+	adjacency
+	map
 
 
 Images
