@@ -1,17 +1,25 @@
-.. Lightning documentation master file, created by
-   sphinx-quickstart on Fri Dec 26 00:18:21 2014.
-   You can adapt this file completely to your liking, but it should at least
-   contain the root `toctree` directive.
 
 Lightning: interactive data visualization 
 =========================================
 
-Lightning is a notebook server for producing and sharing interactive visualizations. This is the documentation for its Python client, which makes it easy to generate interactive visualizations from Python, including from within an iPython notebook. Visualizations are rendered in javascript, and use both d3.js (for two-dimensional charts) and three.js (for three-dimensional visualizations).
+.. raw:: html
+
+	<br>
+	<iframe src='http://lightning-docs.herokuapp.com/visualizations/4/iframe'></iframe>
+Lightning is a data-visualization server providing API-based access to reproducible, web-based, interactive visualizations. It includes a core set of visualization types, but is built for extendability and customization. Lightning supports modern libraries like d3.js, three.js, and leaflet, and is designed for interactivity over large data sets and continuously updating data streams.
+
+This is the API documentation for the official Lightning Python client, which makes it easy to generate interactive visualizations from Python, including from within an iPython notebook. See this notebook for examples, and read Lightning's guide to getting started.
 
 .. toctree::
    :maxdepth: 1
 
-   Github <https://github.com/lightning-viz>
-   api
+.. raw:: html
 
+	<br>
+	<a class='button' href='api.html'>API reference</a>
+	<a class='button' href='api.html'>Github</a>
+	<a class='button' href='api.html'>Homepage</a>
+	<br>
+	<br>
+	<br>
 

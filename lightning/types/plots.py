@@ -20,7 +20,7 @@ class Scatter(Base):
     @staticmethod
     def clean(x, y, color=None, label=None, size=None, alpha=None):
         """
-        Create a scatter plot of x and y.
+        Plot two-dimensional data as points.
 
         Parameters
         ----------
@@ -60,7 +60,7 @@ class ScatterLine(Base):
     @staticmethod
     def clean(x, y, series, color=None, label=None, size=None, alpha=None):
         """
-        Create a linked scatter / line plot.
+        Create a joint scatter / line plot.
 
         In this visualization, each point in the scatter plot is linked to a line.
         Hovering over points in the scatter plot will show the corresponding line.
@@ -104,6 +104,8 @@ class Matrix(Base):
         """
         Visualize a matrix or table as a heat map.
 
+        Useful for looking at dense matrices.
+
         Parameters
         ----------
         matrix : array-like
@@ -131,7 +133,7 @@ class Adjacency(Base):
         """
         Visualize an adjacency matrix.
 
-
+        Useful for looking at the structure of sparse connectivity matrices.
 
         Parameters
         ----------
@@ -159,7 +161,7 @@ class Line(Base):
     @staticmethod
     def clean(series, index=None, color=None, label=None, size=None):
         """
-        Create a line plot.
+        Plot one-dimensional series data as lines.
 
         Can plot a single series as a line, or multiple series as multiple lines.
 
@@ -253,7 +255,7 @@ class Graph(Base):
     @staticmethod
     def clean(x, y, matrix, color=None, label=None, size=None, imagedata=None):
         """
-        Create a node-link graph from a set of points and a connectivity matrix.
+        Create a node-link graph from spatial points and their connectivity matrix.
 
         Parameters
         ----------
@@ -299,8 +301,7 @@ class GraphBundled(Base):
     @staticmethod
     def clean(x, y, matrix, color=None, label=None, size=None, imagedata=None):
         """
-        Create a node-link graph with bundled edges
-        from a set of points and a connectivity matrix.
+        Create a node-link graph with bundled edges.
 
         Parameters
         ----------
@@ -344,7 +345,7 @@ class Map(Base):
     @staticmethod
     def clean(regions, values, colormap=None):
         """
-        Create a chloropleth map of the world or United States.
+        Create a chloropleth map of the world or united states.
 
         Inputs are weights for each region, which will be used to color regions.
         Regions are either strings of length two (for a US map) or three (for world map).
