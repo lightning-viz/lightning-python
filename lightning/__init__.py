@@ -4,5 +4,6 @@ from .visualization import Visualization
 from .types.plots import *
 from .types.images import *
 from .types.streaming import *
+from .types.three import *
 
 __version__ = "0.3.0"

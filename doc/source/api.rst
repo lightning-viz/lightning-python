@@ -28,6 +28,7 @@ Plots
 	:toctree: generated/
 
 	scatter
+	scatterline
 	line
 	linestacked
 	force
@@ -52,6 +53,12 @@ Images
 3D
 ---
 
+.. currentmodule:: lightning.Lightning
+
+.. autosummary::
+	:toctree: generated/
+
+	particles
 
 Streaming
 ---------

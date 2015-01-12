@@ -123,6 +123,22 @@ def vecs_to_points(x, y):
     return points
 
 
+def vecs_to_points_three(x, y, z):
+
+    x = asarray(x)
+    y = asarray(y)
+    z = asarray(z)
+
+    if x.ndim > 1 or y.ndim > 1 or z.ndim > 1:
+        raise Exception('x, y, and z vectors must be one-dimensional')
+
+    if (size(x) != size(y)) or (size(x) != size(z)) or (size(y) != size(z)):
+        raise Exception('x, y, and z vectors must be the same length')
+
+    points = vstack([x, y, z]).T
+
+    return points
+
 def mat_to_array(mat):
 
     mat = asarray(mat)
