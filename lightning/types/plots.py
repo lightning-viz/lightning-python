@@ -22,6 +22,8 @@ class Scatter(Base):
         """
         Plot two-dimensional data as points.
 
+        .. image:: scatter.png
+
         Parameters
         ----------
         x, y : array-like, each (n,)
@@ -62,8 +64,7 @@ class ScatterLine(Base):
         """
         Create a joint scatter / line plot.
 
-        In this visualization, each point in the scatter plot is linked to a line.
-        Hovering over points in the scatter plot will show the corresponding line.
+        .. image:: scatterline.png
 
         Parameters
         ----------
@@ -102,9 +103,9 @@ class Matrix(Base):
     @staticmethod
     def clean(matrix, colormap=None):
         """
-        Visualize a matrix or table as a heat map.
+        Visualize a dense matrix or table as a heat map.
 
-        Useful for looking at dense matrices.
+        .. image:: matrix.png
 
         Parameters
         ----------
@@ -131,9 +132,9 @@ class Adjacency(Base):
     def clean(matrix, label=None):
 
         """
-        Visualize an adjacency matrix.
+        Visualize a sparse adjacency matrix.
 
-        Useful for looking at the structure of sparse connectivity matrices.
+        .. image:: adjacency.png
 
         Parameters
         ----------
@@ -163,7 +164,7 @@ class Line(Base):
         """
         Plot one-dimensional series data as lines.
 
-        Can plot a single series as a line, or multiple series as multiple lines.
+        .. image:: line.png
 
         Parameters
         ----------
@@ -203,6 +204,11 @@ class LineStacked(Base):
 
     @staticmethod
     def clean(series):
+        """
+        Create a browsable array of line plots.
+
+        .. image:: linestacked.png
+        """
 
         data = array_to_lines(series)
         return {'data': data}
@@ -218,6 +224,8 @@ class Force(Base):
     def clean(matrix, color=None, label=None, size=None):
         """
         Create a force-directed network from a connectivity matrix.
+
+        .. image:: force.png
 
         Parameters
         ----------
@@ -256,6 +264,8 @@ class Graph(Base):
     def clean(x, y, matrix, color=None, label=None, size=None, imagedata=None):
         """
         Create a node-link graph from spatial points and their connectivity matrix.
+
+        .. image:: graph.png
 
         Parameters
         ----------
@@ -303,6 +313,8 @@ class GraphBundled(Base):
         """
         Create a node-link graph with bundled edges.
 
+        .. image:: graphbundled.png
+
         Parameters
         ----------
         x,y : array-like, each (n,)
@@ -347,8 +359,7 @@ class Map(Base):
         """
         Create a chloropleth map of the world or united states.
 
-        Inputs are weights for each region, which will be used to color regions.
-        Regions are either strings of length two (for a US map) or three (for world map).
+        .. image:: map.png
 
         Parameters
         ----------

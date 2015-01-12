@@ -4,19 +4,33 @@
   }
 }
 
+.mythumbnail {
+  border-radius: 10px;
+  display: block;
+  margin-left: -15px;
+  margin-right: auto;
+  max-width: 110%;
+  border: 1px solid #B8C6D3;
+}
+
 .button {
   padding-left: 40px;
   padding-right: 40px;
   padding-top: 10px;
   padding-bottom: 10px;
   margin-right: 20px;
-  background-image: linear-gradient(-180deg, rgba(255,255,255,0.70) 0%, rgba(255,255,255,0.00) 100%);
   border: 1px solid #B8C6D3;
   box-shadow: inset 0px 1px 0px 0px rgba(255,255,255,0.30);
   border-radius: 3px;
   font-size: 24px;
-  color: #545E6B;
+  color: #8F7BD9;
   line-height: 26px;
+}
+
+.button:hover {
+  color: #A997EB;
+  background-color: rgb(240,240,240);
+
 }
 
 iframe {
@@ -112,5 +126,8 @@ a:active {
 
 
 .footer {
-  border-top-width: 0px;
+  border-top-width: 4px;
+  border-top-color: #8F7BD9;
+  padding-top: 25px;
+  margin-bottom: 10px;
 }

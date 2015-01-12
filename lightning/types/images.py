@@ -14,6 +14,8 @@ class Image(Base):
         """
         Display an array as an image.
 
+        .. image:: image.png
+
         Parameters
         ----------
         imagedata : array-like
@@ -43,6 +45,8 @@ class Gallery(Base):
     def clean(imagedata):
         """
         Display a collection of arrays as browsable images with thumbnails.
+
+        .. image:: gallery.png
 
         Parameters
         ----------
