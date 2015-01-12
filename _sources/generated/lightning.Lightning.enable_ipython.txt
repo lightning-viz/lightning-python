@@ -1,0 +1,6 @@
+lightning.Lightning.enable_ipython
+==================================
+
+.. currentmodule:: lightning
+
+.. automethod:: Lightning.enable_ipython

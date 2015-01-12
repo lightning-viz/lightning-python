@@ -1,0 +1,6 @@
+lightning.Lightning.set_basic_auth
+==================================
+
+.. currentmodule:: lightning
+
+.. automethod:: Lightning.set_basic_auth

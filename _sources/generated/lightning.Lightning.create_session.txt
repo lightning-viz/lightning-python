@@ -1,0 +1,6 @@
+lightning.Lightning.create_session
+==================================
+
+.. currentmodule:: lightning
+
+.. automethod:: Lightning.create_session

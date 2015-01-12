@@ -1,0 +1,6 @@
+lightning.Lightning.map
+=======================
+
+.. currentmodule:: lightning
+
+.. automethod:: Lightning.map

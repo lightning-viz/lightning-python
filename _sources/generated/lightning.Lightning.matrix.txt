@@ -1,0 +1,6 @@
+lightning.Lightning.matrix
+==========================
+
+.. currentmodule:: lightning
+
+.. automethod:: Lightning.matrix

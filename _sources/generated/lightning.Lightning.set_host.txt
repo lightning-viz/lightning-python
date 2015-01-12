@@ -1,0 +1,6 @@
+lightning.Lightning.set_host
+============================
+
+.. currentmodule:: lightning
+
+.. automethod:: Lightning.set_host

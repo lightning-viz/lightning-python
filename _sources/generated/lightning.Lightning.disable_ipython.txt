@@ -1,0 +1,6 @@
+lightning.Lightning.disable_ipython
+===================================
+
+.. currentmodule:: lightning
+
+.. automethod:: Lightning.disable_ipython

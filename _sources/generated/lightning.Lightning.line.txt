@@ -1,0 +1,6 @@
+lightning.Lightning.line
+========================
+
+.. currentmodule:: lightning
+
+.. automethod:: Lightning.line

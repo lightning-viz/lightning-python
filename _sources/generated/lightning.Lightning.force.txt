@@ -1,0 +1,6 @@
+lightning.Lightning.force
+=========================
+
+.. currentmodule:: lightning
+
+.. automethod:: Lightning.force

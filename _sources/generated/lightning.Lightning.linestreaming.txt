@@ -1,0 +1,6 @@
+lightning.Lightning.linestreaming
+=================================
+
+.. currentmodule:: lightning
+
+.. automethod:: Lightning.linestreaming

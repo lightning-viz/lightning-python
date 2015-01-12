@@ -1,0 +1,6 @@
+lightning.Lightning.graphbundled
+================================
+
+.. currentmodule:: lightning
+
+.. automethod:: Lightning.graphbundled

@@ -1,0 +1,6 @@
+lightning.Lightning.image
+=========================
+
+.. currentmodule:: lightning
+
+.. automethod:: Lightning.image

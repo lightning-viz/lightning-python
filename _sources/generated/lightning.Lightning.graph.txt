@@ -1,0 +1,6 @@
+lightning.Lightning.graph
+=========================
+
+.. currentmodule:: lightning
+
+.. automethod:: Lightning.graph

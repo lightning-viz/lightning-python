@@ -1,0 +1,6 @@
+lightning.Lightning.adjacency
+=============================
+
+.. currentmodule:: lightning
+
+.. automethod:: Lightning.adjacency

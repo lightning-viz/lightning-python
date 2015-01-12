@@ -1,0 +1,6 @@
+lightning.Lightning.scatterline
+===============================
+
+.. currentmodule:: lightning
+
+.. automethod:: Lightning.scatterline

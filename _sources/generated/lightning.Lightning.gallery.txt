@@ -1,0 +1,6 @@
+lightning.Lightning.gallery
+===========================
+
+.. currentmodule:: lightning
+
+.. automethod:: Lightning.gallery

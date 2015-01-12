@@ -1,0 +1,6 @@
+lightning.Lightning.scatterstreaming
+====================================
+
+.. currentmodule:: lightning
+
+.. automethod:: Lightning.scatterstreaming

@@ -1,0 +1,6 @@
+lightning.Lightning.use_session
+===============================
+
+.. currentmodule:: lightning
+
+.. automethod:: Lightning.use_session

@@ -1,0 +1,6 @@
+lightning.Lightning.scatter
+===========================
+
+.. currentmodule:: lightning
+
+.. automethod:: Lightning.scatter
