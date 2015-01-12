@@ -22,6 +22,11 @@ class Session(object):
             return self.name
         return str(self.id)
 
+    def __repr__(self):
+        if self.name:
+            return "Session number: " + str(self.id) + ", name: " + self.name
+        return "Session number: " + str(self.id)
+
     def create_visualization(self, data=None, images=None, type=None):
         viz = Visualization.create(session=self, data=data, images=images, type=type)
         self.visualizations.append(viz)
