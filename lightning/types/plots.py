@@ -203,15 +203,36 @@ class LineStacked(Base):
     _func = 'linestacked'
 
     @staticmethod
-    def clean(series):
+    def clean(series, color=None, label=None, size=None):
         """
         Create a browsable array of line plots.
 
         .. image:: linestacked.png
+
+        Parameters
+        ----------
+        series : array-like, (n,m)
+            Input data for lines, typically n series each of length m.
+            Can also pass a list where each individual series is of a different length.
+
+        color : array-like, optional, singleton or (n,3)
+            Single rgb value or array to set line colors
+
+        label : array-like, optional, singleton or (n,)
+            Single integer or array to set line colors via group labels
+
+        size : array-like, optional, singleton or (n,)
+            Single size or array to set line thickness
         """
 
-        data = array_to_lines(series)
-        return {'data': data}
+        series = array_to_lines(series)
+        outdict = {'series': series}
+
+        outdict = add_property(outdict, color, 'color')
+        outdict = add_property(outdict, size, 'size')
+        outdict = add_property(outdict, label, 'label')
+
+        return outdict
 
 
 @viztype
