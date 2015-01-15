@@ -42,3 +42,29 @@ class Particles(Base):
         outdict = add_property(outdict, alpha, 'alpha')
 
         return outdict
+
+
+@viztype
+class Volume(Base):
+
+    _name = 'volume'
+
+    @staticmethod
+    def clean(imagedata):
+        """
+        Display a collection of arrays as browsable images with thumbnails.
+
+        .. image:: volume.png
+
+        Parameters
+        ----------
+        imagedata : array-like, or list of array-like
+            Image or list of images as two dimensional (grayscale) or three dimensional (RGB) arrays.
+        """
+
+        if isinstance(imagedata, ndarray):
+            imagedata = [imagedata]
+
+        outdict = [array_to_im(im) for im in imagedata]
+
+        return {'images': outdict}
