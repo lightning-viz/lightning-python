@@ -28,6 +28,7 @@ class Image(Base):
 
         return {'images': outdict}
 
+    @property
     def coords(self):
         user_data = self.get_user_data()['settings']
         if 'coords' in user_data.keys():
