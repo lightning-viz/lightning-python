@@ -1,6 +1,8 @@
 from lightning.types.base import Base
 from lightning.types.decorators import viztype
 from lightning.types.utils import vecs_to_points_three, add_property
+from numpy import ndarray, asarray
+from lightning.types.utils import array_to_im
 
 @viztype
 class Scatter3(Base):
