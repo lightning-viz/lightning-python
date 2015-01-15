@@ -3,9 +3,9 @@ from lightning.types.decorators import viztype
 from lightning.types.utils import vecs_to_points_three, add_property
 
 @viztype
-class Particles(Base):
+class Scatter3(Base):
 
-    _name = 'particles'
+    _name = 'scatter3'
 
     @staticmethod
     def clean(x, y, z, color=None, label=None, alpha=None, size=None):
