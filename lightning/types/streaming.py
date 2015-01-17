@@ -64,6 +64,8 @@ class ScatterStreaming(Base):
         in a streaming fashion. The opacity of old and new data is automatically set
         to highlight the most recent data and fade old data away.
 
+        .. image:: scatter.png
+
         Parameters
         ----------
         x, y : array-like, each (n,)
