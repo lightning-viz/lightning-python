@@ -101,8 +101,41 @@
 <h1>lightning.Lightning.linestreaming<a class="headerlink" href="#lightning-lightning-linestreaming" title="Permalink to this headline">¶</a></h1>
 <dl class="method">
 <dt id="lightning.Lightning.linestreaming">
-<tt class="descclassname">Lightning.</tt><tt class="descname">linestreaming</tt><big>(</big><em>series</em><big>)</big><a class="headerlink" href="#lightning.Lightning.linestreaming" title="Permalink to this definition">¶</a></dt>
-<dd></dd></dl>
+<tt class="descclassname">Lightning.</tt><tt class="descname">linestreaming</tt><big>(</big><em>series</em>, <em>index=None</em>, <em>color=None</em>, <em>label=None</em>, <em>size=None</em><big>)</big><a class="headerlink" href="#lightning.Lightning.linestreaming" title="Permalink to this definition">¶</a></dt>
+<dd><p>Plot streaming one-dimensional series data as updating lines.</p>
+<p>Plotting once returns a visualization on which &#8216;append&#8217; can be called
+to add new data in a streaming fashion. New lines will appear on the right.</p>
+<img alt="generated/line.png" src="generated/line.png" />
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><p class="first"><strong>series</strong> : array-like, (n,m)</p>
+<blockquote>
+<div><p>Input data for line plot, typically n series each of length m.
+Can also pass a list where each individual series is of a different length.</p>
+</div></blockquote>
+<p><strong>index</strong> : array-like, (m,)</p>
+<blockquote>
+<div><p>Specify index for the x-axis of the line plot.</p>
+</div></blockquote>
+<p><strong>color</strong> : array-like, optional, singleton or (n,3)</p>
+<blockquote>
+<div><p>Single rgb value or array to set line colors</p>
+</div></blockquote>
+<p><strong>label</strong> : array-like, optional, singleton or (n,)</p>
+<blockquote>
+<div><p>Single integer or array to set line colors via group labels</p>
+</div></blockquote>
+<p><strong>size</strong> : array-like, optional, singleton or (n,)</p>
+<blockquote class="last">
+<div><p>Single size or array to set line thickness</p>
+</div></blockquote>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
 
 </div>
 

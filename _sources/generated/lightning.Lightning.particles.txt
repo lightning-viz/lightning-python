@@ -1,6 +1,0 @@
-lightning.Lightning.particles
-=============================
-
-.. currentmodule:: lightning
-
-.. automethod:: Lightning.particles

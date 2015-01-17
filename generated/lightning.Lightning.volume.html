@@ -6,7 +6,7 @@
   <head>
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
     
-    <title>lightning.Lightning.particles &mdash; Lightning 0.3.0 documentation</title>
+    <title>lightning.Lightning.volume &mdash; Lightning 0.3.0 documentation</title>
     
     <link rel="stylesheet" href="../_static/basic.css" type="text/css" />
     <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
@@ -97,24 +97,20 @@
   <div class="row">
     <div class="col-md-12">
       
-  <div class="section" id="lightning-lightning-particles">
-<h1>lightning.Lightning.particles<a class="headerlink" href="#lightning-lightning-particles" title="Permalink to this headline">¶</a></h1>
+  <div class="section" id="lightning-lightning-volume">
+<h1>lightning.Lightning.volume<a class="headerlink" href="#lightning-lightning-volume" title="Permalink to this headline">¶</a></h1>
 <dl class="method">
-<dt id="lightning.Lightning.particles">
-<tt class="descclassname">Lightning.</tt><tt class="descname">particles</tt><big>(</big><em>x</em>, <em>y</em>, <em>z</em>, <em>color=None</em>, <em>label=None</em><big>)</big><a class="headerlink" href="#lightning.Lightning.particles" title="Permalink to this definition">¶</a></dt>
-<dd><p>Plot three-dimensional data as points.</p>
-<img alt="generated/particles.png" src="generated/particles.png" />
+<dt id="lightning.Lightning.volume">
+<tt class="descclassname">Lightning.</tt><tt class="descname">volume</tt><big>(</big><em>imagedata</em><big>)</big><a class="headerlink" href="#lightning.Lightning.volume" title="Permalink to this definition">¶</a></dt>
+<dd><p>Display a collection of images as a three-dimensional volume.</p>
+<img alt="generated/volume.png" src="generated/volume.png" />
 <table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
 <col class="field-body" />
 <tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><p class="first"><strong>x, y, z</strong> : array-like, each (n,)</p>
-<blockquote>
-<div><p>Input data</p>
-</div></blockquote>
-<p><strong>color</strong> : array-like, optional, singleton or (n,3)</p>
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><p class="first"><strong>imagedata</strong> : array-like, or list of array-like</p>
 <blockquote class="last">
-<div><p>Single rgb value or array to set colors</p>
+<div><p>Image or list of images as two dimensional (grayscale) or three dimensional (RGB) arrays.</p>
 </div></blockquote>
 </td>
 </tr>

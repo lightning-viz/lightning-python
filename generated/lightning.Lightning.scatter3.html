@@ -6,7 +6,7 @@
   <head>
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
     
-    <title>lightning.Lightning.linestacked &mdash; Lightning 0.3.0 documentation</title>
+    <title>lightning.Lightning.scatter3 &mdash; Lightning 0.3.0 documentation</title>
     
     <link rel="stylesheet" href="../_static/basic.css" type="text/css" />
     <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
@@ -97,33 +97,36 @@
   <div class="row">
     <div class="col-md-12">
       
-  <div class="section" id="lightning-lightning-linestacked">
-<h1>lightning.Lightning.linestacked<a class="headerlink" href="#lightning-lightning-linestacked" title="Permalink to this headline">¶</a></h1>
+  <div class="section" id="lightning-lightning-scatter3">
+<h1>lightning.Lightning.scatter3<a class="headerlink" href="#lightning-lightning-scatter3" title="Permalink to this headline">¶</a></h1>
 <dl class="method">
-<dt id="lightning.Lightning.linestacked">
-<tt class="descclassname">Lightning.</tt><tt class="descname">linestacked</tt><big>(</big><em>series</em>, <em>color=None</em>, <em>label=None</em>, <em>size=None</em><big>)</big><a class="headerlink" href="#lightning.Lightning.linestacked" title="Permalink to this definition">¶</a></dt>
-<dd><p>Create a browsable array of line plots.</p>
-<img alt="generated/linestacked.png" src="generated/linestacked.png" />
+<dt id="lightning.Lightning.scatter3">
+<tt class="descclassname">Lightning.</tt><tt class="descname">scatter3</tt><big>(</big><em>x</em>, <em>y</em>, <em>z</em>, <em>color=None</em>, <em>label=None</em>, <em>alpha=None</em>, <em>size=None</em><big>)</big><a class="headerlink" href="#lightning.Lightning.scatter3" title="Permalink to this definition">¶</a></dt>
+<dd><p>Plot three-dimensional data as points.</p>
+<img alt="generated/scatter3.png" src="generated/scatter3.png" />
 <table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
 <col class="field-body" />
 <tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><p class="first"><strong>series</strong> : array-like, (n,m)</p>
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><p class="first"><strong>x, y, z</strong> : array-like, each (n,)</p>
 <blockquote>
-<div><p>Input data for lines, typically n series each of length m.
-Can also pass a list where each individual series is of a different length.</p>
+<div><p>Input data</p>
 </div></blockquote>
 <p><strong>color</strong> : array-like, optional, singleton or (n,3)</p>
 <blockquote>
-<div><p>Single rgb value or array to set line colors</p>
+<div><p>Single rgb value or array to set colors</p>
 </div></blockquote>
 <p><strong>label</strong> : array-like, optional, singleton or (n,)</p>
 <blockquote>
-<div><p>Single integer or array to set line colors via group labels</p>
+<div><p>Single integer or array to set colors via groups</p>
 </div></blockquote>
 <p><strong>size</strong> : array-like, optional, singleton or (n,)</p>
+<blockquote>
+<div><p>Single size or array to set point sizes</p>
+</div></blockquote>
+<p><strong>alpha</strong> : array-like, optional, singleton or (n,)</p>
 <blockquote class="last">
-<div><p>Single size or array to set line thickness</p>
+<div><p>Single alpha value or array to set fill and stroke opacity</p>
 </div></blockquote>
 </td>
 </tr>

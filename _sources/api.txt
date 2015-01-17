@@ -28,7 +28,6 @@ Plots
 	:toctree: generated/
 
 	scatter
-	scatterline
 	line
 	linestacked
 	force
@@ -38,6 +37,15 @@ Plots
 	adjacency
 	map
 
+Linked
+------
+
+.. currentmodule:: lightning.Lightning
+
+.. autosummary::
+	:toctree: generated/
+
+	scatterline
 
 Images
 ------
@@ -58,7 +66,8 @@ Images
 .. autosummary::
 	:toctree: generated/
 
-	particles
+	scatter3
+	volume
 
 Streaming
 ---------

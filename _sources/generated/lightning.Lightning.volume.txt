@@ -1,0 +1,6 @@
+lightning.Lightning.volume
+==========================
+
+.. currentmodule:: lightning
+
+.. automethod:: Lightning.volume
