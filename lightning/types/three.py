@@ -15,7 +15,7 @@ class Scatter3(Base):
         """
         Plot three-dimensional data as points.
 
-        .. image:: particles.png
+        .. image:: scatter3.png
 
         Parameters
         ----------
@@ -55,7 +55,7 @@ class Volume(Base):
     @staticmethod
     def clean(imagedata):
         """
-        Display a collection of arrays as browsable images with thumbnails.
+        Display a collection of images as a three-dimensional volume.
 
         .. image:: volume.png
 
