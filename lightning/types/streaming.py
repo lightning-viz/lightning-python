@@ -10,10 +10,43 @@ class LineStreaming(Base):
     _func = 'linestreaming'
 
     @staticmethod
-    def clean(series):
+    def clean(series, index=None, color=None, label=None, size=None):
+        """
+        Plot streaming one-dimensional series data as updating lines.
 
-        data = array_to_lines(series)
-        return {'data': data}
+        Plotting once returns a visualization on which 'append' can be called
+        to add new data in a streaming fashion. New lines will appear on the right.
+
+        .. image:: line.png
+
+        Parameters
+        ----------
+        series : array-like, (n,m)
+            Input data for line plot, typically n series each of length m.
+            Can also pass a list where each individual series is of a different length.
+
+        index : array-like, (m,)
+            Specify index for the x-axis of the line plot.
+
+        color : array-like, optional, singleton or (n,3)
+            Single rgb value or array to set line colors
+
+        label : array-like, optional, singleton or (n,)
+            Single integer or array to set line colors via group labels
+
+        size : array-like, optional, singleton or (n,)
+            Single size or array to set line thickness
+        """
+
+        series = array_to_lines(series)
+        outdict = {'series': series}
+
+        outdict = add_property(outdict, color, 'color')
+        outdict = add_property(outdict, size, 'size')
+        outdict = add_property(outdict, label, 'label')
+        outdict = add_property(outdict, index, 'index')
+
+        return outdict
 
 
 @viztype
