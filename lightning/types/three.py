@@ -7,7 +7,8 @@ from lightning.types.utils import array_to_im
 @viztype
 class Scatter3(Base):
 
-    _name = 'scatter3'
+    _name = 'scatter-3'
+    _func = 'scatter3'
 
     @staticmethod
     def clean(x, y, z, color=None, label=None, alpha=None, size=None):
