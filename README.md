@@ -1,4 +1,4 @@
-python-lightning
+Lightning python client
 ================
 
 Python client for the [lightning](https://github.com/mathisonian/lightning) API
