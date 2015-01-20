@@ -1,7 +1,7 @@
 from lightning.types.base import Base
 from lightning.types.decorators import viztype
 from lightning.types.utils import array_to_lines, vecs_to_points, \
-    mat_to_links, array_to_im, add_property, mat_to_array, list_to_regions
+    mat_to_links, array_to_im, add_property, mat_to_array, list_to_regions, check_colormap
 
 
 @viztype
@@ -75,6 +75,9 @@ class Matrix(Base):
 
         matrix = mat_to_array(matrix)
         outdict = {'matrix': matrix}
+
+        if colormap:
+            check_colormap(colormap)
 
         outdict = add_property(outdict, colormap, 'colormap')
 

@@ -49,6 +49,18 @@ def check_color(c):
     return c
 
 
+def check_colormap(cmap):
+    """
+    Check if cmap is one of the colorbrewer maps
+    """
+    names = {'BrBG', 'PiYG', 'PRGn', 'PuOr', 'RdBu', 'RdGy', 'RdYlBu', 'RdYlGn', 'Spectral', 'Blues', 'BuGn', 'BuPu',
+             'GnBu', 'Greens', 'Greys', 'Oranges', 'OrRd', 'PuBu', 'PuBuGn', 'PuRd', 'Purples', 'RdPu', 'Reds',
+             'YlGn', 'YlGnBu', 'YlOrBr', 'YlOrRd', 'Accent', 'Dark2',
+             'Paired', 'Pastel1', 'Pastel2', 'Set1', 'Set2', 'Set3'}
+    if cmap not in names:
+        raise Exception("Invalid cmap '%s',  must be one of %s" % (cmap, names))
+
+
 def check_size(s):
     """
     Check and parse size specs as either a single [s] or a list of [s,s,s,...]
