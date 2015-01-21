@@ -85,7 +85,7 @@ http://nbviewer.ipython.org/github/lightning-viz/lightning-example-notebooks/tre
 
 ## complete documentation
 
-https://github.com/lightning-viz/lightning-python
+http://lightning-viz.github.io/lightning-python/
 
 ## help
 
