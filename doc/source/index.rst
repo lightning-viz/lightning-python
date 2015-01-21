@@ -46,7 +46,7 @@ Lightning is a data-visualization server providing API-based access to reproduci
 
 This is the API documentation for the official Lightning Python client, which makes it easy to generate interactive visualizations from Python, including from within an iPython notebook. Check out the `example notebooks`_, and also read Lightning's guide to `getting started`_.
 
-.. _example notebooks: http://nbviewer.ipython.org/github/lightning-viz/lightning-example-notebooks/tree/master/
+.. _example notebooks: http://nbviewer.ipython.org/github/lightning-viz/lightning-example-notebooks/tree/master/index.ipynb
 .. _getting started: http://lightning-viz.org/documentation/
 
 .. toctree::
