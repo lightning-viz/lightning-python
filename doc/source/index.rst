@@ -44,7 +44,7 @@ Lightning: interactive data visualization
 
 Lightning is a data-visualization server providing API-based access to reproducible, web-based, interactive visualizations. It includes a core set of visualization types, but is built for extendability and customization. Lightning supports modern libraries like d3.js, three.js, and leaflet, and is designed for interactivity over large data sets and continuously updating data streams.
 
-This is the API documentation for the official Lightning Python client, which makes it easy to generate interactive visualizations from Python, including from within an iPython notebook. Check out the `example notebooks`_, and also read Lightning's guide to `getting started`_.
+This is the API documentation for the official Lightning Python client, which makes it easy to generate interactive visualizations from Python, including from an iPython notebook. Check out the `example notebooks`_, and also read Lightning's guide to `getting started`_.
 
 .. _example notebooks: http://nbviewer.ipython.org/github/lightning-viz/lightning-example-notebooks/tree/master/index.ipynb
 .. _getting started: http://lightning-viz.org/documentation/
@@ -57,7 +57,7 @@ This is the API documentation for the official Lightning Python client, which ma
 	<br>
 	<a class='button' href='api.html'>API reference</a>
 	<a class='button' href='http://lightning-viz.org'>Project page</a>
-  <a class='button' href='http://nbviewer.ipython.org/github/lightning-viz/lightning-example-notebooks/tree/master/'>Notebooks</a>
+  <a class='button' href='http://nbviewer.ipython.org/github/lightning-viz/lightning-example-notebooks/tree/master/index.ipynb'>Notebooks</a>
   <a class='button' href='https://github.com/lightning-viz'>Github</a>
 	<br>
 	<br>
