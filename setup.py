@@ -17,7 +17,7 @@ METADATA = dict(
   author_email='github@mathisonian.com',
   description='A Python client library for Lightning data vizualization notebooks',
   license='MIT',
-  url='https://github.com/mathisonian/lightning-python',
+  url='https://github.com/lightning-viz/lightning-python',
   keywords='lightning data data-viz',
 )
 
