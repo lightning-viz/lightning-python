@@ -1,3 +1,4 @@
+import os
 import requests
 import json
 import webbrowser
@@ -63,10 +64,30 @@ class Visualization(object):
     def open(self):
         webbrowser.open(self.session.host + '/visualizations/' + str(self.id) + '/')
 
+    def save(self, filename, width=1024, height=768, overwrite=False):
+
+        name, ext = os.path.splitext(filename)
+        if len(ext) > 0:
+            if not ext == '.png':
+                raise Exception('Invalid extension %s on file name' % ext)
+        else:
+            filename += '.png'
+
+        dir = os.path.dirname(filename)
+        if not os.path.isdir(dir):
+            raise Exception('Folder %s does not exist' % dir)
+
+        if os.path.isfile(filename) and overwrite is False:
+            raise Exception('File %s exists and overwrite is set to false' % filename)
+
+        f = open(filename, 'wb')
+        img = requests.get(self.get_permalink() + '/screenshot/?width=%g&height=%g' % (width, height))
+        f.write(img.content)
+        f.close()
+
     def delete(self):
         url = self.get_permalink()
         return requests.delete(url)
-
 
     @classmethod
     def create(cls, session=None, data=None, images=None, type=None):
