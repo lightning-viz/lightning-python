@@ -2,7 +2,7 @@ from numpy import ndarray, asarray
 
 from lightning.types.base import Base
 from lightning.types.decorators import viztype
-from lightning.types.utils import array_to_im
+from lightning.types.utils import array_to_im, polygon_to_points, polygon_to_mask
 
 
 @viztype
@@ -27,12 +27,38 @@ class Image(Base):
         outdict = [array_to_im(imagedata)]
 
         return {'images': outdict}
+    
+    def get_coords(self, return_type='bounds', dims=None):
+        """
+        Get data from polygons drawn on image.
 
-    @property
-    def coords(self):
+        Parameters
+        ----------
+        return_type : string, optional, default='bounds'
+            Specification of output data. Options are 'bounds','points', and 'mask'
+
+        dims : array-like, optional, default=None
+            Specify the size of the image containing the polygon.
+
+        """
+
         user_data = self.get_user_data()['settings']
         if 'coords' in user_data.keys():
-            return user_data['coords']
+            coords = user_data['coords']
+
+            if return_type == 'bounds':
+                return coords
+
+            elif return_type == 'points':
+                return [polygon_to_points(x) for x in coords]
+
+            elif return_type == 'mask':
+                if not dims:
+                    raise Exception('Must provide image dimensions to return mask')
+                return [polygon_to_mask(x, dims) for x in coords]
+
+            else:
+                raise Exception('Option %s is not supported' % return_type)
         else:
             return []
 

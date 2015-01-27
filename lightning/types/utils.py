@@ -1,5 +1,5 @@
-from numpy import asarray, array, ndarray, vstack, newaxis, nonzero, concatenate, transpose, atleast_2d, size, isscalar
-
+from numpy import asarray, array, ndarray, vstack, newaxis, nonzero, concatenate, transpose, atleast_2d, size, isscalar, meshgrid, where
+from matplotlib.path import Path
 
 def add_property(d, prop, name):
 
@@ -207,3 +207,45 @@ def list_to_regions(reg):
         if not (checktwo or checkthree):
             raise Exception("All region names must be two letters (for US) or three letters (for world)")
         return reg
+
+
+def polygon_to_mask(coords, dims):
+    """
+    Given a list of pairs of points which define a polygon, return a binary
+    mask covering the interior of the polygon
+    """
+
+    bounds = array(coords).astype('int')
+    path = Path(bounds)
+
+    grid = meshgrid(range(dims[1]), range(dims[0]))
+    grid_flat = zip(grid[0].ravel(), grid[1].ravel())
+
+    mask = path.contains_points(grid_flat).reshape(dims[0:2]).astype('int')
+
+    return mask
+
+
+def polygon_to_points(coords):
+    """
+    Given a list of pairs of points which define a polygon,
+    return a list of points interior to the polygon
+    """
+
+    bounds = array(coords).astype('int')
+
+    bmax = bounds.max(0)
+    bmin = bounds.min(0)
+
+    path = Path(bounds)
+
+    grid = meshgrid(range(bmin[0], bmax[0]+1), range(bmin[1], bmax[1]+1))
+
+    grid_flat = zip(grid[0].ravel(), grid[1].ravel())
+
+    points = path.contains_points(grid_flat).reshape(grid[0].shape).astype('int')
+    points = where(points)
+    points = vstack([points[0], points[1]]).T + bmin[-1::-1]
+    points = points.tolist()
+
+    return points
