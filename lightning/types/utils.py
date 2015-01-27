@@ -210,7 +210,6 @@ def list_to_regions(reg):
 
 
 def polygon_to_mask(coords, dims):
-
     """
     Given a list of pairs of points which define a polygon, return a binary
     mask covering the interior of the polygon
@@ -227,14 +226,26 @@ def polygon_to_mask(coords, dims):
     return mask
 
 
-def mask_to_points(mask):
-
+def polygon_to_points(coords):
     """
-    Convert binary mask to a list of (y,x) points for each point where the mask is 1
+    Given a list of pairs of points which define a polygon,
+    return a list of points interior to the polygon
     """
 
-    points = where(mask)
-    points = vstack([points[0], points[1]]).T
+    bounds = array(coords).astype('int')
+
+    bmax = bounds.max(0)
+    bmin = bounds.min(0)
+
+    path = Path(bounds)
+
+    grid = meshgrid(range(bmin[0], bmax[0]+1), range(bmin[1], bmax[1]+1))
+
+    grid_flat = zip(grid[0].ravel(), grid[1].ravel())
+
+    points = path.contains_points(grid_flat).reshape(grid[0].shape).astype('int')
+    points = where(points)
+    points = vstack([points[0], points[1]]).T + bmin[-1::-1]
     points = points.tolist()
 
     return points
