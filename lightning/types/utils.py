@@ -1,5 +1,5 @@
-from numpy import asarray, array, ndarray, vstack, newaxis, nonzero, concatenate, transpose, atleast_2d, size, isscalar
-
+from numpy import asarray, array, ndarray, vstack, newaxis, nonzero, concatenate, transpose, atleast_2d, size, isscalar, meshgrid, where
+from matplotlib.path import Path
 
 def add_property(d, prop, name):
 
@@ -207,3 +207,26 @@ def list_to_regions(reg):
         if not (checktwo or checkthree):
             raise Exception("All region names must be two letters (for US) or three letters (for world)")
         return reg
+
+def get_points_from_polygon(coords):
+    """
+    Given a list of pairs of points which define a polygon, return a list of points interior to the polygon
+    """
+    
+    bounds = array(coords).astype('int')
+
+    bMax = bounds.max(0)
+    bMin = bounds.min(0)
+
+    path = Path(bounds)
+
+    grid = meshgrid(range(bMin[0],bMax[0]+1),range(bMin[1],bMax[1]+1))
+
+    gridFlat = zip(grid[0].ravel(),grid[1].ravel())
+
+    inside = path.contains_points(gridFlat).reshape(grid[0].shape).astype('int')
+    inside = where(inside)
+    inside = vstack([inside[0],inside[1]]).T + bMin[-1::-1]    
+    inside.tolist()
+    
+    return inside

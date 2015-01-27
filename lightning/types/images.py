@@ -2,7 +2,7 @@ from numpy import ndarray, asarray
 
 from lightning.types.base import Base
 from lightning.types.decorators import viztype
-from lightning.types.utils import array_to_im
+from lightning.types.utils import array_to_im, get_points_from_polygon
 
 
 @viztype
@@ -29,10 +29,14 @@ class Image(Base):
         return {'images': outdict}
 
     @property
-    def coords(self):
+    def coords(self, as_points=False):
         user_data = self.get_user_data()['settings']
-        if 'coords' in user_data.keys():
-            return user_data['coords']
+        if 'coords' in user_data.keys():            
+            coords = user_data['coords']
+            if as_points:
+                return [get_points_from_polygon(x) for x in coords]
+            else:
+                return coords        
         else:
             return []
 
