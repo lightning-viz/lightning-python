@@ -208,25 +208,33 @@ def list_to_regions(reg):
             raise Exception("All region names must be two letters (for US) or three letters (for world)")
         return reg
 
-def get_points_from_polygon(coords):
+
+def polygon_to_mask(coords, dims):
+
     """
-    Given a list of pairs of points which define a polygon, return a list of points interior to the polygon
+    Given a list of pairs of points which define a polygon, return a binary
+    mask covering the interior of the polygon
     """
-    
+
     bounds = array(coords).astype('int')
-
-    bMax = bounds.max(0)
-    bMin = bounds.min(0)
-
     path = Path(bounds)
 
-    grid = meshgrid(range(bMin[0],bMax[0]+1),range(bMin[1],bMax[1]+1))
+    grid = meshgrid(range(dims[1]), range(dims[0]))
+    grid_flat = zip(grid[0].ravel(), grid[1].ravel())
 
-    gridFlat = zip(grid[0].ravel(),grid[1].ravel())
+    mask = path.contains_points(grid_flat).reshape(dims[0:2]).astype('int')
 
-    inside = path.contains_points(gridFlat).reshape(grid[0].shape).astype('int')
-    inside = where(inside)
-    inside = vstack([inside[0],inside[1]]).T + bMin[-1::-1]    
-    inside.tolist()
-    
-    return inside
+    return mask
+
+
+def mask_to_points(mask):
+
+    """
+    Convert binary mask to a list of (y,x) points for each point where the mask is 1
+    """
+
+    points = where(mask)
+    points = vstack([points[0], points[1]]).T
+    points = points.tolist()
+
+    return points
