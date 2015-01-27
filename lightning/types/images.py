@@ -27,9 +27,8 @@ class Image(Base):
         outdict = [array_to_im(imagedata)]
 
         return {'images': outdict}
-
-    @property
-    def coords(self, as_points=False):
+    
+    def get_coords(self, as_points=False):
         user_data = self.get_user_data()['settings']
         if 'coords' in user_data.keys():            
             coords = user_data['coords']
