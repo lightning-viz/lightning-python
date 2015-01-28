@@ -28,7 +28,7 @@ class Image(Base):
 
         return {'images': outdict}
     
-    def get_coords(self, return_type='bounds', dims=None):
+    def get_coords(self, return_type='bounds', dims=None, z=None):
         """
         Get data from polygons drawn on image.
 
@@ -40,6 +40,10 @@ class Image(Base):
         dims : array-like, optional, default=None
             Specify the size of the image containing the polygon.
 
+        z : int, optional, default=None
+            When returning points or masks, embed the given z-index in the coordinates (for points),
+            or use them to create a volume (for masks). Use when working with a
+            two-dimensional image from a three-dimensional volume.
         """
 
         user_data = self.get_user_data()['settings']
@@ -50,12 +54,12 @@ class Image(Base):
                 return coords
 
             elif return_type == 'points':
-                return [polygon_to_points(x) for x in coords]
+                return [polygon_to_points(x, z) for x in coords]
 
             elif return_type == 'mask':
                 if not dims:
                     raise Exception('Must provide image dimensions to return mask')
-                return [polygon_to_mask(x, dims) for x in coords]
+                return [polygon_to_mask(x, dims, z) for x in coords]
 
             else:
                 raise Exception('Option %s is not supported' % return_type)
