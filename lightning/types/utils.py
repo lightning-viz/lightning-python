@@ -1,5 +1,7 @@
-from numpy import asarray, array, ndarray, vstack, newaxis, nonzero, concatenate, transpose, atleast_2d, size, isscalar, meshgrid, where
+from numpy import asarray, array, ndarray, vstack, newaxis, nonzero, concatenate, \
+    transpose, atleast_2d, size, isscalar, meshgrid, where, zeros
 from matplotlib.path import Path
+
 
 def add_property(d, prop, name):
 
@@ -209,10 +211,10 @@ def list_to_regions(reg):
         return reg
 
 
-def polygon_to_mask(coords, dims):
+def polygon_to_mask(coords, dims, z=None):
     """
     Given a list of pairs of points which define a polygon, return a binary
-    mask covering the interior of the polygon
+    mask covering the interior of the polygon with dimensions dim
     """
 
     bounds = array(coords).astype('int')
@@ -222,6 +224,13 @@ def polygon_to_mask(coords, dims):
     grid_flat = zip(grid[0].ravel(), grid[1].ravel())
 
     mask = path.contains_points(grid_flat).reshape(dims[0:2]).astype('int')
+
+    if z is not None:
+        if len(dims) < 3:
+            raise Exception('Dims must have at least three-dimensions for embedding z-index')
+        tmp = zeros(dims)
+        tmp[:, :, z] = mask
+        mask = tmp
 
     return mask
 
