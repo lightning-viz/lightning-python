@@ -256,8 +256,6 @@ def polygon_to_points(coords, z=None):
     points = where(points)
     points = vstack([points[0], points[1]]).T + bmin[-1::-1]
     if z is not None:
-        points = map(lambda p: (p[0], p[1], z), points)
-    else:
-        points = map(lambda p: tuple(p), points)
+        points = map(lambda p: [p[0], p[1], z], points)
 
     return points
