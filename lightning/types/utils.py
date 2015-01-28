@@ -227,7 +227,9 @@ def polygon_to_mask(coords, dims, z=None):
 
     if z is not None:
         if len(dims) < 3:
-            raise Exception('Dims must have at least three-dimensions for embedding z-index')
+            raise Exception('Dims must have three-dimensions for embedding z-index')
+        if z >= dims[2]:
+            raise Exception('Z-index %g exceeds third dimension %g' % (z, dims[2]))
         tmp = zeros(dims)
         tmp[:, :, z] = mask
         mask = tmp
