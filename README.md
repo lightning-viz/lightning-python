@@ -19,40 +19,17 @@ from lightning import Lightning
 lightning = Lightning(host="http://my-lightning-instance.herokuapp.com")
 lightning.create_session("provide an optional session name")
 
-lightning.plot(data=[1,2,3,4,5,6,7,8,0,-2,2], type='line')
+lightning.line([1,2,3,4,5,6,7,8,0,-2,2])
 
 ```
 
-### using an existing session
+## examples
 
+http://nbviewer.ipython.org/github/lightning-viz/lightning-example-notebooks/tree/master/
 
-```python
-from lightning import Lightning
+## complete documentation
 
-lightning = Lightning(host="http://my-lightning-instance.herokuapp.com")
-
-session_id = 14
-lightning.use_session(session_id)
-
-lightning.plot(data=[1,2,3,4,5,6,7,8,0,-2,2], type='line')
-
-```
-
-### using with iPython
-
-```python
-from lightning import Lightning
-
-lightning = Lightning(host="http://my-lightning-instance.herokuapp.com", ipython=True)
-
-session_id = 14
-lightning.use_session(session_id)
-
-lightning.plot(data=[1,2,3,4,5,6,7,8,0,-2,2], type='line')
-
-```
-
-![ipython-example](http://i.gif.fm/6ZTdQ.png)
+http://lightning-viz.github.io/lightning-python/
 
 ## running tests
 
@@ -79,13 +56,6 @@ or with against a custom host url
 ```
 $ py.test --host=http://mylightninghost.herokuapp.com
 ```
-## examples
-
-http://nbviewer.ipython.org/github/lightning-viz/lightning-example-notebooks/tree/master/
-
-## complete documentation
-
-http://lightning-viz.github.io/lightning-python/
 
 ## help
 
