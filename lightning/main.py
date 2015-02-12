@@ -94,10 +94,13 @@ class Lightning(object):
         """
         Generic plotting function.
 
-        Provide an arbtirary data object as a dictionary,
-        and a plot type as a string. Can be used to provide data to custom
-        plot types, as opposed to the included plot types
-        (e.g. lightning.scatter, lightning.line, etc.)
+        Provide an arbtirary data object as a dictionary, and a plot type as a string.
+        The data dictionary will be passed directly to the plot, without any parsing or formatting,
+        so make sure it is of the appropriate for your visualization
+        (e.g. {"series": [1,2,3]} for a "line" visualization).
+
+        Most useful when providing data to custom visualizations, as opposed to the included plot types
+        (e.g. lightning.scatter, lightning.line, etc.) which do automatic parsing and formatting.
         """
 
         from types.plots import Generic
