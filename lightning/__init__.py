@@ -7,4 +7,4 @@ from .types.images import *
 from .types.streaming import *
 from .types.three import *
 
-__version__ = "1.0.1"
+__version__ = "1.0.4"
