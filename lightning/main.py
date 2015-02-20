@@ -5,7 +5,7 @@ from visualization import Visualization
 class Lightning(object):
 
     def __init__(self, host="http://localhost:3000", ipython=False, auth=None):
-        self.host = host
+        self.set_host(host)
         self.auth = auth
 
         if auth is not None:
@@ -87,6 +87,9 @@ class Lightning(object):
         instance (e.g. http://lightning-test.herokuapp.com), or
         a independently hosted lightning server.
         """
+        if host[-1] == '/':
+            host = host[:-1]
+
         self.host = host
         return self
 
