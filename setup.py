@@ -26,7 +26,7 @@ METADATA = dict(
 
 
 SETUPTOOLS_METADATA = dict(
-  install_requires = ['setuptools', 'requests'],
+  install_requires = ['setuptools', 'requests', 'numpy', 'matplotlib'],
   include_package_data = True
 )
 
@@ -47,8 +47,8 @@ def Main():
     METADATA.update(SETUPTOOLS_METADATA)
     setuptools.setup(**METADATA)
   except ImportError:
-    print "Could not import setuptools, using distutils"
-    print "NOTE: You will need to install dependencies manualy" 
+    print("Could not import setuptools, using distutils")
+    print("NOTE: You will need to install dependencies manualy")
     import distutils.core
     distutils.core.setup(**METADATA)
 

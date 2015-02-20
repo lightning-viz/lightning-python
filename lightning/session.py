@@ -1,6 +1,6 @@
 import requests
 import json
-from visualization import Visualization
+from .visualization import Visualization
 import webbrowser
 
 
