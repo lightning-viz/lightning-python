@@ -1,7 +1,7 @@
 import requests
 import os
-from session import Session
-from visualization import Visualization
+from .session import Session
+from .visualization import Visualization
 
 
 class Lightning(object):
