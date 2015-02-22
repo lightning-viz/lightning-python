@@ -109,7 +109,7 @@ class Base(Visualization):
             images = data['images']
             del data['images']
             viz = cls.create(session, data=data, type=type)
-            viz.append_image(images)
+            viz._append_image(images)
         elif 'images' in data:
             images = data['images']
             viz = cls.create(session, images=images, type=type)
@@ -130,9 +130,9 @@ class Base(Visualization):
         if 'images' in data:
             images = data['images']
             for img in images:
-                self.update_image(img)
+                self._update_image(img)
         else:
-            self.update_data(data=data)
+            self._update_data(data=data)
 
     def append(self, *args, **kwargs):
         """
@@ -146,9 +146,9 @@ class Base(Visualization):
         if 'images' in data:
             images = data['images']
             for img in images:
-                self.append_image(img)
+                self._append_image(img)
         else:
-            self.append_data(data=data)
+            self._append_data(data=data)
 
     def get_user_data(self):
         """

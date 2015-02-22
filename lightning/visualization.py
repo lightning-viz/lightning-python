@@ -17,19 +17,19 @@ class Visualization(object):
 
         return url + '?host=' + urllib.quote(self.session.host)
 
-    def update_image(self, image):
+    def _update_image(self, image):
         url = self.session.host + '/sessions/' + str(self.session.id) + '/visualizations/' + str(self.id) + '/data/images'
         url = self._format_url(url)
         files = {'file': image}
         return requests.put(url, files=files, data={'type': 'image'}, auth=self.auth)
 
-    def append_image(self, image):
+    def _append_image(self, image):
         url = self.session.host + '/sessions/' + str(self.session.id) + '/visualizations/' + str(self.id) + '/data/images'
         url = self._format_url(url)
         files = {'file': image}
         return requests.post(url, files=files, data={'type': 'image'}, auth=self.auth)
 
-    def append_data(self, data=None, field=None):
+    def _append_data(self, data=None, field=None):
         payload = {'data': data}
         headers = {'Content-type': 'application/json', 'Accept': 'text/plain'}        
         url = self.session.host + '/sessions/' + str(self.session.id) + '/visualizations/' + str(self.id) + '/data/'
@@ -39,7 +39,7 @@ class Visualization(object):
         url = self._format_url(url)
         return requests.post(url, data=json.dumps(payload), headers=headers, auth=self.auth)
 
-    def update_data(self, data=None, field=None):
+    def _update_data(self, data=None, field=None):
         payload = {'data': data}
         headers = {'Content-type': 'application/json', 'Accept': 'text/plain'}        
         url = self.session.host + '/sessions/' + str(self.session.id) + '/visualizations/' + str(self.id) + '/data/'
@@ -95,7 +95,7 @@ class Visualization(object):
 
             viz = cls(session=session, json=r.json(), auth=session.auth)
             for image in remaining_images:
-                viz.append_image(image)
+                viz._append_image(image)
 
         return viz
 
