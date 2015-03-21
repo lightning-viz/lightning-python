@@ -109,7 +109,11 @@ class Base(Visualization):
             images = data['images']
             del data['images']
             viz = cls.create(session, data=data, type=type)
-            viz._append_image(images)
+            first_image, remaining_images = images[0], images[1:]
+            viz._append_image(first_image)
+            for image in remaining_images:
+                viz._append_image(image)
+
         elif 'images' in data:
             images = data['images']
             viz = cls.create(session, images=images, type=type)
