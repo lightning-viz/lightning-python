@@ -41,8 +41,7 @@ class Lightning(object):
         from IPython.core.getipython import get_ipython
         ip = get_ipython()
         formatter = ip.display_formatter.formatters['text/html']
-        formatter.for_type(Visualization,
-                           lambda viz, kwds=kwargs: viz.get_html())
+        formatter.for_type(Visualization, lambda viz, kwds=kwargs: viz.get_html())
 
     def disable_ipython(self):
         """

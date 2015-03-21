@@ -113,6 +113,7 @@ class Base(Visualization):
         elif 'images' in data:
             images = data['images']
             viz = cls.create(session, images=images, type=type)
+
         else:
             viz = cls.create(session, data=data, type=type)
 

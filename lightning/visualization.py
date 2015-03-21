@@ -56,7 +56,6 @@ class Visualization(object):
         return self._format_url(self.get_permalink() + '/embed')
 
     def get_html(self):
-
         r = requests.get(self.get_embed_link(), auth=self.auth)
         return r.text
 
@@ -66,7 +65,6 @@ class Visualization(object):
     def delete(self):
         url = self.get_permalink()
         return requests.delete(url)
-
 
     @classmethod
     def create(cls, session=None, data=None, images=None, type=None):
