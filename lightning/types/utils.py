@@ -23,6 +23,7 @@ def check_property(prop, name):
         'alpha': check_alpha,
         'size': check_size,
         'index': check_index,
+        'coordinates': check_coordinates,
     }
 
     if name in checkers:
@@ -31,6 +32,19 @@ def check_property(prop, name):
         return check_1d(prop, name)
     else:
         return prop
+
+
+def check_coordinates(c):
+    """
+    Check and parse coordinates as either a single coordinate list [[x,y],[x,y]] or a
+    list of coordinates for multiple regions [[[x0,y0],[x0,y0]], [[x1,y1],[x1,y1]]]
+    """
+    c = asarray(c)
+    if c.ndim == 1:
+        c = asarray([[c]])
+    elif c.ndim == 2:
+        c = asarray([c])
+    return c
 
 
 def check_color(c):

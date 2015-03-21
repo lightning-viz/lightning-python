@@ -2,7 +2,7 @@ from numpy import ndarray, asarray
 
 from lightning.types.base import Base
 from lightning.types.decorators import viztype
-from lightning.types.utils import array_to_im, polygon_to_points, polygon_to_mask
+from lightning.types.utils import add_property, array_to_im, polygon_to_points, polygon_to_mask
 
 
 @viztype
@@ -34,9 +34,9 @@ class ImageDraw(Base):
     _func = 'imagedraw'
     
     @staticmethod
-    def clean(imagedata):
+    def clean(imagedata, coordinates=None):
         """
-        Display an array as an image.
+        Display an array as an image with polygonal regions and region drawing.
 
         .. image:: image.png
 
@@ -44,13 +44,19 @@ class ImageDraw(Base):
         ----------
         imagedata : array-like
             Image as a two dimensional (grayscale) or three dimensional (RGB) array.
+
+        coordinates : array-like
+            List of coordinates or list of list of coordiantes, in the form
+            [[x,y],[x,y]] for one region or a [[[x0,y0],[x0,y0]], [[x1,y1],[x1,y1]]]
         """
         if asarray(imagedata).ndim not in set((2, 3)):
             raise Exception("Input must be two or three dimensional")
 
-        outdict = [array_to_im(imagedata)]
+        imgs = [array_to_im(imagedata)]
+        outdict = {'images': imgs}
+        outdict = add_property(outdict, coordinates, 'coordinates')
 
-        return {'images': outdict}
+        return outdict
     
     def get_coords(self, return_type='bounds', dims=None, z=None):
         """
