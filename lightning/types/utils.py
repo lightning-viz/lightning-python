@@ -3,16 +3,16 @@ from numpy import asarray, array, ndarray, vstack, newaxis, nonzero, concatenate
 from matplotlib.path import Path
 
 
-def add_property(d, prop, name):
+def add_property(d, prop, name, **kwargs):
 
     if prop is not None:
-        p = check_property(prop, name)
+        p = check_property(prop, name, **kwargs)
         d[name] = p
 
     return d
 
 
-def check_property(prop, name):
+def check_property(prop, name, **kwargs):
     """
     Check and parse a property with either a specific checking function
     or a generic parser
@@ -27,24 +27,25 @@ def check_property(prop, name):
     }
 
     if name in checkers:
-        return checkers[name](prop)
+        return checkers[name](prop, **kwargs)
     elif isinstance(prop, list) or isinstance(prop, ndarray) or isscalar(prop):
         return check_1d(prop, name)
     else:
         return prop
 
 
-def check_coordinates(c):
+def check_coordinates(co, xy=None):
     """
-    Check and parse coordinates as either a single coordinate list [[x,y],[x,y]] or a
-    list of coordinates for multiple regions [[[x0,y0],[x0,y0]], [[x1,y1],[x1,y1]]]
+    Check and parse coordinates as either a single coordinate list [[r,c],[r,c]] or a
+    list of coordinates for multiple regions [[[r0,c0],[r0,c0]], [[r1,c1],[r1,c1]]]
     """
-    c = asarray(c)
-    if c.ndim == 1:
-        c = asarray([[c]])
-    elif c.ndim == 2:
-        c = asarray([c])
-    return c
+    if isinstance(co, ndarray):
+        co = co.tolist()
+    if not (isinstance(co[0][0], list) or isinstance(co[0][0], tuple)):
+        co = [co]
+    if xy is not True:
+        co = map(lambda p: asarray(p)[:, ::-1].tolist(), co)
+    return co
 
 
 def check_color(c):
