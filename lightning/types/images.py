@@ -29,9 +29,9 @@ class Image(Base):
         return {'images': outdict}
 
 @viztype
-class ImageDraw(Base):
-    _name = 'image-draw'
-    _func = 'imagedraw'
+class ImagePoly(Base):
+    _name = 'image-poly'
+    _func = 'imagepoly'
     
     @staticmethod
     def clean(imagedata, coordinates=None):
