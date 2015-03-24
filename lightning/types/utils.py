@@ -70,10 +70,10 @@ def check_colormap(cmap):
     """
     Check if cmap is one of the colorbrewer maps
     """
-    names = {'BrBG', 'PiYG', 'PRGn', 'PuOr', 'RdBu', 'RdGy', 'RdYlBu', 'RdYlGn', 'Spectral', 'Blues', 'BuGn', 'BuPu',
+    names = set(['BrBG', 'PiYG', 'PRGn', 'PuOr', 'RdBu', 'RdGy', 'RdYlBu', 'RdYlGn', 'Spectral', 'Blues', 'BuGn', 'BuPu',
              'GnBu', 'Greens', 'Greys', 'Oranges', 'OrRd', 'PuBu', 'PuBuGn', 'PuRd', 'Purples', 'RdPu', 'Reds',
              'YlGn', 'YlGnBu', 'YlOrBr', 'YlOrRd', 'Accent', 'Dark2',
-             'Paired', 'Pastel1', 'Pastel2', 'Set1', 'Set2', 'Set3'}
+             'Paired', 'Pastel1', 'Pastel2', 'Set1', 'Set2', 'Set3'])
     if cmap not in names:
         raise Exception("Invalid cmap '%s',  must be one of %s" % (cmap, names))
 
