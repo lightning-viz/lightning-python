@@ -61,44 +61,58 @@ class ImagePoly(Base):
         outdict = add_property(outdict, coordinates, 'coordinates', xy=xy)
 
         return outdict
-    
-    def get_coords(self, return_type='bounds', dims=None, z=None):
+
+    @property
+    def _coords(self):
         """
-        Get data from polygons drawn on image.
+        Coordinates of regions retrieved from visualization user data.
+        """
+        user_data = self.get_user_data()['settings']
+        if 'coords' in user_data.keys():
+            return user_data['coords']
+        else:
+            return []
+
+    @property
+    def polygons(self):
+        """
+        Coordinates of polygons as drawn on an image.
+
+        These coordinates can be drawn directly to an image using lighting.imagepoly
+        and should be in the exact same locatinos as they were drawn.
+        """
+        coords = self._coords
+        # convert from x/y to row/column indexing
+        polygons = map(lambda b: asarray(b)[:, ::-1].tolist(), coords)
+        return polygons
+
+    def points(self, z=None):
+        """
+        Points contained in regions drawn on an image
 
         Parameters
         ----------
-        return_type : string, optional, default='bounds'
-            Specification of output data. Options are 'bounds','points', and 'mask'
+        z : int, optiona, default=None
+            Append a z-index to coordinates (yielding three dimensional coordinates)
+        """
+        coords = self._coords
+        return [polygon_to_points(x, z) for x in coords]
 
-        dims : array-like, optional, default=None
-            Specify the size of the image containing the polygon.
+    def masks(self, dims, z=None):
+        """
+        Binary masks with regions filled in as 1s or 0s.
+
+        Parameters
+        ----------
+        dims : array-like
+            Specify the dimensions of the image containing the polygons
 
         z : int, optional, default=None
-            When returning points or masks, embed the given z-index in the coordinates (for points),
-            or use them to create a volume (for masks). Use when working with a
-            two-dimensional image from a three-dimensional volume.
+            Use a z-index to insert regions into the appropriate slice if using
+            three-dimensional volumes.
         """
-
-        user_data = self.get_user_data()['settings']
-        if 'coords' in user_data.keys():
-            coords = user_data['coords']
-
-            if return_type == 'bounds':
-                return coords
-
-            elif return_type == 'points':
-                return [polygon_to_points(x, z) for x in coords]
-
-            elif return_type == 'mask':
-                if not dims:
-                    raise Exception('Must provide image dimensions to return mask')
-                return [polygon_to_mask(x, dims, z) for x in coords]
-
-            else:
-                raise Exception('Option %s is not supported' % return_type)
-        else:
-            return []
+        coords = self._coords
+        return [polygon_to_mask(x, dims, z) for x in coords]
 
 
 @viztype
