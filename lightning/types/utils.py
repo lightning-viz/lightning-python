@@ -271,7 +271,7 @@ def polygon_to_points(coords, z=None):
 
     points = path.contains_points(grid_flat).reshape(grid[0].shape).astype('int')
     points = where(points)
-    points = vstack([points[0], points[1]]).T + bmin[-1::-1]
+    points = (vstack([points[0], points[1]]).T + bmin[-1::-1]).tolist()
     if z is not None:
         points = map(lambda p: [p[0], p[1], z], points)
 
