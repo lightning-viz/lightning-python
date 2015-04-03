@@ -67,11 +67,16 @@ class Visualization(object):
         return requests.delete(url)
 
     @classmethod
-    def create(cls, session=None, data=None, images=None, type=None):
+    def create(cls, session=None, data=None, images=None, type=None, options=None):
+
+        if options is None:
+            options = {}
+
+
         url = session.host + '/sessions/' + str(session.id) + '/visualizations'
 
         if not images:
-            payload = {'data': data, 'type': type}
+            payload = {'data': data, 'type': type, 'opts': options}
             headers = {'Content-type': 'application/json', 'Accept': 'text/plain'}
 
             r = requests.post(url, data=json.dumps(payload), headers=headers, auth=session.auth)
@@ -86,7 +91,7 @@ class Visualization(object):
             first_image, remaining_images = images[0], images[1:]
             files = {'file': first_image}
             
-            r = requests.post(url, files=files, data={'type': type}, auth=session.auth)
+            r = requests.post(url, files=files, data={'type': type, 'opts': options}, auth=session.auth)
 
             if not r.status_code == requests.codes.ok:
                 raise Exception('Problem uploading images')

@@ -103,7 +103,15 @@ class Base(Visualization):
         if not type:
             raise Exception("Must provide a plot type")
 
-        data = cls.clean_data(*args, **kwargs)
+        options = {}
+        if hasattr(cls, '_validOptions'):
+            for key, value in kwargs.iteritems():
+                if key in cls._validOptions:
+                    lgn_option = cls._validOptions[key].get('lightning_name')
+                    options[lgn_option] = value
+
+
+        data = cls.clean_data(*args)
 
         if 'images' in data and len(data) > 1:
             images = data['images']
@@ -116,10 +124,10 @@ class Base(Visualization):
 
         elif 'images' in data:
             images = data['images']
-            viz = cls.create(session, images=images, type=type)
+            viz = cls.create(session, images=images, type=type, options=options)
 
         else:
-            viz = cls.create(session, data=data, type=type)
+            viz = cls.create(session, data=data, type=type, options=options)
 
         return viz
 
