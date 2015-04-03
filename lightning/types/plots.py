@@ -18,7 +18,7 @@ class Scatter(Base):
     _name = 'scatter'
 
     @staticmethod
-    def clean(x, y, color=None, label=None, size=None, alpha=None):
+    def clean(x, y, color=None, label=None, size=None, alpha=None, xaxis=None, yaxis=None):
         """
         Plot two-dimensional data as points.
 
@@ -40,6 +40,12 @@ class Scatter(Base):
 
         alpha : array-like, optional, singleton or (n,)
             Single alpha value or array to set fill and stroke opacity
+
+        xaxis : str, optional, default = None
+            Label for x-axis
+
+        yaxis : str, optional, default = None
+            Label for y-axis
         """
 
         points = vecs_to_points(x, y)
@@ -49,6 +55,8 @@ class Scatter(Base):
         outdict = add_property(outdict, label, 'label')
         outdict = add_property(outdict, size, 'size')
         outdict = add_property(outdict, alpha, 'alpha')
+        outdict = add_property(outdict, xaxis, 'xaxis')
+        outdict = add_property(outdict, yaxis, 'yaxis')
 
         return outdict
 
@@ -130,7 +138,7 @@ class Line(Base):
     }
 
     @staticmethod
-    def clean(series, index=None, color=None, label=None, size=None):
+    def clean(series, index=None, color=None, label=None, size=None, xaxis=None, yaxis=None):
         """
         Plot one-dimensional series data as lines.
 
@@ -153,6 +161,15 @@ class Line(Base):
 
         size : array-like, optional, singleton or (n,)
             Single size or array to set line thickness
+
+        size : array-like, optional, singleton or (n,)
+            Single size or array to set line thickness
+
+        xaxis : str, optional, default = None
+            Label for x-axis
+
+        yaxis : str, optional, default = None
+            Label for y-axis
         """
         
         series = array_to_lines(series)
@@ -162,6 +179,8 @@ class Line(Base):
         outdict = add_property(outdict, size, 'size')
         outdict = add_property(outdict, label, 'label')
         outdict = add_property(outdict, index, 'index')
+        outdict = add_property(outdict, xaxis, 'xaxis')
+        outdict = add_property(outdict, yaxis, 'yaxis')
 
         return outdict
 

@@ -10,7 +10,7 @@ class LineStreaming(Base):
     _func = 'linestreaming'
 
     @staticmethod
-    def clean(series, index=None, color=None, label=None, size=None):
+    def clean(series, index=None, color=None, label=None, size=None, xaxis=None, yaxis=None):
         """
         Plot streaming one-dimensional series data as updating lines.
 
@@ -36,6 +36,12 @@ class LineStreaming(Base):
 
         size : array-like, optional, singleton or (n,)
             Single size or array to set line thickness
+
+        xaxis : str, optional, default = None
+            Label for x-axis
+
+        yaxis : str, optional, default = None
+            Label for y-axis
         """
 
         series = array_to_lines(series)
@@ -45,6 +51,8 @@ class LineStreaming(Base):
         outdict = add_property(outdict, size, 'size')
         outdict = add_property(outdict, label, 'label')
         outdict = add_property(outdict, index, 'index')
+        outdict = add_property(outdict, xaxis, 'xaxis')
+        outdict = add_property(outdict, yaxis, 'yaxis')
 
         return outdict
 
@@ -56,7 +64,7 @@ class ScatterStreaming(Base):
     _func = 'scatterstreaming'
 
     @staticmethod
-    def clean(x, y, color=None, label=None, size=None):
+    def clean(x, y, color=None, label=None, size=None, xaxis=None, yaxis=None):
         """
         Create a streaming scatter plot of x and y.
 
@@ -79,6 +87,12 @@ class ScatterStreaming(Base):
 
         size : array-like, optional, singleton or (n,)
             Single size or array to set point sizes
+
+        xaxis : str, optional, default = None
+            Label for x-axis
+
+        yaxis : str, optional, default = None
+            Label for y-axis
         """
 
         points = vecs_to_points(x, y)
@@ -87,5 +101,7 @@ class ScatterStreaming(Base):
         outdict = add_property(outdict, color, 'color')
         outdict = add_property(outdict, label, 'label')
         outdict = add_property(outdict, size, 'size')
+        outdict = add_property(outdict, xaxis, 'xaxis')
+        outdict = add_property(outdict, yaxis, 'yaxis')
 
         return outdict
