@@ -31,7 +31,7 @@ def viztype(VizType):
     formatted_opts = ', '.join(['%s=%s' % (key, value.get('default_value')) for (key, value) in valid_opts.items()])
     argspec = inspect.getargspec(VizType.clean)
     formatted_args = inspect.formatargspec(*argspec)
-    fndef = 'lambda self, %s, %s: plotter(self,%s, %s)' % (formatted_args.lstrip('(').rstrip(')'), formatted_opts, formatted_args[1:].replace('=None', '').rstrip(')'), formatted_opts)
+    fndef = 'lambda self, %s, %s: plotter(self,%s, %s)' % (formatted_args.lstrip('(').rstrip(')'), formatted_opts, formatted_args[1:].replace('=None', '').rstrip(')'), ', '.join('%s=%s' % (key, key) for key in valid_opts.keys()))
 
     fake_fn = eval(fndef, {'plotter': plotter})
     plotter = wraps(VizType.clean)(fake_fn)

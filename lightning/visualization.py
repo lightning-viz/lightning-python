@@ -72,7 +72,6 @@ class Visualization(object):
         if options is None:
             options = {}
 
-
         url = session.host + '/sessions/' + str(session.id) + '/visualizations'
 
         if not images:

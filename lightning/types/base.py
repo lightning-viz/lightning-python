@@ -110,7 +110,6 @@ class Base(Visualization):
                     lgn_option = cls._validOptions[key].get('lightning_name')
                     options[lgn_option] = value
 
-
         data = cls.clean_data(*args)
 
         if 'images' in data and len(data) > 1:
