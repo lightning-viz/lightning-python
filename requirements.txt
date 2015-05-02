@@ -1,0 +1,5 @@
+setuptools
+requests
+numpy
+pytest
+matplotlib

@@ -1,12 +1,9 @@
 #!/usr/bin/env python
-#
 
 '''The setup and build script for the lightning-python library.'''
 
 __author__ = 'github@mathisonian.com'
 __version__ = '1.0.5'
-
-
 
 # The base package metadata to be used by both distutils and setuptools
 METADATA = dict(
@@ -22,14 +19,10 @@ METADATA = dict(
 )
 
 # Extra package metadata to be used only if setuptools is installed
-
-
-
 SETUPTOOLS_METADATA = dict(
-  install_requires = ['setuptools', 'requests', 'numpy', 'matplotlib'],
+  install_requires = open('requirements.txt').read().split(),
   include_package_data = True
 )
-
 
 def Read(file):
   return open(file).read()
