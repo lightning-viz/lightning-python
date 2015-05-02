@@ -147,7 +147,7 @@ class TestLightningAPIClient:
 
     def test_create_force(self):
 
-        mat = array([[random.uniform(0, 25) if random.random() > 0.95 else 0 for _ in xrange(25)] for _ in xrange(25)])
+        mat = array([[random.uniform(0, 25) if random.random() > 0.95 else 0 for _ in range(25)] for _ in range(25)])
         viz = lightning.force(mat)
 
         assert isinstance(viz, Visualization)
@@ -155,7 +155,7 @@ class TestLightningAPIClient:
 
     def test_create_graph(self):
 
-        mat = array([[random.uniform(0, 25) if random.random() > 0.9 else 0 for _ in xrange(25)] for _ in xrange(25)])
+        mat = array([[random.uniform(0, 25) if random.random() > 0.9 else 0 for _ in range(25)] for _ in range(25)])
         x = random.randn(25)
         y = random.randn(25)
         
