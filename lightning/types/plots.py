@@ -114,7 +114,7 @@ class Adjacency(Base):
         """
 
         links = mat_to_links(matrix)
-        nodes = range(0, matrix.shape[0])
+        nodes = list(range(0, matrix.shape[0]))
         outdict = {'links': links, 'nodes': nodes}
 
         outdict = add_property(outdict, label, 'label')
@@ -254,7 +254,7 @@ class Force(Base):
         """
 
         links = mat_to_links(matrix)
-        nodes = range(0, matrix.shape[0])
+        nodes = list(range(0, matrix.shape[0]))
 
         outdict = {'links': links, 'nodes': nodes}
 
