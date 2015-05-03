@@ -1,12 +1,21 @@
 language: python
 
-python:
-  - "2.7"
-  - "3.4"
+before_script:
+  - git config --global user.name "Teracy" # Configure your git user.name here
+  - git config --global user.email "your-friends@teracy.com" # Configure your git user.email here
+  - export REPO_URL_GITHUB="https://$GH_TOKEN@github.com/$GH_REPO.git"
+  - . ./.travis/setup.sh # make any change needed for setup.sh
+  - echo $DEPLOY_HTML_DIR
 
-install:
-  - pip install .
-  - pip install -r requirements.txt
+after_script:
+  - sudo pip install -r docs/requirements.txt --use-mirrors # change this to the right project path
+  - cd docs
+  - make setup_gh_pages
+  - make generate
+  - make deploy
 
-script:
-  - py.test --host http://lightning-python-test.herokuapp.com
+env:
+  global:
+  - GH_REPO="teracy-official/sphinx-deployment" #change this to your right project
+  # configure the right travis-ci secure key, see sphinx-deployment/README for more details
+  #- secure: im3gWbsEF135C0jKlOIRJUa1tgtsCAaqwGDSpzwe/fnTosqystNE+mhvFfERmy1K4qRg0cbRYGd8L6pP/V7RR3GMqFX4h5wexZeKsCN895S0d7QIWUmw2yJ3+mvk/g+E6q56tORzhKzKVRef5VWkk84EOKrZ/KIeoVpKVAlVR1s=
