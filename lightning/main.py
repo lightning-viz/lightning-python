@@ -117,7 +117,7 @@ class Lightning(object):
         self.host = host
         return self
 
-    def plot(self, type=None, **kwargs):
+    def plot(self, data=None, type=None):
         """
         Generic plotting function.
 
@@ -128,11 +128,22 @@ class Lightning(object):
 
         Most useful when providing data to custom visualizations, as opposed to the included plot types
         (e.g. lightning.scatter, lightning.line, etc.) which do automatic parsing and formatting.
+
+        Parameters
+        ----------
+        data : dict
+            Dictionary with data to plot
+
+        type : str
+            Name of plot (e.g. 'line' or 'scatter')
         """
 
         from types.plots import Generic
+
+        if not hasattr(self, 'session'):
+            self.create_session()
         
-        viz = Generic.baseplot(self.session, type=type, **kwargs)
+        viz = Generic.baseplot(self.session, type, data)
         self.session.visualizations.append(viz)
         return viz
 

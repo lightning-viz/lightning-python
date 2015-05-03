@@ -9,7 +9,7 @@ class Generic(Base):
 
     @staticmethod
     def clean(data):
-        return {'data': data}
+        return data
 
 
 @viztype

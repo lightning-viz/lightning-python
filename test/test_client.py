@@ -41,6 +41,17 @@ class TestLightningAPIClient:
         assert hasattr(viz, 'id')
 
 
+    def test_create_generic(self):
+
+        series = random.randn(5,100)
+
+        viz = lightning.plot(data={"series": series}, type='line')
+        viz = lightning.plot({"series": series}, 'line')
+
+        assert isinstance(viz, Visualization)
+        assert hasattr(viz, 'id')
+
+
     def test_create_line(self):
 
         series = random.randn(5,100)
