@@ -138,7 +138,7 @@ class Lightning(object):
             Name of plot (e.g. 'line' or 'scatter')
         """
 
-        from types.plots import Generic
+        from .types.plots import Generic
 
         if not hasattr(self, 'session'):
             self.create_session()
