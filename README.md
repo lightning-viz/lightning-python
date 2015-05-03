@@ -8,6 +8,9 @@ Lightning python client
 Python client for the [lightning](https://github.com/mathisonian/lightning) API
 
 ## installation
+Compatible with Python 2.7 and 3.4. 
+
+Install using:
 
 ```
 pip install lightning-python
@@ -63,5 +66,5 @@ $ py.test --host=http://mylightninghost.herokuapp.com
 
 ## help
 
-We maintain a [chatroom](https://gitter.im/lightning-viz/lightning) on gitter. If there's no response there: file an issue or reach out on twitter (@mathisonian, @thefreemanlab)
+We maintain a [chatroom](https://gitter.im/lightning-viz/lightning) on gitter. If there's no response there: file an issue or reach out on twitter ([@mathisonian](http://twitter.com/matisonian), [@thefreemanlab](http://twitter.com/thefreemanlab))
 
