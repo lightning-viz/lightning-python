@@ -17,7 +17,7 @@ Compatible with Python 2.7 and 3.4.
 
 ## usage
 
-### creating a new session
+### creating a session
 
 ```python
 from lightning import Lightning
