@@ -1,5 +1,6 @@
 from lightning import Visualization
 import requests
+import six
 
 
 class Base(Visualization):
@@ -105,7 +106,7 @@ class Base(Visualization):
 
         options = {}
         if hasattr(cls, '_validOptions'):
-            for key, value in kwargs.iteritems():
+            for key, value in six.iteritems(kwargs):
                 if key in cls._validOptions:
                     lgn_option = cls._validOptions[key].get('lightning_name')
                     options[lgn_option] = value

@@ -3,3 +3,4 @@ requests
 numpy
 pytest
 matplotlib
+six
