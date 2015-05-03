@@ -8,13 +8,12 @@ Lightning python client
 Python client for the [lightning](https://github.com/mathisonian/lightning) API
 
 ## installation
-Compatible with Python 2.7 and 3.4. 
-
 Install using:
 
 ```
 pip install lightning-python
 ```
+Compatible with Python 2.7 and 3.4. 
 
 ## usage
 
