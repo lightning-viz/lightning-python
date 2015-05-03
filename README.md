@@ -1,10 +1,11 @@
+[![Travis branch](https://img.shields.io/travis/lightning-viz/lightning-python/master.svg)]()
+[![Gitter](https://badges.gitter.im/Join%20Chat.svg)](https://gitter.im/lightning-viz/lightning?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge)
+
+
 Lightning python client
 ================
 
 Python client for the [lightning](https://github.com/mathisonian/lightning) API
-
-[![Travis branch](https://img.shields.io/travis/lightning-viz/lightning-python/master.svg)]()
-[![Gitter](https://badges.gitter.im/Join%20Chat.svg)](https://gitter.im/lightning-viz/lightning?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge)
 
 ## installation
 
