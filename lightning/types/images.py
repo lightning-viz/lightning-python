@@ -69,7 +69,7 @@ class ImagePoly(Base):
         """
         user_data = self.get_user_data()['settings']
         if 'coords' in user_data.keys():
-            return user_data['coords']
+            return [c for c in user_data['coords'] if len(c) > 1]
         else:
             return []
 
