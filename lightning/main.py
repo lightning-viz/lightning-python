@@ -16,6 +16,8 @@ class Lightning(object):
 
         if ipython:
             self.enable_ipython()
+        else:
+            self.ipython_enabled = False
 
         if dbcloud:
             self.enable_dbcloud()
@@ -25,6 +27,11 @@ class Lightning(object):
             return 'Lightning server at host: %s' % self.host + '\n' + self.session.__repr__()
         else:
             return 'Lightning server at host: %s' % self.host
+
+
+    def get_ipython_markup_link(self):
+        return '%s/js/ipython-comm.js' % (self.host)
+
 
     def enable_ipython(self, **kwargs):
         """
@@ -39,9 +46,18 @@ class Lightning(object):
         # https://github.com/jakevdp/mpld3/blob/master/mpld3/_display.py#L357
 
         from IPython.core.getipython import get_ipython
+        from IPython.display import display, HTML
+
+        self.ipython_enabled = True
         ip = get_ipython()
         formatter = ip.display_formatter.formatters['text/html']
         formatter.for_type(Visualization, lambda viz, kwds=kwargs: viz.get_html())
+
+        r = requests.get(self.get_ipython_markup_link(), auth=self.auth)
+        ipython_comm_markup = '<script>' + r.text + '</script>'
+
+        display(HTML(ipython_comm_markup))
+
 
     def disable_ipython(self):
         """
@@ -51,6 +67,8 @@ class Lightning(object):
         but will not appear in the notebook.
         """
         from IPython.core.getipython import get_ipython
+
+        self.ipython_enabled = False
         ip = get_ipython()
         formatter = ip.display_formatter.formatters['text/html']
         formatter.type_printers.pop(Visualization, None)
@@ -82,7 +100,7 @@ class Lightning(object):
         Can create a session with the provided name, otherwise session name
         will be "Session No." with the number automatically generated.
         """
-        self.session = Session.create(self.host, name=name, auth=self.auth)
+        self.session = Session.create(self, name=name)
         return self.session
 
     def use_session(self, session_id):
@@ -92,7 +110,7 @@ class Lightning(object):
         Specify a lightning session by id number. Check the number of an existing
         session in the attribute lightning.session.id.
         """
-        self.session = Session(host=self.host, id=session_id, auth=self.auth)
+        self.session = Session(lgn=self, id=session_id)
         return self.session
 
     def set_basic_auth(self, username, password):
