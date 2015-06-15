@@ -1,6 +1,6 @@
 import pytest
-from lightning import Lightning, Visualization
 from numpy import random, ceil
+from lightning import Lightning, Visualization
 
 
 class TestLightningImages(object):

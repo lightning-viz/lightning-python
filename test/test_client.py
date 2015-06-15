@@ -1,6 +1,6 @@
-from lightning import Lightning, Session, Visualization
-from numpy import random, ceil
 import pytest
+from numpy import random, ceil
+from lightning import Lightning, Visualization
 
 
 class TestLightningAPIClient(object):

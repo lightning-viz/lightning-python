@@ -193,13 +193,25 @@ def mat_to_links(mat):
     return links
 
 
-def parse_links(data, count=None):
+def parse_nodes(data):
+
+    data = asarray(data)
+
+    if data.shape[0] == data.shape[1]:
+        nodes = list(range(0, len(data)))
+
+    else:
+        nodes = list(range(0, int(max(max(data[:, 0]), max(data[:, 1])) + 1)))
+
+    return nodes
+
+
+def parse_links(data):
 
     data = asarray(data)
 
     if data.shape[0] == data.shape[1]:
         links = mat_to_links(data)
-        nodes = list(range(0, len(data)))
 
     else:
         if len(data[0]) == 2:
@@ -209,12 +221,7 @@ def parse_links(data, count=None):
         else:
             raise ValueError("Too many entries per link, must be 2 or 3, got %g" % len(data[0]))
 
-        if count:
-            nodes = list(range(0, count))
-        else:
-            nodes = list(range(0, max(max(data[:, 0]), max(data[:, 1])) + 1))
-
-    return links, nodes
+    return links
 
 
 def array_to_im(im):

@@ -1,7 +1,8 @@
 from lightning.types.base import Base
 from lightning.types.decorators import viztype
 from lightning.types.utils import array_to_lines, vecs_to_points, \
-    parse_links, array_to_im, add_property, mat_to_array, list_to_regions, check_colormap
+    parse_links, array_to_im, add_property, mat_to_array, list_to_regions, \
+    check_colormap, parse_nodes
 
 
 @viztype
@@ -115,7 +116,8 @@ class Adjacency(Base):
         colormap : string
             Specification of color map, only colorbrewer types supported
         """
-        links, nodes = parse_links(conn)
+        links = parse_links(conn)
+        nodes = parse_nodes(conn)
 
         outdict = {'links': links, 'nodes': nodes}
 
@@ -257,7 +259,8 @@ class Force(Base):
             Single size or array to set node sizes
         """
 
-        links, nodes = parse_links(conn)
+        links = parse_links(conn)
+        nodes = parse_nodes(conn)
 
         outdict = {'links': links, 'nodes': nodes}
 
@@ -301,7 +304,7 @@ class Graph(Base):
             Single size or array to set node sizes
         """
 
-        links, _ = parse_links(conn, count=len(x))
+        links = parse_links(conn)
         nodes = vecs_to_points(x, y)
 
         outdict = {'links': links, 'nodes': nodes}
@@ -350,7 +353,7 @@ class GraphBundled(Base):
         size : array-like, optional, singleton or (n,)
             Single size or array to set node sizes
         """
-        links, _ = parse_links(conn, count=len(x))
+        links, _ = parse_links(conn)
         points = vecs_to_points(x, y)
 
         outdict = {'links': links, 'nodes': points}

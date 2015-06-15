@@ -1,6 +1,7 @@
 import pytest
-from lightning import Lightning, Visualization
 from numpy import random, ceil, array, clip
+from lightning import Lightning, Visualization
+from lightning.types.utils import mat_to_links
 
 
 class TestLightningPlots(object):
@@ -89,6 +90,15 @@ class TestLightningPlots(object):
 
         mat = array([[random.uniform(0, 25) if random.random() > 0.95 else 0 for _ in range(25)] for _ in range(25)])
         viz = lgn.force(mat)
+
+        assert isinstance(viz, Visualization)
+        assert hasattr(viz, 'id')
+
+    def test_create_force_links(self, lgn):
+
+        mat = array([[random.uniform(0, 25) if random.random() > 0.95 else 0 for _ in range(25)] for _ in range(25)])
+        links = mat_to_links(mat)
+        viz = lgn.force(links)
 
         assert isinstance(viz, Visualization)
         assert hasattr(viz, 'id')
