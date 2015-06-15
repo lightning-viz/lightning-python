@@ -1,5 +1,5 @@
 from numpy import asarray, array, ndarray, vstack, newaxis, nonzero, concatenate, \
-    transpose, atleast_2d, size, isscalar, meshgrid, where, zeros
+    transpose, atleast_2d, size, isscalar, meshgrid, where, zeros, ones
 from matplotlib.path import Path
 
 
@@ -168,6 +168,7 @@ def vecs_to_points_three(x, y, z):
 
     return points
 
+
 def mat_to_array(mat):
 
     mat = asarray(mat)
@@ -190,6 +191,33 @@ def mat_to_links(mat):
     links = concatenate((transpose(nonzero(mat)), atleast_2d(mat[inds]).T), axis=1)
 
     return links
+
+
+def parse_links(data, mode, count=None):
+
+    data = asarray(data)
+
+    if mode == "matrix":
+        links = mat_to_links(data)
+        nodes = list(range(0, len(data)))
+
+    elif mode == "links":
+        if len(data[0]) == 2:
+            links = concatenate((data, ones((len(data), 1))), axis=1)
+        elif len(data[0]) == 3:
+            links = data
+        else:
+            raise ValueError("Too many entries per link, must be 2 or 3, got %g" % len(data[0]))
+
+        if count:
+            nodes = list(range(0, count))
+        else:
+            nodes = list(range(0, len(data)))
+
+    else:
+        raise ValueError("Mode must be links or matrix, got %s" % mode)
+
+    return links, nodes
 
 
 def array_to_im(im):
