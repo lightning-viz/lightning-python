@@ -10,6 +10,13 @@ class Visualization(object):
         self.id = json.get('id')
         self.auth = auth
 
+        if self.session.lgn.ipython_enabled:
+            from IPython.kernel.comm import Comm
+            self.comm = Comm('lightning', {'id': self.id})
+            self.comm_handlers = {}
+            self.comm.on_msg(self._handle_comm_message)
+
+
     def _format_url(self, url):
         if not url.endswith('/'):
             url += '/'
@@ -67,6 +74,24 @@ class Visualization(object):
     def delete(self):
         url = self.get_permalink()
         return requests.delete(url)
+
+
+    def on(self, event_name, handler):
+
+        if self.session.lgn.ipython_enabled:
+            self.comm_handlers[event_name] = handler
+
+        else:
+            raise Exception('The current implementation of this method is only compatible with IPython.')
+
+
+    def _handle_comm_message(self, message):
+        # Parsing logic taken from similar code in matplotlib
+        message = json.loads(message['content']['data'])
+
+        if message['type'] in self.comm_handlers:
+            self.comm_handlers[message['type']](message['data'])
+
 
     @classmethod
     def create(cls, session=None, data=None, images=None, type=None, options=None):
