@@ -1,7 +1,7 @@
 from lightning.types.base import Base
 from lightning.types.decorators import viztype
 from lightning.types.utils import array_to_lines, vecs_to_points, \
-    mat_to_links, array_to_im, add_property, mat_to_array, list_to_regions, check_colormap
+    parse_links, array_to_im, add_property, mat_to_array, list_to_regions, check_colormap
 
 
 @viztype
@@ -97,7 +97,7 @@ class Adjacency(Base):
     _name = 'adjacency'
 
     @staticmethod
-    def clean(matrix, label=None):
+    def clean(conn, label=None):
 
         """
         Visualize a sparse adjacency matrix.
@@ -106,15 +106,17 @@ class Adjacency(Base):
 
         Parameters
         ----------
-        matrix : array-like
-            Two-dimensional array of matrix data
+       conn : array-like, (n,n) or (n,3) or (n,2)
+            Input connectivity data as either a matrix or a list of links.
+            Matrix can be binary or continuous valued. Links should contain
+            either 2 elements per link (source, target),
+            or 3 elements (source, target, value).
 
         colormap : string
             Specification of color map, only colorbrewer types supported
         """
+        links, nodes = parse_links(conn)
 
-        links = mat_to_links(matrix)
-        nodes = list(range(0, matrix.shape[0]))
         outdict = {'links': links, 'nodes': nodes}
 
         outdict = add_property(outdict, label, 'label')
@@ -171,7 +173,7 @@ class Line(Base):
         yaxis : str, optional, default = None
             Label for y-axis
         """
-        
+
         series = array_to_lines(series)
         outdict = {'series': series}
 
@@ -231,7 +233,7 @@ class Force(Base):
     _func = 'force'
 
     @staticmethod
-    def clean(matrix, color=None, label=None, size=None):
+    def clean(conn, color=None, label=None, size=None):
         """
         Create a force-directed network from a connectivity matrix.
 
@@ -239,9 +241,11 @@ class Force(Base):
 
         Parameters
         ----------
-        matrix : array-like, (n,n)
-            Input data with connectivity matrix. Can be binary or continuous-valued
-            for weighted edges.
+        conn : array-like, (n,n) or (n,3) or (n,2)
+            Input connectivity data as either a matrix or a list of links.
+            Matrix can be binary or continuous valued. Links should contain
+            either 2 elements per link (source, target),
+            or 3 elements (source, target, value).
 
         color : array-like, optional, singleton or (n,3)
             Single rgb value or array to set node colors
@@ -253,8 +257,7 @@ class Force(Base):
             Single size or array to set node sizes
         """
 
-        links = mat_to_links(matrix)
-        nodes = list(range(0, matrix.shape[0]))
+        links, nodes = parse_links(conn)
 
         outdict = {'links': links, 'nodes': nodes}
 
@@ -271,7 +274,7 @@ class Graph(Base):
     _func = 'graph'
 
     @staticmethod
-    def clean(x, y, matrix, color=None, label=None, size=None, imagedata=None):
+    def clean(x, y, conn, color=None, label=None, size=None, imagedata=None):
         """
         Create a node-link graph from spatial points and their connectivity matrix.
 
@@ -282,9 +285,11 @@ class Graph(Base):
         x,y : array-like, each (n,)
             Input data for nodes (x,y coordinates)
 
-        matrix : array, (n,n)
-            Input data with connectivity matrix. Can be binary or continuous-valued
-            (for weighted edges).
+        conn : array-like, (n,n) or (n,3) or (n,2)
+            Input connectivity data as either a matrix or a list of links.
+            Matrix can be binary or continuous valued. Links should contain
+            either 2 elements per link (source, target),
+            or 3 elements (source, target, value).
 
         color : array-like, optional, singleton or (n,) or (n,3)
             Single rgb value or array to set node colors
@@ -296,7 +301,7 @@ class Graph(Base):
             Single size or array to set node sizes
         """
 
-        links = mat_to_links(matrix)
+        links, _ = parse_links(conn, count=len(x))
         nodes = vecs_to_points(x, y)
 
         outdict = {'links': links, 'nodes': nodes}
@@ -319,7 +324,7 @@ class GraphBundled(Base):
     _func = 'graphbundled'
 
     @staticmethod
-    def clean(x, y, matrix, color=None, label=None, size=None, imagedata=None):
+    def clean(x, y, conn, color=None, label=None, size=None, imagedata=None):
         """
         Create a node-link graph with bundled edges.
 
@@ -330,9 +335,11 @@ class GraphBundled(Base):
         x,y : array-like, each (n,)
             Input data for nodes (x,y coordinates)
 
-        matrix : array, (n,n)
-            Input data with connectivity matrix. Can be binary or continuous-valued
-            (for weighted edges).
+        conn : array-like, (n,n) or (n,3) or (n,2)
+            Input connectivity data as either a matrix or a list of links.
+            Matrix can be binary or continuous valued. Links should contain
+            either 2 elements per link (source, target),
+            or 3 elements (source, target, value).
 
         color : array-like, optional, singleton or (n,) or (n,3)
             Single rgb value or array to set node colors
@@ -343,9 +350,8 @@ class GraphBundled(Base):
         size : array-like, optional, singleton or (n,)
             Single size or array to set node sizes
         """
-
+        links, _ = parse_links(conn, count=len(x))
         points = vecs_to_points(x, y)
-        links = mat_to_links(matrix)
 
         outdict = {'links': links, 'nodes': points}
 

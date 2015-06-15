@@ -193,15 +193,15 @@ def mat_to_links(mat):
     return links
 
 
-def parse_links(data, mode, count=None):
+def parse_links(data, count=None):
 
     data = asarray(data)
 
-    if mode == "matrix":
+    if data.shape[0] == data.shape[1]:
         links = mat_to_links(data)
         nodes = list(range(0, len(data)))
 
-    elif mode == "links":
+    else:
         if len(data[0]) == 2:
             links = concatenate((data, ones((len(data), 1))), axis=1)
         elif len(data[0]) == 3:
@@ -212,10 +212,7 @@ def parse_links(data, mode, count=None):
         if count:
             nodes = list(range(0, count))
         else:
-            nodes = list(range(0, len(data)))
-
-    else:
-        raise ValueError("Mode must be links or matrix, got %s" % mode)
+            nodes = list(range(0, max(max(data[:, 0]), max(data[:, 1])) + 1))
 
     return links, nodes
 
