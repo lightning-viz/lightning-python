@@ -19,7 +19,7 @@ class Scatter(Base):
     _name = 'scatter'
 
     @staticmethod
-    def clean(x, y, color=None, label=None, size=None, alpha=None, xaxis=None, yaxis=None):
+    def clean(x, y, color=None, label=None, value=None, colormap=None, size=None, alpha=None, xaxis=None, yaxis=None):
         """
         Plot two-dimensional data as points.
 
@@ -35,6 +35,12 @@ class Scatter(Base):
 
         label : array-like, optional, singleton or (n,)
             Single integer or array to set colors via groups
+
+        value : array-like, optional, singleton or (n,)
+            Values to set node colors via a linear scale
+
+        colormap : string
+            Specification of color map, only colorbrewer types supported
 
         size : array-like, optional, singleton or (n,)
             Single size or array to set point sizes
@@ -54,6 +60,8 @@ class Scatter(Base):
 
         outdict = add_property(outdict, color, 'color')
         outdict = add_property(outdict, label, 'label')
+        outdict = add_property(outdict, value, 'value')
+        outdict = add_property(outdict, colormap, 'colormap')
         outdict = add_property(outdict, size, 'size')
         outdict = add_property(outdict, alpha, 'alpha')
         outdict = add_property(outdict, xaxis, 'xaxis')
@@ -113,8 +121,8 @@ class Adjacency(Base):
             either 2 elements per link (source, target),
             or 3 elements (source, target, value).
 
-        colormap : string
-            Specification of color map, only colorbrewer types supported
+        label : array-like, optional, singleton or (n,)
+            Single integer or array to set colors via groups
         """
         links = parse_links(conn)
         nodes = parse_nodes(conn)
@@ -162,9 +170,6 @@ class Line(Base):
 
         label : array-like, optional, singleton or (n,)
             Single integer or array to set line colors via group labels
-
-        size : array-like, optional, singleton or (n,)
-            Single size or array to set line thickness
 
         size : array-like, optional, singleton or (n,)
             Single size or array to set line thickness
@@ -235,7 +240,7 @@ class Force(Base):
     _func = 'force'
 
     @staticmethod
-    def clean(conn, color=None, label=None, size=None):
+    def clean(conn, color=None, label=None, value=None, colormap=None, size=None):
         """
         Create a force-directed network from a connectivity matrix.
 
@@ -255,6 +260,12 @@ class Force(Base):
         label : array-like, optional, singleton or (n,)
             Single integer or array to set node colors via group labels
 
+        value : array-like, optional, singleton or (n,)
+            Values to set node colors via a linear scale
+
+        colormap : string
+            Specification of color map, only colorbrewer types supported
+
         size : array-like, optional, singleton or (n,)
             Single size or array to set node sizes
         """
@@ -266,6 +277,8 @@ class Force(Base):
 
         outdict = add_property(outdict, color, 'color')
         outdict = add_property(outdict, label, 'label')
+        outdict = add_property(outdict, value, 'value')
+        outdict = add_property(outdict, colormap, 'colormap')
         outdict = add_property(outdict, size, 'size')
 
         return outdict
@@ -277,7 +290,7 @@ class Graph(Base):
     _func = 'graph'
 
     @staticmethod
-    def clean(x, y, conn, color=None, label=None, size=None, imagedata=None):
+    def clean(x, y, conn, color=None, label=None, value=None, colormap=None, size=None, imagedata=None):
         """
         Create a node-link graph from spatial points and their connectivity matrix.
 
@@ -300,6 +313,12 @@ class Graph(Base):
         label : array-like, optional, singleton or (n,)
             Single integer or array to set node colors via group labels
 
+        value : array-like, optional, singleton or (n,)
+            Values to set node colors via a linear scale
+
+        colormap : string
+            Specification of color map, only colorbrewer types supported
+
         size : array-like, optional, singleton or (n,)
             Single size or array to set node sizes
         """
@@ -311,6 +330,8 @@ class Graph(Base):
 
         outdict = add_property(outdict, color, 'color')
         outdict = add_property(outdict, label, 'label')
+        outdict = add_property(outdict, value, 'value')
+        outdict = add_property(outdict, colormap, 'colormap')
         outdict = add_property(outdict, size, 'size')
 
         if imagedata is not None:
@@ -327,7 +348,7 @@ class GraphBundled(Base):
     _func = 'graphbundled'
 
     @staticmethod
-    def clean(x, y, conn, color=None, label=None, size=None, imagedata=None):
+    def clean(x, y, conn, color=None, label=None, value=None, colormap=None, size=None, imagedata=None):
         """
         Create a node-link graph with bundled edges.
 
@@ -350,6 +371,12 @@ class GraphBundled(Base):
         label : array-like, optional, singleton or (n,)
             Single integer or array to set node colors via group labels
 
+        value : array-like, optional, singleton or (n,)
+            Values to set node colors via a linear scale
+
+        colormap : string
+            Specification of color map, only colorbrewer types supported
+
         size : array-like, optional, singleton or (n,)
             Single size or array to set node sizes
         """
@@ -360,6 +387,8 @@ class GraphBundled(Base):
 
         outdict = add_property(outdict, color, 'color')
         outdict = add_property(outdict, label, 'label')
+        outdict = add_property(outdict, value, 'value')
+        outdict = add_property(outdict, colormap, 'colormap')
         outdict = add_property(outdict, size, 'size')
 
         if imagedata is not None:

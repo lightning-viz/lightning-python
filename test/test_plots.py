@@ -25,6 +25,19 @@ class TestLightningPlots(object):
         assert isinstance(viz, Visualization)
         assert hasattr(viz, 'id')
 
+    def test_create_scatter_value(self, lgn):
+
+        x = random.randn(100)
+        y = random.randn(100)
+        v = ceil(random.rand(100) * 5)
+        s = random.rand(100) * 10 + 10
+        a = clip(random.rand(100) + 0.1, 0, 1)
+
+        viz = lgn.scatter(x, y, value=v, colormap="Purples", size=s, alpha=a)
+
+        assert isinstance(viz, Visualization)
+        assert hasattr(viz, 'id')
+
     def test_create_line(self, lgn):
 
         series = random.randn(5,100)
