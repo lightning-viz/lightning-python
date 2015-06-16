@@ -64,7 +64,7 @@ class ScatterStreaming(Base):
     _func = 'scatterstreaming'
 
     @staticmethod
-    def clean(x, y, color=None, label=None, size=None, xaxis=None, yaxis=None):
+    def clean(x, y, color=None, label=None, value=None, colormap=None, size=None, xaxis=None, yaxis=None):
         """
         Create a streaming scatter plot of x and y.
 
@@ -85,6 +85,12 @@ class ScatterStreaming(Base):
         label : array-like, optional, singleton or (n,)
             Single integer or array to set colors via groups
 
+        value : array-like, optional, singleton or (n,)
+            Values to set node colors via a linear scale
+
+        colormap : string
+            Specification of color map, only colorbrewer types supported
+
         size : array-like, optional, singleton or (n,)
             Single size or array to set point sizes
 
@@ -100,6 +106,8 @@ class ScatterStreaming(Base):
 
         outdict = add_property(outdict, color, 'color')
         outdict = add_property(outdict, label, 'label')
+        outdict = add_property(outdict, value, 'value')
+        outdict = add_property(outdict, colormap, 'colormap')
         outdict = add_property(outdict, size, 'size')
         outdict = add_property(outdict, xaxis, 'xaxis')
         outdict = add_property(outdict, yaxis, 'yaxis')
