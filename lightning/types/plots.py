@@ -93,9 +93,6 @@ class Matrix(Base):
         matrix = mat_to_array(matrix)
         outdict = {'matrix': matrix}
 
-        if colormap:
-            check_colormap(colormap)
-
         outdict = add_property(outdict, colormap, 'colormap')
 
         return outdict

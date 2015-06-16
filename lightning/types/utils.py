@@ -24,6 +24,7 @@ def check_property(prop, name, **kwargs):
         'size': check_size,
         'index': check_index,
         'coordinates': check_coordinates,
+        'colormap': check_colormap
     }
 
     if name in checkers:
@@ -70,12 +71,14 @@ def check_colormap(cmap):
     """
     Check if cmap is one of the colorbrewer maps
     """
-    names = set(['BrBG', 'PiYG', 'PRGn', 'PuOr', 'RdBu', 'RdGy', 'RdYlBu', 'RdYlGn', 'Spectral', 'Blues', 'BuGn', 'BuPu',
-             'GnBu', 'Greens', 'Greys', 'Oranges', 'OrRd', 'PuBu', 'PuBuGn', 'PuRd', 'Purples', 'RdPu', 'Reds',
-             'YlGn', 'YlGnBu', 'YlOrBr', 'YlOrRd', 'Accent', 'Dark2',
-             'Paired', 'Pastel1', 'Pastel2', 'Set1', 'Set2', 'Set3'])
+    names = set(['BrBG', 'PiYG', 'PRGn', 'PuOr', 'RdBu', 'RdGy', 'RdYlBu', 'RdYlGn', 'Spectral',
+                 'Blues', 'BuGn', 'BuPu', 'GnBu', 'Greens', 'Greys', 'Oranges', 'OrRd', 'PuBu',
+                 'PuBuGn', 'PuRd', 'Purples', 'RdPu', 'Reds', 'YlGn', 'YlGnBu', 'YlOrBr', 'YlOrRd',
+                 'Accent', 'Dark2', 'Paired', 'Pastel1', 'Pastel2', 'Set1', 'Set2', 'Set3', 'Lightning'])
     if cmap not in names:
         raise Exception("Invalid cmap '%s',  must be one of %s" % (cmap, names))
+    else:
+        return cmap
 
 
 def check_size(s):
