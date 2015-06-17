@@ -28,10 +28,8 @@ class Lightning(object):
         else:
             return 'Lightning server at host: %s' % self.host
 
-
     def get_ipython_markup_link(self):
-        return '%s/js/ipython-comm.js' % (self.host)
-
+        return '%s/js/ipython-comm.js' % self.host
 
     def enable_ipython(self, **kwargs):
         """
@@ -46,7 +44,7 @@ class Lightning(object):
         # https://github.com/jakevdp/mpld3/blob/master/mpld3/_display.py#L357
 
         from IPython.core.getipython import get_ipython
-        from IPython.display import display, HTML
+        from IPython.display import display, Javascript
 
         self.ipython_enabled = True
         ip = get_ipython()
@@ -54,10 +52,8 @@ class Lightning(object):
         formatter.for_type(Visualization, lambda viz, kwds=kwargs: viz.get_html())
 
         r = requests.get(self.get_ipython_markup_link(), auth=self.auth)
-        ipython_comm_markup = '<script>' + r.text + '</script>'
 
-        display(HTML(ipython_comm_markup))
-
+        display(Javascript(r.text))
 
     def disable_ipython(self):
         """
