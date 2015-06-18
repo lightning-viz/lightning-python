@@ -239,7 +239,7 @@ class Force(Base):
     @staticmethod
     def clean(conn, color=None, label=None, value=None, colormap=None, size=None):
         """
-        Create a force-directed network from a connectivity matrix.
+        Create a force-directed network from connectivity.
 
         .. image:: force.png
 
@@ -289,7 +289,7 @@ class Graph(Base):
     @staticmethod
     def clean(x, y, conn, color=None, label=None, value=None, colormap=None, size=None, imagedata=None):
         """
-        Create a node-link graph from spatial points and their connectivity matrix.
+        Create a node-link graph from spatial points and their connectivity.
 
         .. image:: graph.png
 
@@ -347,7 +347,7 @@ class GraphBundled(Base):
     @staticmethod
     def clean(x, y, conn, color=None, label=None, value=None, colormap=None, size=None, imagedata=None):
         """
-        Create a node-link graph with bundled edges.
+        Create a node-link graph with bundled edges from spatial points and their connectivity.
 
         .. image:: graphbundled.png
 
