@@ -8,11 +8,16 @@ def viztype(VizType):
     # wrapper that passes inputs to cleaning function and creates viz
     @wraps(VizType.clean)
     def plotter(self, *args, **kwargs):
-        if not hasattr(self, 'session'):
-            self.create_session()
-        viz = VizType.baseplot(self.session, VizType._name, *args, **kwargs)
-        self.session.visualizations.append(viz)
-        return viz
+        if self.local_enabled:
+            viz = VizType.baseplot_local(self.host, VizType._name, *args, **kwargs)
+            self.count += 1
+            return viz
+        else:
+            if not hasattr(self, 'session'):
+                self.create_session()
+            viz = VizType.baseplot(self.session, VizType._name, *args, **kwargs)
+            self.session.visualizations.append(viz)
+            return viz
 
     # get desired function name if different than plot type
     if hasattr(VizType, '_func'):

@@ -6,7 +6,7 @@ from .visualization import Visualization
 
 class Lightning(object):
 
-    def __init__(self, host="http://localhost:3000", ipython=False, dbcloud=False, auth=None):
+    def __init__(self, host="http://localhost:3000", local=True, ipython=False, dbcloud=False, auth=None):
         self.set_host(host)
         self.auth = auth
 
@@ -21,6 +21,9 @@ class Lightning(object):
 
         if dbcloud:
             self.enable_dbcloud()
+
+        if local:
+            self.enable_local()
 
     def __repr__(self):
         if hasattr(self, 'session') and self.session is not None:
@@ -108,6 +111,21 @@ class Lightning(object):
         """
         self.session = Session(lgn=self, id=session_id)
         return self.session
+
+    def enable_local(self):
+        """
+        Enable a local mode in which the host lightning server is only
+        queried for javascript and css, and all data is handled locally
+        """
+        self.local_enabled = True
+        self.count = 0
+
+    def disable_local(self):
+        """
+        Disable local mode
+        """
+        self.local_enabled = False
+        self.count = None
 
     def set_basic_auth(self, username, password):
         """

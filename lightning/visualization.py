@@ -5,17 +5,22 @@ import webbrowser
 
 class Visualization(object):
 
-    def __init__(self, session=None, json=None, auth=None):
-        self.session = session
-        self.id = json.get('id')
-        self.auth = auth
+    def __init__(self, session=None, json=None, auth=None, local=None, html=None):
 
-        if self.session.lgn.ipython_enabled:
-            from IPython.kernel.comm import Comm
-            self.comm = Comm('lightning', {'id': self.id})
-            self.comm_handlers = {}
-            self.comm.on_msg(self._handle_comm_message)
+        if local:
+            self.html = html
+            self.local = True
+        else:
+            self.session = session
+            self.id = json.get('id')
+            self.auth = auth
+            self.local = False
 
+            if self.session.lgn.ipython_enabled:
+                from IPython.kernel.comm import Comm
+                self.comm = Comm('lightning', {'id': self.id})
+                self.comm_handlers = {}
+                self.comm.on_msg(self._handle_comm_message)
 
     def _format_url(self, url):
         if not url.endswith('/'):
@@ -65,8 +70,11 @@ class Visualization(object):
         return self._format_url(self.get_permalink() + '/embed')
 
     def get_html(self):
-        r = requests.get(self.get_embed_link(), auth=self.auth)
-        return r.text
+        if self.local:
+            return self.html
+        else:
+            r = requests.get(self.get_embed_link(), auth=self.auth)
+            return r.text
 
     def open(self):
         webbrowser.open(self.session.host + '/visualizations/' + str(self.id) + '/')
@@ -74,7 +82,6 @@ class Visualization(object):
     def delete(self):
         url = self.get_permalink()
         return requests.delete(url)
-
 
     def on(self, event_name, handler):
 
@@ -84,7 +91,6 @@ class Visualization(object):
         else:
             raise Exception('The current implementation of this method is only compatible with IPython.')
 
-
     def _handle_comm_message(self, message):
         # Parsing logic taken from similar code in matplotlib
         message = json.loads(message['content']['data'])
@@ -92,6 +98,16 @@ class Visualization(object):
         if message['type'] in self.comm_handlers:
             self.comm_handlers[message['type']](message['data'])
 
+    @classmethod
+    def create_local(cls, host=None, data=None, type=None):
+
+        from jinja2 import Template, escape
+
+        t = Template(open('/Users/freemanj11/github/lightning-python/lightning/lib/template.html').read())
+        payload = escape(json.dumps(data))
+        html = t.render(viz=type, host=host, id=1, data=payload)
+        viz = cls(html=html, local=True)
+        return viz
 
     @classmethod
     def create(cls, session=None, data=None, images=None, type=None, options=None):

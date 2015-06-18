@@ -85,6 +85,13 @@ class Base(Visualization):
         return data
 
     @classmethod
+    def baseplot_local(cls, host, type, *args, **kwargs):
+
+        data = cls.clean_data(*args)
+        viz = cls.create_local(host=host, type=type, data=data)
+        return viz
+
+    @classmethod
     def baseplot(cls, session, type, *args, **kwargs):
         """
         Base method for plotting data and images.
