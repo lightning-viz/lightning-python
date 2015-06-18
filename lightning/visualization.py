@@ -103,7 +103,7 @@ class Visualization(object):
 
         from jinja2 import Template, escape
 
-        t = Template(open('/Users/freemanj11/github/lightning-python/lightning/lib/template.html').read())
+        t = Template(open('/Users/freemanj11/github/lightning-python/lightning/templates/template.html').read())
         payload = escape(json.dumps(data))
         html = t.render(viz=type, host=host, id=1, data=payload)
         viz = cls(html=html, local=True)
