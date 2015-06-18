@@ -102,8 +102,11 @@ class Visualization(object):
     def create_local(cls, host=None, data=None, type=None):
 
         from jinja2 import Template, escape
+        import lightning
+        import os
 
-        t = Template(open('/Users/freemanj11/github/lightning-python/lightning/templates/template.html').read())
+        loc = os.path.join(os.path.dirname(lightning.__file__), 'templates/template.html')
+        t = Template(open(loc).read())
         payload = escape(json.dumps(data))
         html = t.render(viz=type, host=host, id=1, data=payload)
         viz = cls(html=html, local=True)
