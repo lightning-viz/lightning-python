@@ -99,7 +99,7 @@ class Visualization(object):
             self.comm_handlers[message['type']](message['data'])
 
     @classmethod
-    def create_local(cls, host=None, data=None, type=None):
+    def create_local(cls, host=None, id=None, data=None, type=None):
 
         from jinja2 import Template, escape
         import lightning
@@ -108,7 +108,7 @@ class Visualization(object):
         loc = os.path.join(os.path.dirname(lightning.__file__), 'templates/template.html')
         t = Template(open(loc).read())
         payload = escape(json.dumps(data))
-        html = t.render(viz=type, host=host, id=1, data=payload)
+        html = t.render(viz=type, host=host, id=id, data=payload)
         viz = cls(html=html, local=True)
         return viz
 

@@ -85,10 +85,10 @@ class Base(Visualization):
         return data
 
     @classmethod
-    def baseplot_local(cls, host, type, *args, **kwargs):
+    def baseplot_local(cls, host, type, id, *args, **kwargs):
 
         data = cls.clean_data(*args)
-        viz = cls.create_local(host=host, type=type, data=data)
+        viz = cls.create_local(host=host, type=type, id=id, data=data)
         return viz
 
     @classmethod

@@ -9,7 +9,7 @@ def viztype(VizType):
     @wraps(VizType.clean)
     def plotter(self, *args, **kwargs):
         if self.local_enabled:
-            viz = VizType.baseplot_local(self.host, VizType._name, *args, **kwargs)
+            viz = VizType.baseplot_local(self.host, VizType._name, self.count, *args, **kwargs)
             self.count += 1
             return viz
         else:
