@@ -24,6 +24,8 @@ class Lightning(object):
 
         if local:
             self.enable_local()
+        else:
+            self.local_enabled = False
 
     def __repr__(self):
         if hasattr(self, 'session') and self.session is not None:
