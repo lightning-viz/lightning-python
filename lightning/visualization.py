@@ -137,7 +137,7 @@ class VisualizationLocal(object):
         import lightning
         import os
 
-        loc = os.path.join(os.path.dirname(lightning.__file__), 'templates/template.html')
+        loc = os.path.join(os.path.dirname(lightning.__file__), 'lib/template.html')
         t = Template(open(loc).read())
         payload = escape(json.dumps(data))
         html = t.render(viz=type, host=host, id=id, data=payload)
