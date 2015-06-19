@@ -1,6 +1,6 @@
 import pytest
 from numpy import random, ceil
-from lightning import Lightning, Visualization
+from lightning import Lightning, Visualization, VisualizationLocal
 
 
 class TestLightningAPIClient(object):
@@ -19,7 +19,6 @@ class TestLightningAPIClient(object):
         assert isinstance(viz, Visualization)
         assert hasattr(viz, 'id')
 
-
     def test_ipython_support(self, lgn):
 
         lgn.ipython = True
@@ -27,5 +26,14 @@ class TestLightningAPIClient(object):
         viz = lgn.line(x)
 
         assert isinstance(viz, Visualization)
+        assert hasattr(viz, 'id')
+
+    def test_local_mode(self, lgn):
+
+        lgn.local = True
+        x = random.randn(100)
+        viz = lgn.line(x)
+
+        assert isinstance(viz, VisualizationLocal)
         assert hasattr(viz, 'id')
 
