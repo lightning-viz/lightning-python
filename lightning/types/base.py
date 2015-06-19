@@ -85,10 +85,32 @@ class Base(Visualization, VisualizationLocal):
         return data
 
     @classmethod
+    def clean_options(cls, **kwargs):
+
+        options = {}
+        if hasattr(cls, '_validOptions'):
+            for key, value in six.iteritems(kwargs):
+                if key in cls._validOptions:
+                    lgn_option = cls._validOptions[key].get('lightning_name')
+                    options[lgn_option] = value
+
+        return options
+
+    @classmethod
     def baseplot_local(cls, host, type, id, *args, **kwargs):
 
         data = cls.clean_data(*args)
-        viz = VisualizationLocal.create(host=host, type=type, id=id, data=data)
+        options = cls.clean_options(**kwargs)
+
+        payload = {'host': host, 'type': type, 'id': id, 'options': options}
+
+        if 'images' in data:
+            payload['images'] = data['images']
+        else:
+            payload['data'] = data
+
+        viz = VisualizationLocal.create(**payload)
+
         return viz
 
     @classmethod
@@ -111,13 +133,7 @@ class Base(Visualization, VisualizationLocal):
         if not type:
             raise Exception("Must provide a plot type")
 
-        options = {}
-        if hasattr(cls, '_validOptions'):
-            for key, value in six.iteritems(kwargs):
-                if key in cls._validOptions:
-                    lgn_option = cls._validOptions[key].get('lightning_name')
-                    options[lgn_option] = value
-
+        options = cls.clean_options(**kwargs)
         data = cls.clean_data(*args)
 
         if 'images' in data and len(data) > 1:

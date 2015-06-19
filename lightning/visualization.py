@@ -131,16 +131,27 @@ class VisualizationLocal(object):
         self.html = html
 
     @classmethod
-    def create(cls, host=None, id=None, data=None, type=None):
+    def create(cls, host=None, id=None, data=None, images=None, type=None, options=None):
 
+        import base64
         from jinja2 import Template, escape
         import lightning
         import os
 
         loc = os.path.join(os.path.dirname(lightning.__file__), 'lib/template.html')
         t = Template(open(loc).read())
-        payload = escape(json.dumps(data))
-        html = t.render(viz=type, host=host, id=id, data=payload)
+
+        options = escape(json.dumps(options))
+        fields = {'viz': type, 'host': host, 'id': id, 'options': options}
+
+        if images:
+            bytes = ['data:image/png;base64,' + base64.b64encode(img) + ',' for img in images]
+            fields['images'] = escape(json.dumps(bytes))
+        else:
+            data = escape(json.dumps(data))
+            fields['data'] = data
+
+        html = t.render(**fields)
         viz = cls(html)
         return viz
 
