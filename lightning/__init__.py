@@ -1,6 +1,6 @@
 from .main import Lightning
 from .session import Session
-from .visualization import Visualization
+from .visualization import Visualization, VisualizationLocal
 from .types.plots import *
 from .types.linked import *
 from .types.images import *

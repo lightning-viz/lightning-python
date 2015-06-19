@@ -1,18 +1,23 @@
 import requests
 import os
 from .session import Session
-from .visualization import Visualization
+from .visualization import Visualization, VisualizationLocal
 
 
 class Lightning(object):
 
-    def __init__(self, host="http://localhost:3000", local=True, ipython=False, dbcloud=False, auth=None):
+    def __init__(self, host="http://localhost:3000", local=False, ipython=False, dbcloud=False, auth=None):
         self.set_host(host)
         self.auth = auth
 
         if auth is not None:
             if isinstance(auth, tuple):
                 self.set_basic_auth(auth[0], auth[1])
+
+        if local:
+            self.enable_local()
+        else:
+            self.local_enabled = False
 
         if ipython:
             self.enable_ipython()
@@ -21,11 +26,6 @@ class Lightning(object):
 
         if dbcloud:
             self.enable_dbcloud()
-
-        if local:
-            self.enable_local()
-        else:
-            self.local_enabled = False
 
     def __repr__(self):
         if hasattr(self, 'session') and self.session is not None:
@@ -54,11 +54,13 @@ class Lightning(object):
         self.ipython_enabled = True
         ip = get_ipython()
         formatter = ip.display_formatter.formatters['text/html']
-        formatter.for_type(Visualization, lambda viz, kwds=kwargs: viz.get_html())
 
-        r = requests.get(self.get_ipython_markup_link(), auth=self.auth)
-
-        display(Javascript(r.text))
+        if self.local_enabled:
+            formatter.for_type(VisualizationLocal, lambda viz, kwds=kwargs: viz.get_html())
+        else:
+            formatter.for_type(Visualization, lambda viz, kwds=kwargs: viz.get_html())
+            r = requests.get(self.get_ipython_markup_link(), auth=self.auth)
+            display(Javascript(r.text))
 
     def disable_ipython(self):
         """
@@ -73,6 +75,7 @@ class Lightning(object):
         ip = get_ipython()
         formatter = ip.display_formatter.formatters['text/html']
         formatter.type_printers.pop(Visualization, None)
+        formatter.type_printers.pop(VisualizationLocal, None)
 
     def enable_dbcloud(self):
         """

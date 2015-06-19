@@ -5,22 +5,17 @@ import webbrowser
 
 class Visualization(object):
 
-    def __init__(self, session=None, json=None, auth=None, local=None, html=None):
+    def __init__(self, session=None, json=None, auth=None):
 
-        if local:
-            self.html = html
-            self.local = True
-        else:
-            self.session = session
-            self.id = json.get('id')
-            self.auth = auth
-            self.local = False
+        self.session = session
+        self.id = json.get('id')
+        self.auth = auth
 
-            if self.session.lgn.ipython_enabled:
-                from IPython.kernel.comm import Comm
-                self.comm = Comm('lightning', {'id': self.id})
-                self.comm_handlers = {}
-                self.comm.on_msg(self._handle_comm_message)
+        if self.session.lgn.ipython_enabled:
+            from IPython.kernel.comm import Comm
+            self.comm = Comm('lightning', {'id': self.id})
+            self.comm_handlers = {}
+            self.comm.on_msg(self._handle_comm_message)
 
     def _format_url(self, url):
         if not url.endswith('/'):
@@ -70,11 +65,8 @@ class Visualization(object):
         return self._format_url(self.get_permalink() + '/embed')
 
     def get_html(self):
-        if self.local:
-            return self.html
-        else:
-            r = requests.get(self.get_embed_link(), auth=self.auth)
-            return r.text
+        r = requests.get(self.get_embed_link(), auth=self.auth)
+        return r.text
 
     def open(self):
         webbrowser.open(self.session.host + '/visualizations/' + str(self.id) + '/')
@@ -99,20 +91,6 @@ class Visualization(object):
             self.comm_handlers[message['type']](message['data'])
 
     @classmethod
-    def create_local(cls, host=None, id=None, data=None, type=None):
-
-        from jinja2 import Template, escape
-        import lightning
-        import os
-
-        loc = os.path.join(os.path.dirname(lightning.__file__), 'templates/template.html')
-        t = Template(open(loc).read())
-        payload = escape(json.dumps(data))
-        html = t.render(viz=type, host=host, id=id, data=payload)
-        viz = cls(html=html, local=True)
-        return viz
-
-    @classmethod
     def create(cls, session=None, data=None, images=None, type=None, options=None):
 
         if options is None:
@@ -132,7 +110,6 @@ class Visualization(object):
             viz = cls(session=session, json=r.json(), auth=session.auth)
 
         else:
-
             first_image, remaining_images = images[0], images[1:]
             files = {'file': first_image}
             
@@ -147,3 +124,25 @@ class Visualization(object):
 
         return viz
 
+
+class VisualizationLocal(object):
+
+    def __init__(self, html):
+        self.html = html
+
+    @classmethod
+    def create(cls, host=None, id=None, data=None, type=None):
+
+        from jinja2 import Template, escape
+        import lightning
+        import os
+
+        loc = os.path.join(os.path.dirname(lightning.__file__), 'templates/template.html')
+        t = Template(open(loc).read())
+        payload = escape(json.dumps(data))
+        html = t.render(viz=type, host=host, id=id, data=payload)
+        viz = cls(html)
+        return viz
+
+    def get_html(self):
+        return self.html

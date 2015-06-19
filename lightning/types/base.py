@@ -1,9 +1,9 @@
-from lightning import Visualization
+from lightning import Visualization, VisualizationLocal
 import requests
 import six
 
 
-class Base(Visualization):
+class Base(Visualization, VisualizationLocal):
 
     _name = 'base'
 
@@ -88,7 +88,7 @@ class Base(Visualization):
     def baseplot_local(cls, host, type, id, *args, **kwargs):
 
         data = cls.clean_data(*args)
-        viz = cls.create_local(host=host, type=type, id=id, data=data)
+        viz = VisualizationLocal.create(host=host, type=type, id=id, data=data)
         return viz
 
     @classmethod
@@ -131,10 +131,10 @@ class Base(Visualization):
 
         elif 'images' in data:
             images = data['images']
-            viz = cls.create(session, images=images, type=type, options=options)
+            viz = Visualization.create(session, images=images, type=type, options=options)
 
         else:
-            viz = cls.create(session, data=data, type=type, options=options)
+            viz = Visualization.create(session, data=data, type=type, options=options)
 
         return viz
 
@@ -173,7 +173,6 @@ class Base(Visualization):
     def get_user_data(self):
         """
         Base method for retrieving user data from a viz.
-        
         """
 
         url = self.session.host + '/sessions/' + str(self.session.id) + '/visualizations/' + str(self.id) + '/settings/'
