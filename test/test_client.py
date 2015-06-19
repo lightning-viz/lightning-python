@@ -11,7 +11,7 @@ class TestLightningAPIClient(object):
         lgn.create_session("test-session")
         return lgn
 
-    def test_create_generic(self, lgn):
+    def test_create(self, lgn):
 
         series = random.randn(5, 100)
         viz = lgn.plot(data={"series": series}, type='line')
@@ -19,18 +19,18 @@ class TestLightningAPIClient(object):
         assert isinstance(viz, Visualization)
         assert hasattr(viz, 'id')
 
-    def test_ipython_support(self, lgn):
+    def test_ipython(self, lgn):
 
-        lgn.ipython = True
+        lgn.enable_ipython()
         x = random.randn(100)
         viz = lgn.line(x)
 
         assert isinstance(viz, Visualization)
         assert hasattr(viz, 'id')
 
-    def test_local_mode(self, lgn):
+    def test_local(self, lgn):
 
-        lgn.local = True
+        lgn.enable_local()
         x = random.randn(100)
         viz = lgn.line(x)
 
