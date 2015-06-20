@@ -9,7 +9,7 @@ class ScatterLine(Base):
     _func = 'scatterline'
 
     @staticmethod
-    def clean(x, y, series, color=None, label=None, size=None, alpha=None):
+    def clean(x, y, series, color=None, label=None, value=None, colormap=None, size=None, alpha=None):
         """
         Create a joint scatter / line plot.
 
@@ -29,6 +29,12 @@ class ScatterLine(Base):
         label : array-like, optional, singleton or (n,)
             Single integer or array to set point colors via group labels
 
+        value : array-like, optional, singleton or (n,)
+            Values to set node colors via a linear scale
+
+        colormap : string
+            Specification of color map, only colorbrewer types supported
+
         size : array-like, optional, singleton or (n,)
             Single size or array to set point sizes
         """
@@ -39,6 +45,8 @@ class ScatterLine(Base):
 
         outdict = add_property(outdict, color, 'color')
         outdict = add_property(outdict, label, 'label')
+        outdict = add_property(outdict, value, 'value')
+        outdict = add_property(outdict, colormap, 'colormap')
         outdict = add_property(outdict, size, 'size')
         outdict = add_property(outdict, alpha, 'alpha')
 

@@ -62,10 +62,9 @@ class ImagePoly(Base):
 
         return outdict
 
-    @property
     def _coords(self):
         """
-        Coordinates of regions retrieved from visualization user data.
+        Raw coordinates of regions retrieved from visualization user data.
         """
         user_data = self.get_user_data()['settings']
         if 'coords' in user_data.keys():
@@ -73,15 +72,14 @@ class ImagePoly(Base):
         else:
             return []
 
-    @property
     def polygons(self):
         """
         Coordinates of polygons as drawn on an image.
 
         These coordinates can be drawn directly to an image using lighting.imagepoly
-        and should be in the exact same locatinos as they were drawn.
+        and should be in the exact same locations as they were drawn.
         """
-        coords = self._coords
+        coords = self._coords()
         # convert from x/y to row/column indexing
         polygons = map(lambda b: asarray(b)[:, ::-1].tolist(), coords)
         return polygons
@@ -92,10 +90,10 @@ class ImagePoly(Base):
 
         Parameters
         ----------
-        z : int, optiona, default=None
+        z : int, optional, default=None
             Append a z-index to coordinates (yielding three dimensional coordinates)
         """
-        coords = self._coords
+        coords = self._coords()
         return [polygon_to_points(x, z) for x in coords]
 
     def masks(self, dims, z=None):
@@ -111,7 +109,7 @@ class ImagePoly(Base):
             Use a z-index to insert regions into the appropriate slice if using
             three-dimensional volumes.
         """
-        coords = self._coords
+        coords = self._coords()
         return [polygon_to_mask(x, dims, z) for x in coords]
 
 

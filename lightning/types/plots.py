@@ -69,6 +69,17 @@ class Scatter(Base):
 
         return outdict
 
+    def selected(self):
+        """
+        Selected points from scatter plot
+        """
+        user_data = self.get_user_data()['settings']
+        if 'selected' in user_data.keys():
+            return user_data['selected']
+        else:
+            return []
+
+
 @viztype
 class Matrix(Base):
 
@@ -279,6 +290,16 @@ class Force(Base):
         outdict = add_property(outdict, size, 'size')
 
         return outdict
+
+    def selected(self):
+        """
+        Selected points from force plot
+        """
+        user_data = self.get_user_data()['settings']
+        if 'selected' in user_data.keys():
+            return user_data['selected']
+        else:
+            return []
 
 @viztype
 class Graph(Base):
