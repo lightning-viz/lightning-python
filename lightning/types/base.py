@@ -147,10 +147,10 @@ class Base(Visualization, VisualizationLocal):
 
         elif 'images' in data:
             images = data['images']
-            viz = Visualization.create(session, images=images, type=type, options=options)
+            viz = cls.create(session, images=images, type=type, options=options)
 
         else:
-            viz = Visualization.create(session, data=data, type=type, options=options)
+            viz = cls.create(session, data=data, type=type, options=options)
 
         return viz
 
