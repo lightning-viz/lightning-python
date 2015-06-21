@@ -7,6 +7,7 @@ class ScatterLine(Base):
 
     _name = 'scatter-line'
     _func = 'scatterline'
+    _local = False
 
     @staticmethod
     def clean(x, y, series, color=None, label=None, size=None, alpha=None):

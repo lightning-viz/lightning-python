@@ -124,6 +124,10 @@ class Lightning(object):
         """
         self.local_enabled = True
         self.count = 0
+        print('Running Lightning in local mode.\n'
+              'Visualizations are interactive, but not all types are avaialble. \n'
+              'For the full power of Lightning run your own server! '
+              'See http://lightning-viz.org/documentation/#server')
 
     def disable_local(self):
         """
