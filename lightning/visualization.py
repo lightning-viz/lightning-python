@@ -128,7 +128,7 @@ class Visualization(object):
 class VisualizationLocal(object):
 
     def __init__(self, html):
-        self.html = html
+        self._html = html
 
     @classmethod
     def create(cls, host=None, id=None, data=None, images=None, type=None, options=None):
@@ -156,4 +156,4 @@ class VisualizationLocal(object):
         return viz
 
     def get_html(self):
-        return self.html
+        return self._html
