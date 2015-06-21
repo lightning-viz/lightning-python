@@ -71,7 +71,7 @@ class Scatter(Base):
 
     def selected(self):
         """
-        Selected points from scatter plot
+        Selected points from scatter plot as indices
         """
         user_data = self.get_user_data()['settings']
         if 'selected' in user_data.keys():
@@ -79,6 +79,15 @@ class Scatter(Base):
         else:
             return []
 
+    def points(self):
+        """
+        Selected points from scatter plot as x,y coordinates
+        """
+        user_data = self.get_user_data()['settings']
+        if 'x' in user_data.keys() and 'y' in user_data.keys():
+            return user_data['x'], user_data['y']
+        else:
+            return []
 
 @viztype
 class Matrix(Base):
