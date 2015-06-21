@@ -13,13 +13,13 @@ def viztype(VizType):
                 name = VizType._func if hasattr(VizType, 'func') else VizType._name
                 print("Plots of type '%s' not yet supported in local mode" % name)
             else:
-                viz = VizType.baseplot_local(self.host, VizType._name, self.count, *args, **kwargs)
+                viz = VizType._baseplot_local(self.host, VizType._name, self.count, *args, **kwargs)
                 self.count += 1
                 return viz
         else:
             if not hasattr(self, 'session'):
                 self.create_session()
-            viz = VizType.baseplot(self.session, VizType._name, *args, **kwargs)
+            viz = VizType._baseplot(self.session, VizType._name, *args, **kwargs)
             self.session.visualizations.append(viz)
             return viz
 

@@ -184,7 +184,7 @@ class Lightning(object):
         if not hasattr(self, 'session'):
             self.create_session()
         
-        viz = Generic.baseplot(self.session, type, data)
+        viz = Generic._baseplot(self.session, type, data)
         self.session.visualizations.append(viz)
         return viz
 

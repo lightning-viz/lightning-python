@@ -91,7 +91,7 @@ class Visualization(object):
             self.comm_handlers[message['type']](message['data'])
 
     @classmethod
-    def create(cls, session=None, data=None, images=None, type=None, options=None):
+    def _create(cls, session=None, data=None, images=None, type=None, options=None):
 
         if options is None:
             options = {}
@@ -131,7 +131,7 @@ class VisualizationLocal(object):
         self._html = html
 
     @classmethod
-    def create(cls, host=None, id=None, data=None, images=None, type=None, options=None):
+    def _create(cls, host=None, id=None, data=None, images=None, type=None, options=None):
 
         import base64
         from jinja2 import Template, escape
