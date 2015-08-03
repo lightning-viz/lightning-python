@@ -1,5 +1,6 @@
 import requests
 import json
+import uuid
 import webbrowser
 
 
@@ -15,7 +16,6 @@ class Visualization(object):
             self.comm = Comm('lightning', {'id': self.id})
             self.comm_handlers = {}
             self.comm.on_msg(self._handle_comm_message)
-
 
     def _format_url(self, url):
         if not url.endswith('/'):
@@ -68,13 +68,22 @@ class Visualization(object):
         r = requests.get(self.get_embed_link(), auth=self.auth)
         return r.text
 
+    def get_pym_link(self):
+        return self._format_url(self.get_permalink() + '/pym')
+
+    def get_pym_html(self):
+        r = self.get_pym_link()
+        uid = uuid.uuid4().hex
+        html = '<div id="%s" style="width: 500px"></div>' % uid
+        js = '<script> var pymParent = new pym.Parent("%s", "%s", {}); </script>' % (uid, r)
+        return html + js
+
     def open(self):
         webbrowser.open(self.session.host + '/visualizations/' + str(self.id) + '/')
 
     def delete(self):
         url = self.get_permalink()
         return requests.delete(url)
-
 
     def on(self, event_name, handler):
 
@@ -84,14 +93,12 @@ class Visualization(object):
         else:
             raise Exception('The current implementation of this method is only compatible with IPython.')
 
-
     def _handle_comm_message(self, message):
         # Parsing logic taken from similar code in matplotlib
         message = json.loads(message['content']['data'])
 
         if message['type'] in self.comm_handlers:
             self.comm_handlers[message['type']](message['data'])
-
 
     @classmethod
     def create(cls, session=None, data=None, images=None, type=None, options=None):
