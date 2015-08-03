@@ -49,10 +49,12 @@ class Lightning(object):
         self.ipython_enabled = True
         ip = get_ipython()
         formatter = ip.display_formatter.formatters['text/html']
-        formatter.for_type(Visualization, lambda viz, kwds=kwargs: viz.get_html())
+        formatter.for_type(Visualization, lambda viz, kwds=kwargs: viz.get_pym_html())
 
         r = requests.get(self.get_ipython_markup_link(), auth=self.auth)
+        display(Javascript(r.text))
 
+        r = requests.get("https://cdnjs.cloudflare.com/ajax/libs/pym/0.4.5/pym.js")
         display(Javascript(r.text))
 
     def disable_ipython(self):
