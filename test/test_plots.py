@@ -47,17 +47,6 @@ class TestLightningPlots(object):
         assert isinstance(viz, Visualization)
         assert hasattr(viz, 'id')
 
-    def test_create_scatter_line(self, lgn):
-
-        x = random.randn(50)
-        y = random.randn(50)
-        series = random.randn(50,1000)
-        l = ceil(random.rand(50) * 5)
-        viz = lgn.scatterline(x, y, series, label=l)
-
-        assert isinstance(viz, Visualization)
-        assert hasattr(viz, 'id')
-
     def test_create_us_map(self, lgn):
 
         states = ["NA", "AK", "AL", "AR", "AZ", "CA", "CO", "CT", "DC", "DE", "FL", "GA",
