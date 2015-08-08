@@ -107,7 +107,9 @@ class Visualization(object):
 
             r = requests.post(url, data=json.dumps(payload), headers=headers, auth=session.auth)
 
-            if not r.status_code == requests.codes.ok:
+            if r.status_code == 404:
+                raise Exception(r.text)
+            elif not r.status_code == requests.codes.ok:
                 raise Exception('Problem uploading data')
 
             viz = cls(session=session, json=r.json(), auth=session.auth)
@@ -119,7 +121,9 @@ class Visualization(object):
             
             r = requests.post(url, files=files, data={'type': type, 'opts': options}, auth=session.auth)
 
-            if not r.status_code == requests.codes.ok:
+            if r.status_code == 404:
+                raise Exception(r.text)
+            elif not r.status_code == requests.codes.ok:
                 raise Exception('Problem uploading images')
 
             viz = cls(session=session, json=r.json(), auth=session.auth)
