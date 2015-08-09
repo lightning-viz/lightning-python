@@ -123,14 +123,13 @@ class Visualization(object):
 
         return viz
 
-
 class VisualizationLocal(object):
 
     def __init__(self, html):
         self._html = html
 
     @classmethod
-    def _create(cls, host=None, data=None, images=None, type=None, options=None):
+    def _create(cls, data=None, images=None, type=None, options=None):
 
         import base64
         from jinja2 import Template, escape
@@ -140,7 +139,7 @@ class VisualizationLocal(object):
         t = Template(open(loc).read())
 
         options = escape(json.dumps(options))
-        fields = {'viz': type, 'host': host, 'options': options}
+        fields = {'viz': type, 'options': options}
 
         if images:
             bytes = ['data:image/png;base64,' + base64.b64encode(img) + ',' for img in images]
