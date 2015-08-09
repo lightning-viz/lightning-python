@@ -123,7 +123,6 @@ class Visualization(object):
 
         return viz
 
-
 class VisualizationLocal(object):
 
     def __init__(self, html):
