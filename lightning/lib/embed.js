@@ -87993,34 +87993,8 @@ function loadJS(src, callback) {
     document.getElementsByTagName('head')[0].appendChild(s);
 }
 
-function init() {
-    console.log('initializing everything');
-    $('.feed-item[data-initialized=false]').each(function() {
-        var $this = $(this);
-        var type = $this.data('type');
-        var data = $this.data('data');
-        var images = $this.data('images');
-        var options = $this.data('options');
-
-        var Viz;
-        try {
-            require(type);
-        } catch(e) {
-            Viz = require('lightning-' + type);
-        }
-
-        new Viz($this[0], data, images, options);
-        $this.data('initialized', true);
-        $this.attr('data-initialized', true);
-
-        $('.feed-container').animate({opacity: 1});
-    });
-}
-
 if(!window.$) {
-    loadJS(jQueryURL, init);
-} else {
-    init();
+    loadJS(jQueryURL, function(){});
 }
 
 },{"lightning-adjacency":6,"lightning-force":32,"lightning-gallery":57,"lightning-graph":89,"lightning-graph-bundled":64,"lightning-image":147,"lightning-image-poly":112,"lightning-line":194,"lightning-line-streaming":169,"lightning-map":217,"lightning-matrix":229,"lightning-scatter":296,"lightning-scatter-3":249,"lightning-scatter-streaming":271,"lightning-volume":319}]},{},[328]);
