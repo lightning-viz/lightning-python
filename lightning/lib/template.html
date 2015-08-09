@@ -1,4 +1,7 @@
-<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1"/><meta http-equiv="X-UA-Compatible" content="IE=10; IE=9; IE=8; IE=7; IE=EDGE"/><meta charset="UTF-8"/><link href="http://fonts.googleapis.com/css?family=Open+Sans:400,700" rel="stylesheet" type="text/css"/>
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1"/>
+<meta http-equiv="X-UA-Compatible" content="IE=10; IE=9; IE=8; IE=7; IE=EDGE"/>
+<meta charset="UTF-8"/>
+<link href="http://fonts.googleapis.com/css?family=Open+Sans:400,700" rel="stylesheet" type="text/css"/>
 <style>
 #lightning-body {
 	max-width: 100%;
@@ -17,7 +20,17 @@
 	outline: none !important;
 }
 </style>
-<div id="lightning-body" class="container content wrap push"><div class="feed-container"><div data-model="visualization" class="feed-item-container"><div data-type="{{ viz }}" data-data="{{ data }}" data-images="{{ images }}" data-options="{{ options }}" data-initialized="false" class="feed-item"></div></div></div></div><script>window.lightning = window.lightning || {};</script><script src="http://ajax.googleapis.com/ajax/libs/jquery/1.11.0/jquery.min.js"></script>
+<div id="lightning-body" class="container content wrap push">
+	<div class="feed-container">
+		<div data-model="visualization" class="feed-item-container">
+			<div data-type="{{ viz }}" data-data="{{ data }}" data-images="{{ images }}" data-options="{{ options }}" data-initialized="false" class="feed-item"></div>
+		</div>
+	</div>
+</div>
 <script>
-    window.lightning.initVisualizations();
+	window.lightning = window.lightning || {};
+</script>
+<script src="http://ajax.googleapis.com/ajax/libs/jquery/1.11.0/jquery.min.js"></script>
+<script>
+	window.lightning.initVisualizations();
 </script>
