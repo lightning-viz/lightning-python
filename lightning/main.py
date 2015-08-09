@@ -48,14 +48,18 @@ class Lightning(object):
         # inspired by code powering similar functionality in mpld3
         # https://github.com/jakevdp/mpld3/blob/master/mpld3/_display.py#L357
 
+        import codecs
         from IPython.core.getipython import get_ipython
-        from IPython.display import display, Javascript
+        from IPython.display import display, Javascript, HTML
 
         self.ipython_enabled = True
         ip = get_ipython()
         formatter = ip.display_formatter.formatters['text/html']
+        embed_location = os.path.join(os.path.dirname(__file__), 'lib/embed.js')
 
         if self.local_enabled:
+            f = codecs.open(embed_location, "r", "utf-8")
+            display(HTML(f.read()))
             formatter.for_type(VisualizationLocal, lambda viz, kwds=kwargs: viz.get_html())
         else:
             formatter.for_type(Visualization, lambda viz, kwds=kwargs: viz.get_html())
