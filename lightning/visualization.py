@@ -141,8 +141,13 @@ class VisualizationLocal(object):
         loc = os.path.join(os.path.dirname(lightning.__file__), 'lib/template.html')
         t = Template(open(loc).read())
 
+        embed_location = os.path.join(os.path.dirname(lightning.__file__), 'lib/embed.js')
+        f = open(embed_location, 'r')
+        embed_script = f.read()
+        print embed_script
+
         options = escape(json.dumps(options))
-        fields = {'viz': type, 'host': host, 'id': id, 'options': options}
+        fields = {'viz': type, 'host': host, 'id': id, 'options': options, 'embed_script': embed_script}
 
         if images:
             bytes = ['data:image/png;base64,' + base64.b64encode(img) + ',' for img in images]
