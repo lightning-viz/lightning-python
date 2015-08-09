@@ -87996,18 +87996,19 @@ function loadJS(src, callback) {
 function init() {
     console.log('initializing everything');
     $('.feed-item[data-initialized=false]').each(function() {
-
-
         var $this = $(this);
         var type = $this.data('type');
         var data = $this.data('data');
         var images = $this.data('images');
         var options = $this.data('options');
 
-        console.log($this);
-        console.log(data);
-        
-        var Viz = require(type);
+        var Viz;
+        try {
+            require(type);
+        } catch(e) {
+            Viz = require('lightning-' + type);
+        }
+
         new Viz($this[0], data, images, options);
         $this.data('initialized', true);
         $this.attr('data-initialized', true);
