@@ -1,4 +1,4 @@
-(function e(t,n,r){function s(o,u){if(!n[o]){if(!t[o]){var a=typeof require=="function"&&require;if(!u&&a)return a(o,!0);if(i)return i(o,!0);var f=new Error("Cannot find module '"+o+"'");throw f.code="MODULE_NOT_FOUND",f}var l=n[o]={exports:{}};t[o][0].call(l.exports,function(e){var n=t[o][1][e];return s(n?n:e)},l,l.exports,e,t,n,r)}return n[o].exports}var i=typeof require=="function"&&require;for(var o=0;o<r.length;o++)s(r[o]);return s})({1:[function(require,module,exports){
+;window._define = window.define;window.define = undefined;window._require = window.require;window.require = undefined;(function e(t,n,r){function s(o,u){if(!n[o]){if(!t[o]){var a=typeof require=="function"&&require;if(!u&&a)return a(o,!0);if(i)return i(o,!0);var f=new Error("Cannot find module '"+o+"'");throw f.code="MODULE_NOT_FOUND",f}var l=n[o]={exports:{}};t[o][0].call(l.exports,function(e){var n=t[o][1][e];return s(n?n:e)},l,l.exports,e,t,n,r)}return n[o].exports}var i=typeof require=="function"&&require;for(var o=0;o<r.length;o++)s(r[o]);return s})({1:[function(require,module,exports){
 /*!
  * The buffer module from node.js, for the browser.
  *
@@ -87993,8 +87993,37 @@ function loadJS(src, callback) {
     document.getElementsByTagName('head')[0].appendChild(s);
 }
 
-if(!window.$) {
-    loadJS(jQueryURL, function(){});
+function init() {
+    $('.feed-item[data-initialized=false]').each(function() {
+        var $this = $(this);
+        var type = $this.data('type');
+        var data = $this.data('data');
+        var images = $this.data('images');
+        var options = $this.data('options');
+
+        var Viz;
+        try {
+            require(type);
+        } catch(e) {
+            Viz = require('lightning-' + type);
+        }
+
+        new Viz($this[0], data, images, options);
+        $this.data('initialized', true);
+        $this.attr('data-initialized', true);
+
+        $('.feed-container').animate({opacity: 1});
+    });
 }
 
+if(!window.$) {
+    loadJS(jQueryURL, init);
+} else {
+    init();
+}
+
+window.lightning = window.lightning || {};
+window.lightning.initVisualizations = init;
+
 },{"lightning-adjacency":6,"lightning-force":32,"lightning-gallery":57,"lightning-graph":89,"lightning-graph-bundled":64,"lightning-image":147,"lightning-image-poly":112,"lightning-line":194,"lightning-line-streaming":169,"lightning-map":217,"lightning-matrix":229,"lightning-scatter":296,"lightning-scatter-3":249,"lightning-scatter-streaming":271,"lightning-volume":319}]},{},[328]);
+;window.define = window._define;window.require = window._require;

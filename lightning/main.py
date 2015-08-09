@@ -59,7 +59,7 @@ class Lightning(object):
 
         if self.local_enabled:
             f = codecs.open(embed_location, "r", "utf-8")
-            display(HTML(f.read()))
+            display(HTML("<script>" + f.read() + "</script>"))
             formatter.for_type(VisualizationLocal, lambda viz, kwds=kwargs: viz.get_html())
         else:
             formatter.for_type(Visualization, lambda viz, kwds=kwargs: viz.get_html())

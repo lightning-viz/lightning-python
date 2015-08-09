@@ -4,26 +4,7 @@
 	max-width: 100%;
 }
 </style>
-<div id="lightning-body" class="container content wrap push"><div class="feed-container"><div data-model="visualization" data-model-id="{{ id }}" class="feed-item-container"><div data-type="{{ viz }}" data-data="{{ data }}" data-images="{{ images }}" data-options="{{ options }}" id="viz-{{ id }}" data-initialized="false" class="feed-item"></div></div></div></div><script>window.lightning = window.lightning || {}; window.lightning.host = "{{ host }}/"; window.lightning.vizCount = (window.lightning.vizCount + 1) || 1; window.lightning.requiredVizTypes = window.lightning.requiredVizTypes || []; if(window.lightning.requiredVizTypes.indexOf("{{ viz }}") === -1) { window.lightning.requiredVizTypes.push("{{ viz }}")}; window._require = window.require; window.require = undefined; window._define = window.define; window.define = undefined; </script><script src="http://ajax.googleapis.com/ajax/libs/jquery/1.11.0/jquery.min.js"></script>
+<div id="lightning-body" class="container content wrap push"><div class="feed-container"><div data-model="visualization" class="feed-item-container"><div data-type="{{ viz }}" data-data="{{ data }}" data-images="{{ images }}" data-options="{{ options }}" data-initialized="false" class="feed-item"></div></div></div></div><script>window.lightning = window.lightning || {};</script><script src="http://ajax.googleapis.com/ajax/libs/jquery/1.11.0/jquery.min.js"></script>
 <script>
-    $('.feed-item[data-initialized=false]').each(function() {
-        var $this = $(this);
-        var type = $this.data('type');
-        var data = $this.data('data');
-        var images = $this.data('images');
-        var options = $this.data('options');
-
-        var Viz;
-        try {
-            require(type);
-        } catch(e) {
-            Viz = require('lightning-' + type);
-        }
-
-        new Viz($this[0], data, images, options);
-        $this.data('initialized', true);
-        $this.attr('data-initialized', true);
-
-        $('.feed-container').animate({opacity: 1});
-    });
+    window.lightning.initVisualizations();
 </script>
