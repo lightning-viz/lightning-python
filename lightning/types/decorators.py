@@ -10,6 +10,10 @@ def viztype(VizType):
     def plotter(self, *args, **kwargs):
         if not hasattr(self, 'session'):
             self.create_session()
+        if True and kwargs['height'] is None and kwargs['width'] is None:
+            if self.size != 'full':
+                kwargs['width'] = SIZES[self.size]
+
         viz = VizType.baseplot(self.session, VizType._name, *args, **kwargs)
         self.session.visualizations.append(viz)
         return viz
@@ -46,3 +50,9 @@ def viztype(VizType):
     setattr(Lightning, func, plotter)
 
     return VizType
+
+SIZES = {
+    'small': 400,
+    'medium': 600,
+    'large': 800,
+}
