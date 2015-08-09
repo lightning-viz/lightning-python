@@ -1,12 +1,11 @@
 import requests
-import os
 from .session import Session
 from .visualization import Visualization
 
 
 class Lightning(object):
 
-    def __init__(self, host="http://localhost:3000", ipython=False, dbcloud=False, auth=None):
+    def __init__(self, host="http://localhost:3000", ipython=False, auth=None):
         self.set_host(host)
         self.auth = auth
 
@@ -24,8 +23,6 @@ class Lightning(object):
         else:
             self.ipython_enabled = False
 
-        if dbcloud:
-            self.enable_dbcloud()
 
     def __repr__(self):
         if hasattr(self, 'session') and self.session is not None:
@@ -73,26 +70,6 @@ class Lightning(object):
         ip = get_ipython()
         formatter = ip.display_formatter.formatters['text/html']
         formatter.type_printers.pop(Visualization, None)
-
-    def enable_dbcloud(self):
-        """
-        Enable lightning in the Databricks cloud notebook.
-
-        This will automatically start a lightning server if
-        it is not already running, using the host and install
-        location expected on a Databricks cloud notebook.
-        """
-        self.host = "http://localhost:3000"
-        url = self.host + "/status/"
-        installation = '/root/lightning/'
-        try:
-            r = requests.get(url)
-            if r.status_code != 200:
-                raise Exception("Server is running but not returning 200 status")
-        except requests.ConnectionError:
-            s = os.system('node ' + installation + '/server.js &> /dev/null > /dev/null &')
-            if s != 0:
-                raise Exception("Failed to start lightning server, check path %s", installation)
 
     def create_session(self, name=None):
         """
