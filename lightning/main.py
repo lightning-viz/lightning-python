@@ -123,7 +123,6 @@ class Lightning(object):
         queried for javascript and css, and all data is handled locally
         """
         self.local_enabled = True
-        self.count = 0
         print('Running Lightning in local mode.\n'
               'Visualizations are interactive, but not all types are avaialble. \n'
               'For the full power of Lightning run your own server! '
@@ -134,7 +133,6 @@ class Lightning(object):
         Disable local mode
         """
         self.local_enabled = False
-        self.count = None
 
     def set_basic_auth(self, username, password):
         """
