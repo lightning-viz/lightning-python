@@ -14,6 +14,11 @@ class Lightning(object):
             if isinstance(auth, tuple):
                 self.set_basic_auth(auth[0], auth[1])
 
+        status = self.check_status()
+
+        if not status:
+            raise ValueError("Could not instantiate lightning server")
+
         if ipython:
             self.enable_ipython()
         else:
@@ -131,6 +136,24 @@ class Lightning(object):
         self.host = host
         return self
 
+    def check_status(self):
+        """
+        Check the server for status
+        """
+        try:
+            r = requests.get(self.host + '/status', auth=self.auth)
+            if not r.status_code == requests.codes.ok:
+                print("Problem connecting to lightning server at %s" % self.host)
+                print("status code: %s" % r.status_code)
+                return False
+            else:
+                print("Connected to lightning server at %s" % self.host)
+                return True
+        except (requests.exceptions.ConnectionError, requests.exceptions.MissingSchema) as e:
+            print("Problem connecting to lightning server at %s" % self.host)
+            print("error: %s" % e)
+            return False
+
     def plot(self, data=None, type=None):
         """
         Generic plotting function.
@@ -160,10 +183,3 @@ class Lightning(object):
         viz = Generic.baseplot(self.session, type, data)
         self.session.visualizations.append(viz)
         return viz
-
-
-
-
-
-        
-
