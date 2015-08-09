@@ -2,7 +2,6 @@ import requests
 import json
 import webbrowser
 
-
 class Visualization(object):
 
     def __init__(self, session=None, json=None, auth=None):
