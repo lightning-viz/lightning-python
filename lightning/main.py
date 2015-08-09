@@ -141,7 +141,8 @@ class Lightning(object):
         Check the server for status
         """
         try:
-            r = requests.get(self.host + '/status', auth=self.auth)
+            r = requests.get(self.host + '/status', auth=self.auth,
+                             timeout=(10.0, 10.0))
             if not r.status_code == requests.codes.ok:
                 print("Problem connecting to lightning server at %s" % self.host)
                 print("status code: %s" % r.status_code)
