@@ -2017,1608 +2017,7 @@ function isUndefined(arg) {
 // All source code is kept in the src directory
 module.exports = require('./src');
 
-},{"./src":31}],7:[function(require,module,exports){
-/* MIT license */
-var convert = require("color-convert"),
-    string = require("color-string");
-
-var Color = function(obj) {
-  if (obj instanceof Color) return obj;
-  if (! (this instanceof Color)) return new Color(obj);
-
-   this.values = {
-      rgb: [0, 0, 0],
-      hsl: [0, 0, 0],
-      hsv: [0, 0, 0],
-      hwb: [0, 0, 0],
-      cmyk: [0, 0, 0, 0],
-      alpha: 1
-   }
-
-   // parse Color() argument
-   if (typeof obj == "string") {
-      var vals = string.getRgba(obj);
-      if (vals) {
-         this.setValues("rgb", vals);
-      }
-      else if(vals = string.getHsla(obj)) {
-         this.setValues("hsl", vals);
-      }
-      else if(vals = string.getHwb(obj)) {
-         this.setValues("hwb", vals);
-      }
-      else {
-        throw new Error("Unable to parse color from string \"" + obj + "\"");
-      }
-   }
-   else if (typeof obj == "object") {
-      var vals = obj;
-      if(vals["r"] !== undefined || vals["red"] !== undefined) {
-         this.setValues("rgb", vals)
-      }
-      else if(vals["l"] !== undefined || vals["lightness"] !== undefined) {
-         this.setValues("hsl", vals)
-      }
-      else if(vals["v"] !== undefined || vals["value"] !== undefined) {
-         this.setValues("hsv", vals)
-      }
-      else if(vals["w"] !== undefined || vals["whiteness"] !== undefined) {
-         this.setValues("hwb", vals)
-      }
-      else if(vals["c"] !== undefined || vals["cyan"] !== undefined) {
-         this.setValues("cmyk", vals)
-      }
-      else {
-        throw new Error("Unable to parse color from object " + JSON.stringify(obj));
-      }
-   }
-}
-
-Color.prototype = {
-   rgb: function (vals) {
-      return this.setSpace("rgb", arguments);
-   },
-   hsl: function(vals) {
-      return this.setSpace("hsl", arguments);
-   },
-   hsv: function(vals) {
-      return this.setSpace("hsv", arguments);
-   },
-   hwb: function(vals) {
-      return this.setSpace("hwb", arguments);
-   },
-   cmyk: function(vals) {
-      return this.setSpace("cmyk", arguments);
-   },
-
-   rgbArray: function() {
-      return this.values.rgb;
-   },
-   hslArray: function() {
-      return this.values.hsl;
-   },
-   hsvArray: function() {
-      return this.values.hsv;
-   },
-   hwbArray: function() {
-      if (this.values.alpha !== 1) {
-        return this.values.hwb.concat([this.values.alpha])
-      }
-      return this.values.hwb;
-   },
-   cmykArray: function() {
-      return this.values.cmyk;
-   },
-   rgbaArray: function() {
-      var rgb = this.values.rgb;
-      return rgb.concat([this.values.alpha]);
-   },
-   hslaArray: function() {
-      var hsl = this.values.hsl;
-      return hsl.concat([this.values.alpha]);
-   },
-   alpha: function(val) {
-      if (val === undefined) {
-         return this.values.alpha;
-      }
-      this.setValues("alpha", val);
-      return this;
-   },
-
-   red: function(val) {
-      return this.setChannel("rgb", 0, val);
-   },
-   green: function(val) {
-      return this.setChannel("rgb", 1, val);
-   },
-   blue: function(val) {
-      return this.setChannel("rgb", 2, val);
-   },
-   hue: function(val) {
-      return this.setChannel("hsl", 0, val);
-   },
-   saturation: function(val) {
-      return this.setChannel("hsl", 1, val);
-   },
-   lightness: function(val) {
-      return this.setChannel("hsl", 2, val);
-   },
-   saturationv: function(val) {
-      return this.setChannel("hsv", 1, val);
-   },
-   whiteness: function(val) {
-      return this.setChannel("hwb", 1, val);
-   },
-   blackness: function(val) {
-      return this.setChannel("hwb", 2, val);
-   },
-   value: function(val) {
-      return this.setChannel("hsv", 2, val);
-   },
-   cyan: function(val) {
-      return this.setChannel("cmyk", 0, val);
-   },
-   magenta: function(val) {
-      return this.setChannel("cmyk", 1, val);
-   },
-   yellow: function(val) {
-      return this.setChannel("cmyk", 2, val);
-   },
-   black: function(val) {
-      return this.setChannel("cmyk", 3, val);
-   },
-
-   hexString: function() {
-      return string.hexString(this.values.rgb);
-   },
-   rgbString: function() {
-      return string.rgbString(this.values.rgb, this.values.alpha);
-   },
-   rgbaString: function() {
-      return string.rgbaString(this.values.rgb, this.values.alpha);
-   },
-   percentString: function() {
-      return string.percentString(this.values.rgb, this.values.alpha);
-   },
-   hslString: function() {
-      return string.hslString(this.values.hsl, this.values.alpha);
-   },
-   hslaString: function() {
-      return string.hslaString(this.values.hsl, this.values.alpha);
-   },
-   hwbString: function() {
-      return string.hwbString(this.values.hwb, this.values.alpha);
-   },
-   keyword: function() {
-      return string.keyword(this.values.rgb, this.values.alpha);
-   },
-
-   rgbNumber: function() {
-      return (this.values.rgb[0] << 16) | (this.values.rgb[1] << 8) | this.values.rgb[2];
-   },
-
-   luminosity: function() {
-      // http://www.w3.org/TR/WCAG20/#relativeluminancedef
-      var rgb = this.values.rgb;
-      var lum = [];
-      for (var i = 0; i < rgb.length; i++) {
-         var chan = rgb[i] / 255;
-         lum[i] = (chan <= 0.03928) ? chan / 12.92
-                  : Math.pow(((chan + 0.055) / 1.055), 2.4)
-      }
-      return 0.2126 * lum[0] + 0.7152 * lum[1] + 0.0722 * lum[2];
-   },
-
-   contrast: function(color2) {
-      // http://www.w3.org/TR/WCAG20/#contrast-ratiodef
-      var lum1 = this.luminosity();
-      var lum2 = color2.luminosity();
-      if (lum1 > lum2) {
-         return (lum1 + 0.05) / (lum2 + 0.05)
-      };
-      return (lum2 + 0.05) / (lum1 + 0.05);
-   },
-
-   level: function(color2) {
-     var contrastRatio = this.contrast(color2);
-     return (contrastRatio >= 7.1)
-       ? 'AAA'
-       : (contrastRatio >= 4.5)
-        ? 'AA'
-        : '';
-   },
-
-   dark: function() {
-      // YIQ equation from http://24ways.org/2010/calculating-color-contrast
-      var rgb = this.values.rgb,
-          yiq = (rgb[0] * 299 + rgb[1] * 587 + rgb[2] * 114) / 1000;
-      return yiq < 128;
-   },
-
-   light: function() {
-      return !this.dark();
-   },
-
-   negate: function() {
-      var rgb = []
-      for (var i = 0; i < 3; i++) {
-         rgb[i] = 255 - this.values.rgb[i];
-      }
-      this.setValues("rgb", rgb);
-      return this;
-   },
-
-   lighten: function(ratio) {
-      this.values.hsl[2] += this.values.hsl[2] * ratio;
-      this.setValues("hsl", this.values.hsl);
-      return this;
-   },
-
-   darken: function(ratio) {
-      this.values.hsl[2] -= this.values.hsl[2] * ratio;
-      this.setValues("hsl", this.values.hsl);
-      return this;
-   },
-
-   saturate: function(ratio) {
-      this.values.hsl[1] += this.values.hsl[1] * ratio;
-      this.setValues("hsl", this.values.hsl);
-      return this;
-   },
-
-   desaturate: function(ratio) {
-      this.values.hsl[1] -= this.values.hsl[1] * ratio;
-      this.setValues("hsl", this.values.hsl);
-      return this;
-   },
-
-   whiten: function(ratio) {
-      this.values.hwb[1] += this.values.hwb[1] * ratio;
-      this.setValues("hwb", this.values.hwb);
-      return this;
-   },
-
-   blacken: function(ratio) {
-      this.values.hwb[2] += this.values.hwb[2] * ratio;
-      this.setValues("hwb", this.values.hwb);
-      return this;
-   },
-
-   greyscale: function() {
-      var rgb = this.values.rgb;
-      // http://en.wikipedia.org/wiki/Grayscale#Converting_color_to_grayscale
-      var val = rgb[0] * 0.3 + rgb[1] * 0.59 + rgb[2] * 0.11;
-      this.setValues("rgb", [val, val, val]);
-      return this;
-   },
-
-   clearer: function(ratio) {
-      this.setValues("alpha", this.values.alpha - (this.values.alpha * ratio));
-      return this;
-   },
-
-   opaquer: function(ratio) {
-      this.setValues("alpha", this.values.alpha + (this.values.alpha * ratio));
-      return this;
-   },
-
-   rotate: function(degrees) {
-      var hue = this.values.hsl[0];
-      hue = (hue + degrees) % 360;
-      hue = hue < 0 ? 360 + hue : hue;
-      this.values.hsl[0] = hue;
-      this.setValues("hsl", this.values.hsl);
-      return this;
-   },
-
-   /**
-    * Ported from sass implementation in C
-    * https://github.com/sass/libsass/blob/0e6b4a2850092356aa3ece07c6b249f0221caced/functions.cpp#L209
-    */
-   mix: function(mixinColor, weight) {
-      var color1 = this;
-      var color2 = mixinColor;
-      var p = weight !== undefined ? weight : 0.5;
-
-      var w = 2 * p - 1;
-      var a = color1.alpha() - color2.alpha();
-
-      var w1 = (((w * a == -1) ? w : (w + a)/(1 + w*a)) + 1) / 2.0;
-      var w2 = 1 - w1;
-
-      return this
-        .rgb(
-          w1 * color1.red() + w2 * color2.red(),
-          w1 * color1.green() + w2 * color2.green(),
-          w1 * color1.blue() + w2 * color2.blue()
-        )
-        .alpha(color1.alpha() * p + color2.alpha() * (1 - p));
-   },
-
-   toJSON: function() {
-     return this.rgb();
-   },
-
-   clone: function() {
-     return new Color(this.rgb());
-   }
-}
-
-
-Color.prototype.getValues = function(space) {
-   var vals = {};
-   for (var i = 0; i < space.length; i++) {
-      vals[space.charAt(i)] = this.values[space][i];
-   }
-   if (this.values.alpha != 1) {
-      vals["a"] = this.values.alpha;
-   }
-   // {r: 255, g: 255, b: 255, a: 0.4}
-   return vals;
-}
-
-Color.prototype.setValues = function(space, vals) {
-   var spaces = {
-      "rgb": ["red", "green", "blue"],
-      "hsl": ["hue", "saturation", "lightness"],
-      "hsv": ["hue", "saturation", "value"],
-      "hwb": ["hue", "whiteness", "blackness"],
-      "cmyk": ["cyan", "magenta", "yellow", "black"]
-   };
-
-   var maxes = {
-      "rgb": [255, 255, 255],
-      "hsl": [360, 100, 100],
-      "hsv": [360, 100, 100],
-      "hwb": [360, 100, 100],
-      "cmyk": [100, 100, 100, 100]
-   };
-
-   var alpha = 1;
-   if (space == "alpha") {
-      alpha = vals;
-   }
-   else if (vals.length) {
-      // [10, 10, 10]
-      this.values[space] = vals.slice(0, space.length);
-      alpha = vals[space.length];
-   }
-   else if (vals[space.charAt(0)] !== undefined) {
-      // {r: 10, g: 10, b: 10}
-      for (var i = 0; i < space.length; i++) {
-        this.values[space][i] = vals[space.charAt(i)];
-      }
-      alpha = vals.a;
-   }
-   else if (vals[spaces[space][0]] !== undefined) {
-      // {red: 10, green: 10, blue: 10}
-      var chans = spaces[space];
-      for (var i = 0; i < space.length; i++) {
-        this.values[space][i] = vals[chans[i]];
-      }
-      alpha = vals.alpha;
-   }
-   this.values.alpha = Math.max(0, Math.min(1, (alpha !== undefined ? alpha : this.values.alpha) ));
-   if (space == "alpha") {
-      return;
-   }
-
-   // cap values of the space prior converting all values
-   for (var i = 0; i < space.length; i++) {
-      var capped = Math.max(0, Math.min(maxes[space][i], this.values[space][i]));
-      this.values[space][i] = Math.round(capped);
-   }
-
-   // convert to all the other color spaces
-   for (var sname in spaces) {
-      if (sname != space) {
-         this.values[sname] = convert[space][sname](this.values[space])
-      }
-
-      // cap values
-      for (var i = 0; i < sname.length; i++) {
-         var capped = Math.max(0, Math.min(maxes[sname][i], this.values[sname][i]));
-         this.values[sname][i] = Math.round(capped);
-      }
-   }
-   return true;
-}
-
-Color.prototype.setSpace = function(space, args) {
-   var vals = args[0];
-   if (vals === undefined) {
-      // color.rgb()
-      return this.getValues(space);
-   }
-   // color.rgb(10, 10, 10)
-   if (typeof vals == "number") {
-      vals = Array.prototype.slice.call(args);
-   }
-   this.setValues(space, vals);
-   return this;
-}
-
-Color.prototype.setChannel = function(space, index, val) {
-   if (val === undefined) {
-      // color.red()
-      return this.values[space][index];
-   }
-   // color.red(100)
-   this.values[space][index] = val;
-   this.setValues(space, this.values[space]);
-   return this;
-}
-
-module.exports = Color;
-
-},{"color-convert":9,"color-string":10}],8:[function(require,module,exports){
-/* MIT license */
-
-module.exports = {
-  rgb2hsl: rgb2hsl,
-  rgb2hsv: rgb2hsv,
-  rgb2hwb: rgb2hwb,
-  rgb2cmyk: rgb2cmyk,
-  rgb2keyword: rgb2keyword,
-  rgb2xyz: rgb2xyz,
-  rgb2lab: rgb2lab,
-  rgb2lch: rgb2lch,
-
-  hsl2rgb: hsl2rgb,
-  hsl2hsv: hsl2hsv,
-  hsl2hwb: hsl2hwb,
-  hsl2cmyk: hsl2cmyk,
-  hsl2keyword: hsl2keyword,
-
-  hsv2rgb: hsv2rgb,
-  hsv2hsl: hsv2hsl,
-  hsv2hwb: hsv2hwb,
-  hsv2cmyk: hsv2cmyk,
-  hsv2keyword: hsv2keyword,
-
-  hwb2rgb: hwb2rgb,
-  hwb2hsl: hwb2hsl,
-  hwb2hsv: hwb2hsv,
-  hwb2cmyk: hwb2cmyk,
-  hwb2keyword: hwb2keyword,
-
-  cmyk2rgb: cmyk2rgb,
-  cmyk2hsl: cmyk2hsl,
-  cmyk2hsv: cmyk2hsv,
-  cmyk2hwb: cmyk2hwb,
-  cmyk2keyword: cmyk2keyword,
-
-  keyword2rgb: keyword2rgb,
-  keyword2hsl: keyword2hsl,
-  keyword2hsv: keyword2hsv,
-  keyword2hwb: keyword2hwb,
-  keyword2cmyk: keyword2cmyk,
-  keyword2lab: keyword2lab,
-  keyword2xyz: keyword2xyz,
-
-  xyz2rgb: xyz2rgb,
-  xyz2lab: xyz2lab,
-  xyz2lch: xyz2lch,
-
-  lab2xyz: lab2xyz,
-  lab2rgb: lab2rgb,
-  lab2lch: lab2lch,
-
-  lch2lab: lch2lab,
-  lch2xyz: lch2xyz,
-  lch2rgb: lch2rgb
-}
-
-
-function rgb2hsl(rgb) {
-  var r = rgb[0]/255,
-      g = rgb[1]/255,
-      b = rgb[2]/255,
-      min = Math.min(r, g, b),
-      max = Math.max(r, g, b),
-      delta = max - min,
-      h, s, l;
-
-  if (max == min)
-    h = 0;
-  else if (r == max)
-    h = (g - b) / delta;
-  else if (g == max)
-    h = 2 + (b - r) / delta;
-  else if (b == max)
-    h = 4 + (r - g)/ delta;
-
-  h = Math.min(h * 60, 360);
-
-  if (h < 0)
-    h += 360;
-
-  l = (min + max) / 2;
-
-  if (max == min)
-    s = 0;
-  else if (l <= 0.5)
-    s = delta / (max + min);
-  else
-    s = delta / (2 - max - min);
-
-  return [h, s * 100, l * 100];
-}
-
-function rgb2hsv(rgb) {
-  var r = rgb[0],
-      g = rgb[1],
-      b = rgb[2],
-      min = Math.min(r, g, b),
-      max = Math.max(r, g, b),
-      delta = max - min,
-      h, s, v;
-
-  if (max == 0)
-    s = 0;
-  else
-    s = (delta/max * 1000)/10;
-
-  if (max == min)
-    h = 0;
-  else if (r == max)
-    h = (g - b) / delta;
-  else if (g == max)
-    h = 2 + (b - r) / delta;
-  else if (b == max)
-    h = 4 + (r - g) / delta;
-
-  h = Math.min(h * 60, 360);
-
-  if (h < 0)
-    h += 360;
-
-  v = ((max / 255) * 1000) / 10;
-
-  return [h, s, v];
-}
-
-function rgb2hwb(rgb) {
-  var r = rgb[0],
-      g = rgb[1],
-      b = rgb[2],
-      h = rgb2hsl(rgb)[0],
-      w = 1/255 * Math.min(r, Math.min(g, b)),
-      b = 1 - 1/255 * Math.max(r, Math.max(g, b));
-
-  return [h, w * 100, b * 100];
-}
-
-function rgb2cmyk(rgb) {
-  var r = rgb[0] / 255,
-      g = rgb[1] / 255,
-      b = rgb[2] / 255,
-      c, m, y, k;
-
-  k = Math.min(1 - r, 1 - g, 1 - b);
-  c = (1 - r - k) / (1 - k) || 0;
-  m = (1 - g - k) / (1 - k) || 0;
-  y = (1 - b - k) / (1 - k) || 0;
-  return [c * 100, m * 100, y * 100, k * 100];
-}
-
-function rgb2keyword(rgb) {
-  return reverseKeywords[JSON.stringify(rgb)];
-}
-
-function rgb2xyz(rgb) {
-  var r = rgb[0] / 255,
-      g = rgb[1] / 255,
-      b = rgb[2] / 255;
-
-  // assume sRGB
-  r = r > 0.04045 ? Math.pow(((r + 0.055) / 1.055), 2.4) : (r / 12.92);
-  g = g > 0.04045 ? Math.pow(((g + 0.055) / 1.055), 2.4) : (g / 12.92);
-  b = b > 0.04045 ? Math.pow(((b + 0.055) / 1.055), 2.4) : (b / 12.92);
-
-  var x = (r * 0.4124) + (g * 0.3576) + (b * 0.1805);
-  var y = (r * 0.2126) + (g * 0.7152) + (b * 0.0722);
-  var z = (r * 0.0193) + (g * 0.1192) + (b * 0.9505);
-
-  return [x * 100, y *100, z * 100];
-}
-
-function rgb2lab(rgb) {
-  var xyz = rgb2xyz(rgb),
-        x = xyz[0],
-        y = xyz[1],
-        z = xyz[2],
-        l, a, b;
-
-  x /= 95.047;
-  y /= 100;
-  z /= 108.883;
-
-  x = x > 0.008856 ? Math.pow(x, 1/3) : (7.787 * x) + (16 / 116);
-  y = y > 0.008856 ? Math.pow(y, 1/3) : (7.787 * y) + (16 / 116);
-  z = z > 0.008856 ? Math.pow(z, 1/3) : (7.787 * z) + (16 / 116);
-
-  l = (116 * y) - 16;
-  a = 500 * (x - y);
-  b = 200 * (y - z);
-
-  return [l, a, b];
-}
-
-function rgb2lch(args) {
-  return lab2lch(rgb2lab(args));
-}
-
-function hsl2rgb(hsl) {
-  var h = hsl[0] / 360,
-      s = hsl[1] / 100,
-      l = hsl[2] / 100,
-      t1, t2, t3, rgb, val;
-
-  if (s == 0) {
-    val = l * 255;
-    return [val, val, val];
-  }
-
-  if (l < 0.5)
-    t2 = l * (1 + s);
-  else
-    t2 = l + s - l * s;
-  t1 = 2 * l - t2;
-
-  rgb = [0, 0, 0];
-  for (var i = 0; i < 3; i++) {
-    t3 = h + 1 / 3 * - (i - 1);
-    t3 < 0 && t3++;
-    t3 > 1 && t3--;
-
-    if (6 * t3 < 1)
-      val = t1 + (t2 - t1) * 6 * t3;
-    else if (2 * t3 < 1)
-      val = t2;
-    else if (3 * t3 < 2)
-      val = t1 + (t2 - t1) * (2 / 3 - t3) * 6;
-    else
-      val = t1;
-
-    rgb[i] = val * 255;
-  }
-
-  return rgb;
-}
-
-function hsl2hsv(hsl) {
-  var h = hsl[0],
-      s = hsl[1] / 100,
-      l = hsl[2] / 100,
-      sv, v;
-
-  if(l === 0) {
-      // no need to do calc on black
-      // also avoids divide by 0 error
-      return [0, 0, 0];
-  }
-
-  l *= 2;
-  s *= (l <= 1) ? l : 2 - l;
-  v = (l + s) / 2;
-  sv = (2 * s) / (l + s);
-  return [h, sv * 100, v * 100];
-}
-
-function hsl2hwb(args) {
-  return rgb2hwb(hsl2rgb(args));
-}
-
-function hsl2cmyk(args) {
-  return rgb2cmyk(hsl2rgb(args));
-}
-
-function hsl2keyword(args) {
-  return rgb2keyword(hsl2rgb(args));
-}
-
-
-function hsv2rgb(hsv) {
-  var h = hsv[0] / 60,
-      s = hsv[1] / 100,
-      v = hsv[2] / 100,
-      hi = Math.floor(h) % 6;
-
-  var f = h - Math.floor(h),
-      p = 255 * v * (1 - s),
-      q = 255 * v * (1 - (s * f)),
-      t = 255 * v * (1 - (s * (1 - f))),
-      v = 255 * v;
-
-  switch(hi) {
-    case 0:
-      return [v, t, p];
-    case 1:
-      return [q, v, p];
-    case 2:
-      return [p, v, t];
-    case 3:
-      return [p, q, v];
-    case 4:
-      return [t, p, v];
-    case 5:
-      return [v, p, q];
-  }
-}
-
-function hsv2hsl(hsv) {
-  var h = hsv[0],
-      s = hsv[1] / 100,
-      v = hsv[2] / 100,
-      sl, l;
-
-  l = (2 - s) * v;
-  sl = s * v;
-  sl /= (l <= 1) ? l : 2 - l;
-  sl = sl || 0;
-  l /= 2;
-  return [h, sl * 100, l * 100];
-}
-
-function hsv2hwb(args) {
-  return rgb2hwb(hsv2rgb(args))
-}
-
-function hsv2cmyk(args) {
-  return rgb2cmyk(hsv2rgb(args));
-}
-
-function hsv2keyword(args) {
-  return rgb2keyword(hsv2rgb(args));
-}
-
-// http://dev.w3.org/csswg/css-color/#hwb-to-rgb
-function hwb2rgb(hwb) {
-  var h = hwb[0] / 360,
-      wh = hwb[1] / 100,
-      bl = hwb[2] / 100,
-      ratio = wh + bl,
-      i, v, f, n;
-
-  // wh + bl cant be > 1
-  if (ratio > 1) {
-    wh /= ratio;
-    bl /= ratio;
-  }
-
-  i = Math.floor(6 * h);
-  v = 1 - bl;
-  f = 6 * h - i;
-  if ((i & 0x01) != 0) {
-    f = 1 - f;
-  }
-  n = wh + f * (v - wh);  // linear interpolation
-
-  switch (i) {
-    default:
-    case 6:
-    case 0: r = v; g = n; b = wh; break;
-    case 1: r = n; g = v; b = wh; break;
-    case 2: r = wh; g = v; b = n; break;
-    case 3: r = wh; g = n; b = v; break;
-    case 4: r = n; g = wh; b = v; break;
-    case 5: r = v; g = wh; b = n; break;
-  }
-
-  return [r * 255, g * 255, b * 255];
-}
-
-function hwb2hsl(args) {
-  return rgb2hsl(hwb2rgb(args));
-}
-
-function hwb2hsv(args) {
-  return rgb2hsv(hwb2rgb(args));
-}
-
-function hwb2cmyk(args) {
-  return rgb2cmyk(hwb2rgb(args));
-}
-
-function hwb2keyword(args) {
-  return rgb2keyword(hwb2rgb(args));
-}
-
-function cmyk2rgb(cmyk) {
-  var c = cmyk[0] / 100,
-      m = cmyk[1] / 100,
-      y = cmyk[2] / 100,
-      k = cmyk[3] / 100,
-      r, g, b;
-
-  r = 1 - Math.min(1, c * (1 - k) + k);
-  g = 1 - Math.min(1, m * (1 - k) + k);
-  b = 1 - Math.min(1, y * (1 - k) + k);
-  return [r * 255, g * 255, b * 255];
-}
-
-function cmyk2hsl(args) {
-  return rgb2hsl(cmyk2rgb(args));
-}
-
-function cmyk2hsv(args) {
-  return rgb2hsv(cmyk2rgb(args));
-}
-
-function cmyk2hwb(args) {
-  return rgb2hwb(cmyk2rgb(args));
-}
-
-function cmyk2keyword(args) {
-  return rgb2keyword(cmyk2rgb(args));
-}
-
-
-function xyz2rgb(xyz) {
-  var x = xyz[0] / 100,
-      y = xyz[1] / 100,
-      z = xyz[2] / 100,
-      r, g, b;
-
-  r = (x * 3.2406) + (y * -1.5372) + (z * -0.4986);
-  g = (x * -0.9689) + (y * 1.8758) + (z * 0.0415);
-  b = (x * 0.0557) + (y * -0.2040) + (z * 1.0570);
-
-  // assume sRGB
-  r = r > 0.0031308 ? ((1.055 * Math.pow(r, 1.0 / 2.4)) - 0.055)
-    : r = (r * 12.92);
-
-  g = g > 0.0031308 ? ((1.055 * Math.pow(g, 1.0 / 2.4)) - 0.055)
-    : g = (g * 12.92);
-
-  b = b > 0.0031308 ? ((1.055 * Math.pow(b, 1.0 / 2.4)) - 0.055)
-    : b = (b * 12.92);
-
-  r = Math.min(Math.max(0, r), 1);
-  g = Math.min(Math.max(0, g), 1);
-  b = Math.min(Math.max(0, b), 1);
-
-  return [r * 255, g * 255, b * 255];
-}
-
-function xyz2lab(xyz) {
-  var x = xyz[0],
-      y = xyz[1],
-      z = xyz[2],
-      l, a, b;
-
-  x /= 95.047;
-  y /= 100;
-  z /= 108.883;
-
-  x = x > 0.008856 ? Math.pow(x, 1/3) : (7.787 * x) + (16 / 116);
-  y = y > 0.008856 ? Math.pow(y, 1/3) : (7.787 * y) + (16 / 116);
-  z = z > 0.008856 ? Math.pow(z, 1/3) : (7.787 * z) + (16 / 116);
-
-  l = (116 * y) - 16;
-  a = 500 * (x - y);
-  b = 200 * (y - z);
-
-  return [l, a, b];
-}
-
-function xyz2lch(args) {
-  return lab2lch(xyz2lab(args));
-}
-
-function lab2xyz(lab) {
-  var l = lab[0],
-      a = lab[1],
-      b = lab[2],
-      x, y, z, y2;
-
-  if (l <= 8) {
-    y = (l * 100) / 903.3;
-    y2 = (7.787 * (y / 100)) + (16 / 116);
-  } else {
-    y = 100 * Math.pow((l + 16) / 116, 3);
-    y2 = Math.pow(y / 100, 1/3);
-  }
-
-  x = x / 95.047 <= 0.008856 ? x = (95.047 * ((a / 500) + y2 - (16 / 116))) / 7.787 : 95.047 * Math.pow((a / 500) + y2, 3);
-
-  z = z / 108.883 <= 0.008859 ? z = (108.883 * (y2 - (b / 200) - (16 / 116))) / 7.787 : 108.883 * Math.pow(y2 - (b / 200), 3);
-
-  return [x, y, z];
-}
-
-function lab2lch(lab) {
-  var l = lab[0],
-      a = lab[1],
-      b = lab[2],
-      hr, h, c;
-
-  hr = Math.atan2(b, a);
-  h = hr * 360 / 2 / Math.PI;
-  if (h < 0) {
-    h += 360;
-  }
-  c = Math.sqrt(a * a + b * b);
-  return [l, c, h];
-}
-
-function lab2rgb(args) {
-  return xyz2rgb(lab2xyz(args));
-}
-
-function lch2lab(lch) {
-  var l = lch[0],
-      c = lch[1],
-      h = lch[2],
-      a, b, hr;
-
-  hr = h / 360 * 2 * Math.PI;
-  a = c * Math.cos(hr);
-  b = c * Math.sin(hr);
-  return [l, a, b];
-}
-
-function lch2xyz(args) {
-  return lab2xyz(lch2lab(args));
-}
-
-function lch2rgb(args) {
-  return lab2rgb(lch2lab(args));
-}
-
-function keyword2rgb(keyword) {
-  return cssKeywords[keyword];
-}
-
-function keyword2hsl(args) {
-  return rgb2hsl(keyword2rgb(args));
-}
-
-function keyword2hsv(args) {
-  return rgb2hsv(keyword2rgb(args));
-}
-
-function keyword2hwb(args) {
-  return rgb2hwb(keyword2rgb(args));
-}
-
-function keyword2cmyk(args) {
-  return rgb2cmyk(keyword2rgb(args));
-}
-
-function keyword2lab(args) {
-  return rgb2lab(keyword2rgb(args));
-}
-
-function keyword2xyz(args) {
-  return rgb2xyz(keyword2rgb(args));
-}
-
-var cssKeywords = {
-  aliceblue:  [240,248,255],
-  antiquewhite: [250,235,215],
-  aqua: [0,255,255],
-  aquamarine: [127,255,212],
-  azure:  [240,255,255],
-  beige:  [245,245,220],
-  bisque: [255,228,196],
-  black:  [0,0,0],
-  blanchedalmond: [255,235,205],
-  blue: [0,0,255],
-  blueviolet: [138,43,226],
-  brown:  [165,42,42],
-  burlywood:  [222,184,135],
-  cadetblue:  [95,158,160],
-  chartreuse: [127,255,0],
-  chocolate:  [210,105,30],
-  coral:  [255,127,80],
-  cornflowerblue: [100,149,237],
-  cornsilk: [255,248,220],
-  crimson:  [220,20,60],
-  cyan: [0,255,255],
-  darkblue: [0,0,139],
-  darkcyan: [0,139,139],
-  darkgoldenrod:  [184,134,11],
-  darkgray: [169,169,169],
-  darkgreen:  [0,100,0],
-  darkgrey: [169,169,169],
-  darkkhaki:  [189,183,107],
-  darkmagenta:  [139,0,139],
-  darkolivegreen: [85,107,47],
-  darkorange: [255,140,0],
-  darkorchid: [153,50,204],
-  darkred:  [139,0,0],
-  darksalmon: [233,150,122],
-  darkseagreen: [143,188,143],
-  darkslateblue:  [72,61,139],
-  darkslategray:  [47,79,79],
-  darkslategrey:  [47,79,79],
-  darkturquoise:  [0,206,209],
-  darkviolet: [148,0,211],
-  deeppink: [255,20,147],
-  deepskyblue:  [0,191,255],
-  dimgray:  [105,105,105],
-  dimgrey:  [105,105,105],
-  dodgerblue: [30,144,255],
-  firebrick:  [178,34,34],
-  floralwhite:  [255,250,240],
-  forestgreen:  [34,139,34],
-  fuchsia:  [255,0,255],
-  gainsboro:  [220,220,220],
-  ghostwhite: [248,248,255],
-  gold: [255,215,0],
-  goldenrod:  [218,165,32],
-  gray: [128,128,128],
-  green:  [0,128,0],
-  greenyellow:  [173,255,47],
-  grey: [128,128,128],
-  honeydew: [240,255,240],
-  hotpink:  [255,105,180],
-  indianred:  [205,92,92],
-  indigo: [75,0,130],
-  ivory:  [255,255,240],
-  khaki:  [240,230,140],
-  lavender: [230,230,250],
-  lavenderblush:  [255,240,245],
-  lawngreen:  [124,252,0],
-  lemonchiffon: [255,250,205],
-  lightblue:  [173,216,230],
-  lightcoral: [240,128,128],
-  lightcyan:  [224,255,255],
-  lightgoldenrodyellow: [250,250,210],
-  lightgray:  [211,211,211],
-  lightgreen: [144,238,144],
-  lightgrey:  [211,211,211],
-  lightpink:  [255,182,193],
-  lightsalmon:  [255,160,122],
-  lightseagreen:  [32,178,170],
-  lightskyblue: [135,206,250],
-  lightslategray: [119,136,153],
-  lightslategrey: [119,136,153],
-  lightsteelblue: [176,196,222],
-  lightyellow:  [255,255,224],
-  lime: [0,255,0],
-  limegreen:  [50,205,50],
-  linen:  [250,240,230],
-  magenta:  [255,0,255],
-  maroon: [128,0,0],
-  mediumaquamarine: [102,205,170],
-  mediumblue: [0,0,205],
-  mediumorchid: [186,85,211],
-  mediumpurple: [147,112,219],
-  mediumseagreen: [60,179,113],
-  mediumslateblue:  [123,104,238],
-  mediumspringgreen:  [0,250,154],
-  mediumturquoise:  [72,209,204],
-  mediumvioletred:  [199,21,133],
-  midnightblue: [25,25,112],
-  mintcream:  [245,255,250],
-  mistyrose:  [255,228,225],
-  moccasin: [255,228,181],
-  navajowhite:  [255,222,173],
-  navy: [0,0,128],
-  oldlace:  [253,245,230],
-  olive:  [128,128,0],
-  olivedrab:  [107,142,35],
-  orange: [255,165,0],
-  orangered:  [255,69,0],
-  orchid: [218,112,214],
-  palegoldenrod:  [238,232,170],
-  palegreen:  [152,251,152],
-  paleturquoise:  [175,238,238],
-  palevioletred:  [219,112,147],
-  papayawhip: [255,239,213],
-  peachpuff:  [255,218,185],
-  peru: [205,133,63],
-  pink: [255,192,203],
-  plum: [221,160,221],
-  powderblue: [176,224,230],
-  purple: [128,0,128],
-  rebeccapurple: [102, 51, 153],
-  red:  [255,0,0],
-  rosybrown:  [188,143,143],
-  royalblue:  [65,105,225],
-  saddlebrown:  [139,69,19],
-  salmon: [250,128,114],
-  sandybrown: [244,164,96],
-  seagreen: [46,139,87],
-  seashell: [255,245,238],
-  sienna: [160,82,45],
-  silver: [192,192,192],
-  skyblue:  [135,206,235],
-  slateblue:  [106,90,205],
-  slategray:  [112,128,144],
-  slategrey:  [112,128,144],
-  snow: [255,250,250],
-  springgreen:  [0,255,127],
-  steelblue:  [70,130,180],
-  tan:  [210,180,140],
-  teal: [0,128,128],
-  thistle:  [216,191,216],
-  tomato: [255,99,71],
-  turquoise:  [64,224,208],
-  violet: [238,130,238],
-  wheat:  [245,222,179],
-  white:  [255,255,255],
-  whitesmoke: [245,245,245],
-  yellow: [255,255,0],
-  yellowgreen:  [154,205,50]
-};
-
-var reverseKeywords = {};
-for (var key in cssKeywords) {
-  reverseKeywords[JSON.stringify(cssKeywords[key])] = key;
-}
-
-},{}],9:[function(require,module,exports){
-var conversions = require("./conversions");
-
-var convert = function() {
-   return new Converter();
-}
-
-for (var func in conversions) {
-  // export Raw versions
-  convert[func + "Raw"] =  (function(func) {
-    // accept array or plain args
-    return function(arg) {
-      if (typeof arg == "number")
-        arg = Array.prototype.slice.call(arguments);
-      return conversions[func](arg);
-    }
-  })(func);
-
-  var pair = /(\w+)2(\w+)/.exec(func),
-      from = pair[1],
-      to = pair[2];
-
-  // export rgb2hsl and ["rgb"]["hsl"]
-  convert[from] = convert[from] || {};
-
-  convert[from][to] = convert[func] = (function(func) { 
-    return function(arg) {
-      if (typeof arg == "number")
-        arg = Array.prototype.slice.call(arguments);
-      
-      var val = conversions[func](arg);
-      if (typeof val == "string" || val === undefined)
-        return val; // keyword
-
-      for (var i = 0; i < val.length; i++)
-        val[i] = Math.round(val[i]);
-      return val;
-    }
-  })(func);
-}
-
-
-/* Converter does lazy conversion and caching */
-var Converter = function() {
-   this.convs = {};
-};
-
-/* Either get the values for a space or
-  set the values for a space, depending on args */
-Converter.prototype.routeSpace = function(space, args) {
-   var values = args[0];
-   if (values === undefined) {
-      // color.rgb()
-      return this.getValues(space);
-   }
-   // color.rgb(10, 10, 10)
-   if (typeof values == "number") {
-      values = Array.prototype.slice.call(args);        
-   }
-
-   return this.setValues(space, values);
-};
-  
-/* Set the values for a space, invalidating cache */
-Converter.prototype.setValues = function(space, values) {
-   this.space = space;
-   this.convs = {};
-   this.convs[space] = values;
-   return this;
-};
-
-/* Get the values for a space. If there's already
-  a conversion for the space, fetch it, otherwise
-  compute it */
-Converter.prototype.getValues = function(space) {
-   var vals = this.convs[space];
-   if (!vals) {
-      var fspace = this.space,
-          from = this.convs[fspace];
-      vals = convert[fspace][space](from);
-
-      this.convs[space] = vals;
-   }
-  return vals;
-};
-
-["rgb", "hsl", "hsv", "cmyk", "keyword"].forEach(function(space) {
-   Converter.prototype[space] = function(vals) {
-      return this.routeSpace(space, arguments);
-   }
-});
-
-module.exports = convert;
-},{"./conversions":8}],10:[function(require,module,exports){
-/* MIT license */
-var colorNames = require('color-name');
-
-module.exports = {
-   getRgba: getRgba,
-   getHsla: getHsla,
-   getRgb: getRgb,
-   getHsl: getHsl,
-   getHwb: getHwb,
-   getAlpha: getAlpha,
-
-   hexString: hexString,
-   rgbString: rgbString,
-   rgbaString: rgbaString,
-   percentString: percentString,
-   percentaString: percentaString,
-   hslString: hslString,
-   hslaString: hslaString,
-   hwbString: hwbString,
-   keyword: keyword
-}
-
-function getRgba(string) {
-   if (!string) {
-      return;
-   }
-   var abbr =  /^#([a-fA-F0-9]{3})$/,
-       hex =  /^#([a-fA-F0-9]{6})$/,
-       rgba = /^rgba?\(\s*([+-]?\d+)\s*,\s*([+-]?\d+)\s*,\s*([+-]?\d+)\s*(?:,\s*([+-]?[\d\.]+)\s*)?\)$/,
-       per = /^rgba?\(\s*([+-]?[\d\.]+)\%\s*,\s*([+-]?[\d\.]+)\%\s*,\s*([+-]?[\d\.]+)\%\s*(?:,\s*([+-]?[\d\.]+)\s*)?\)$/,
-       keyword = /(\D+)/;
-
-   var rgb = [0, 0, 0],
-       a = 1,
-       match = string.match(abbr);
-   if (match) {
-      match = match[1];
-      for (var i = 0; i < rgb.length; i++) {
-         rgb[i] = parseInt(match[i] + match[i], 16);
-      }
-   }
-   else if (match = string.match(hex)) {
-      match = match[1];
-      for (var i = 0; i < rgb.length; i++) {
-         rgb[i] = parseInt(match.slice(i * 2, i * 2 + 2), 16);
-      }
-   }
-   else if (match = string.match(rgba)) {
-      for (var i = 0; i < rgb.length; i++) {
-         rgb[i] = parseInt(match[i + 1]);
-      }
-      a = parseFloat(match[4]);
-   }
-   else if (match = string.match(per)) {
-      for (var i = 0; i < rgb.length; i++) {
-         rgb[i] = Math.round(parseFloat(match[i + 1]) * 2.55);
-      }
-      a = parseFloat(match[4]);
-   }
-   else if (match = string.match(keyword)) {
-      if (match[1] == "transparent") {
-         return [0, 0, 0, 0];
-      }
-      rgb = colorNames[match[1]];
-      if (!rgb) {
-         return;
-      }
-   }
-
-   for (var i = 0; i < rgb.length; i++) {
-      rgb[i] = scale(rgb[i], 0, 255);
-   }
-   if (!a && a != 0) {
-      a = 1;
-   }
-   else {
-      a = scale(a, 0, 1);
-   }
-   rgb[3] = a;
-   return rgb;
-}
-
-function getHsla(string) {
-   if (!string) {
-      return;
-   }
-   var hsl = /^hsla?\(\s*([+-]?\d+)(?:deg)?\s*,\s*([+-]?[\d\.]+)%\s*,\s*([+-]?[\d\.]+)%\s*(?:,\s*([+-]?[\d\.]+)\s*)?\)/;
-   var match = string.match(hsl);
-   if (match) {
-      var alpha = parseFloat(match[4]);
-      var h = scale(parseInt(match[1]), 0, 360),
-          s = scale(parseFloat(match[2]), 0, 100),
-          l = scale(parseFloat(match[3]), 0, 100),
-          a = scale(isNaN(alpha) ? 1 : alpha, 0, 1);
-      return [h, s, l, a];
-   }
-}
-
-function getHwb(string) {
-   if (!string) {
-      return;
-   }
-   var hwb = /^hwb\(\s*([+-]?\d+)(?:deg)?\s*,\s*([+-]?[\d\.]+)%\s*,\s*([+-]?[\d\.]+)%\s*(?:,\s*([+-]?[\d\.]+)\s*)?\)/;
-   var match = string.match(hwb);
-   if (match) {
-    var alpha = parseFloat(match[4]);
-      var h = scale(parseInt(match[1]), 0, 360),
-          w = scale(parseFloat(match[2]), 0, 100),
-          b = scale(parseFloat(match[3]), 0, 100),
-          a = scale(isNaN(alpha) ? 1 : alpha, 0, 1);
-      return [h, w, b, a];
-   }
-}
-
-function getRgb(string) {
-   var rgba = getRgba(string);
-   return rgba && rgba.slice(0, 3);
-}
-
-function getHsl(string) {
-  var hsla = getHsla(string);
-  return hsla && hsla.slice(0, 3);
-}
-
-function getAlpha(string) {
-   var vals = getRgba(string);
-   if (vals) {
-      return vals[3];
-   }
-   else if (vals = getHsla(string)) {
-      return vals[3];
-   }
-   else if (vals = getHwb(string)) {
-      return vals[3];
-   }
-}
-
-// generators
-function hexString(rgb) {
-   return "#" + hexDouble(rgb[0]) + hexDouble(rgb[1])
-              + hexDouble(rgb[2]);
-}
-
-function rgbString(rgba, alpha) {
-   if (alpha < 1 || (rgba[3] && rgba[3] < 1)) {
-      return rgbaString(rgba, alpha);
-   }
-   return "rgb(" + rgba[0] + ", " + rgba[1] + ", " + rgba[2] + ")";
-}
-
-function rgbaString(rgba, alpha) {
-   if (alpha === undefined) {
-      alpha = (rgba[3] !== undefined ? rgba[3] : 1);
-   }
-   return "rgba(" + rgba[0] + ", " + rgba[1] + ", " + rgba[2]
-           + ", " + alpha + ")";
-}
-
-function percentString(rgba, alpha) {
-   if (alpha < 1 || (rgba[3] && rgba[3] < 1)) {
-      return percentaString(rgba, alpha);
-   }
-   var r = Math.round(rgba[0]/255 * 100),
-       g = Math.round(rgba[1]/255 * 100),
-       b = Math.round(rgba[2]/255 * 100);
-
-   return "rgb(" + r + "%, " + g + "%, " + b + "%)";
-}
-
-function percentaString(rgba, alpha) {
-   var r = Math.round(rgba[0]/255 * 100),
-       g = Math.round(rgba[1]/255 * 100),
-       b = Math.round(rgba[2]/255 * 100);
-   return "rgba(" + r + "%, " + g + "%, " + b + "%, " + (alpha || rgba[3] || 1) + ")";
-}
-
-function hslString(hsla, alpha) {
-   if (alpha < 1 || (hsla[3] && hsla[3] < 1)) {
-      return hslaString(hsla, alpha);
-   }
-   return "hsl(" + hsla[0] + ", " + hsla[1] + "%, " + hsla[2] + "%)";
-}
-
-function hslaString(hsla, alpha) {
-   if (alpha === undefined) {
-      alpha = (hsla[3] !== undefined ? hsla[3] : 1);
-   }
-   return "hsla(" + hsla[0] + ", " + hsla[1] + "%, " + hsla[2] + "%, "
-           + alpha + ")";
-}
-
-// hwb is a bit different than rgb(a) & hsl(a) since there is no alpha specific syntax
-// (hwb have alpha optional & 1 is default value)
-function hwbString(hwb, alpha) {
-   if (alpha === undefined) {
-      alpha = (hwb[3] !== undefined ? hwb[3] : 1);
-   }
-   return "hwb(" + hwb[0] + ", " + hwb[1] + "%, " + hwb[2] + "%"
-           + (alpha !== undefined && alpha !== 1 ? ", " + alpha : "") + ")";
-}
-
-function keyword(rgb) {
-  return reverseNames[rgb.slice(0, 3)];
-}
-
-// helpers
-function scale(num, min, max) {
-   return Math.min(Math.max(min, num), max);
-}
-
-function hexDouble(num) {
-  var str = num.toString(16).toUpperCase();
-  return (str.length < 2) ? "0" + str : str;
-}
-
-
-//create a list of reverse color names
-var reverseNames = {};
-for (var name in colorNames) {
-   reverseNames[colorNames[name]] = name;
-}
-
-},{"color-name":11}],11:[function(require,module,exports){
-module.exports={
-	"aliceblue": [240, 248, 255],
-	"antiquewhite": [250, 235, 215],
-	"aqua": [0, 255, 255],
-	"aquamarine": [127, 255, 212],
-	"azure": [240, 255, 255],
-	"beige": [245, 245, 220],
-	"bisque": [255, 228, 196],
-	"black": [0, 0, 0],
-	"blanchedalmond": [255, 235, 205],
-	"blue": [0, 0, 255],
-	"blueviolet": [138, 43, 226],
-	"brown": [165, 42, 42],
-	"burlywood": [222, 184, 135],
-	"cadetblue": [95, 158, 160],
-	"chartreuse": [127, 255, 0],
-	"chocolate": [210, 105, 30],
-	"coral": [255, 127, 80],
-	"cornflowerblue": [100, 149, 237],
-	"cornsilk": [255, 248, 220],
-	"crimson": [220, 20, 60],
-	"cyan": [0, 255, 255],
-	"darkblue": [0, 0, 139],
-	"darkcyan": [0, 139, 139],
-	"darkgoldenrod": [184, 134, 11],
-	"darkgray": [169, 169, 169],
-	"darkgreen": [0, 100, 0],
-	"darkgrey": [169, 169, 169],
-	"darkkhaki": [189, 183, 107],
-	"darkmagenta": [139, 0, 139],
-	"darkolivegreen": [85, 107, 47],
-	"darkorange": [255, 140, 0],
-	"darkorchid": [153, 50, 204],
-	"darkred": [139, 0, 0],
-	"darksalmon": [233, 150, 122],
-	"darkseagreen": [143, 188, 143],
-	"darkslateblue": [72, 61, 139],
-	"darkslategray": [47, 79, 79],
-	"darkslategrey": [47, 79, 79],
-	"darkturquoise": [0, 206, 209],
-	"darkviolet": [148, 0, 211],
-	"deeppink": [255, 20, 147],
-	"deepskyblue": [0, 191, 255],
-	"dimgray": [105, 105, 105],
-	"dimgrey": [105, 105, 105],
-	"dodgerblue": [30, 144, 255],
-	"firebrick": [178, 34, 34],
-	"floralwhite": [255, 250, 240],
-	"forestgreen": [34, 139, 34],
-	"fuchsia": [255, 0, 255],
-	"gainsboro": [220, 220, 220],
-	"ghostwhite": [248, 248, 255],
-	"gold": [255, 215, 0],
-	"goldenrod": [218, 165, 32],
-	"gray": [128, 128, 128],
-	"green": [0, 128, 0],
-	"greenyellow": [173, 255, 47],
-	"grey": [128, 128, 128],
-	"honeydew": [240, 255, 240],
-	"hotpink": [255, 105, 180],
-	"indianred": [205, 92, 92],
-	"indigo": [75, 0, 130],
-	"ivory": [255, 255, 240],
-	"khaki": [240, 230, 140],
-	"lavender": [230, 230, 250],
-	"lavenderblush": [255, 240, 245],
-	"lawngreen": [124, 252, 0],
-	"lemonchiffon": [255, 250, 205],
-	"lightblue": [173, 216, 230],
-	"lightcoral": [240, 128, 128],
-	"lightcyan": [224, 255, 255],
-	"lightgoldenrodyellow": [250, 250, 210],
-	"lightgray": [211, 211, 211],
-	"lightgreen": [144, 238, 144],
-	"lightgrey": [211, 211, 211],
-	"lightpink": [255, 182, 193],
-	"lightsalmon": [255, 160, 122],
-	"lightseagreen": [32, 178, 170],
-	"lightskyblue": [135, 206, 250],
-	"lightslategray": [119, 136, 153],
-	"lightslategrey": [119, 136, 153],
-	"lightsteelblue": [176, 196, 222],
-	"lightyellow": [255, 255, 224],
-	"lime": [0, 255, 0],
-	"limegreen": [50, 205, 50],
-	"linen": [250, 240, 230],
-	"magenta": [255, 0, 255],
-	"maroon": [128, 0, 0],
-	"mediumaquamarine": [102, 205, 170],
-	"mediumblue": [0, 0, 205],
-	"mediumorchid": [186, 85, 211],
-	"mediumpurple": [147, 112, 219],
-	"mediumseagreen": [60, 179, 113],
-	"mediumslateblue": [123, 104, 238],
-	"mediumspringgreen": [0, 250, 154],
-	"mediumturquoise": [72, 209, 204],
-	"mediumvioletred": [199, 21, 133],
-	"midnightblue": [25, 25, 112],
-	"mintcream": [245, 255, 250],
-	"mistyrose": [255, 228, 225],
-	"moccasin": [255, 228, 181],
-	"navajowhite": [255, 222, 173],
-	"navy": [0, 0, 128],
-	"oldlace": [253, 245, 230],
-	"olive": [128, 128, 0],
-	"olivedrab": [107, 142, 35],
-	"orange": [255, 165, 0],
-	"orangered": [255, 69, 0],
-	"orchid": [218, 112, 214],
-	"palegoldenrod": [238, 232, 170],
-	"palegreen": [152, 251, 152],
-	"paleturquoise": [175, 238, 238],
-	"palevioletred": [219, 112, 147],
-	"papayawhip": [255, 239, 213],
-	"peachpuff": [255, 218, 185],
-	"peru": [205, 133, 63],
-	"pink": [255, 192, 203],
-	"plum": [221, 160, 221],
-	"powderblue": [176, 224, 230],
-	"purple": [128, 0, 128],
-	"rebeccapurple": [102, 51, 153],
-	"red": [255, 0, 0],
-	"rosybrown": [188, 143, 143],
-	"royalblue": [65, 105, 225],
-	"saddlebrown": [139, 69, 19],
-	"salmon": [250, 128, 114],
-	"sandybrown": [244, 164, 96],
-	"seagreen": [46, 139, 87],
-	"seashell": [255, 245, 238],
-	"sienna": [160, 82, 45],
-	"silver": [192, 192, 192],
-	"skyblue": [135, 206, 235],
-	"slateblue": [106, 90, 205],
-	"slategray": [112, 128, 144],
-	"slategrey": [112, 128, 144],
-	"snow": [255, 250, 250],
-	"springgreen": [0, 255, 127],
-	"steelblue": [70, 130, 180],
-	"tan": [210, 180, 140],
-	"teal": [0, 128, 128],
-	"thistle": [216, 191, 216],
-	"tomato": [255, 99, 71],
-	"turquoise": [64, 224, 208],
-	"violet": [238, 130, 238],
-	"wheat": [245, 222, 179],
-	"white": [255, 255, 255],
-	"whitesmoke": [245, 245, 245],
-	"yellow": [255, 255, 0],
-	"yellowgreen": [154, 205, 50]
-}
-},{}],12:[function(require,module,exports){
+},{"./src":22}],7:[function(require,module,exports){
 // This product includes color specifications and designs developed by Cynthia Brewer (http://colorbrewer.org/).
 // JavaScript specs as packaged in the D3 library (d3js.org). Please see license at http://colorbrewer.org/export/LICENSE.txt
 !function() {
@@ -3935,10 +2334,10 @@ if (typeof define === "function" && define.amd) {
 
 }();
 
-},{}],13:[function(require,module,exports){
+},{}],8:[function(require,module,exports){
 module.exports = require('./colorbrewer.js');
 
-},{"./colorbrewer.js":12}],14:[function(require,module,exports){
+},{"./colorbrewer.js":7}],9:[function(require,module,exports){
 !function() {
   var d3 = {
     version: "3.5.6"
@@ -13443,7 +11842,7 @@ module.exports = require('./colorbrewer.js');
   if (typeof define === "function" && define.amd) define(d3); else if (typeof module === "object" && module.exports) module.exports = d3;
   this.d3 = d3;
 }();
-},{}],15:[function(require,module,exports){
+},{}],10:[function(require,module,exports){
 
 var _ = require('lodash');
 var request = require('superagent');
@@ -13843,7 +12242,7 @@ var utils = {
 
 
 module.exports = utils;
-},{"color":16,"colorbrewer":13,"d3-color":21,"d3-scale":22,"lodash":23,"superagent":24}],16:[function(require,module,exports){
+},{"color":11,"colorbrewer":8,"d3-color":16,"d3-scale":17,"lodash":18,"superagent":19}],11:[function(require,module,exports){
 /* MIT license */
 var convert = require("color-convert"),
     string = require("color-string");
@@ -14278,11 +12677,800 @@ Color.prototype.setChannel = function(space, index, val) {
 
 module.exports = Color;
 
-},{"color-convert":18,"color-string":19}],17:[function(require,module,exports){
-arguments[4][8][0].apply(exports,arguments)
-},{"dup":8}],18:[function(require,module,exports){
-arguments[4][9][0].apply(exports,arguments)
-},{"./conversions":17,"dup":9}],19:[function(require,module,exports){
+},{"color-convert":13,"color-string":14}],12:[function(require,module,exports){
+/* MIT license */
+
+module.exports = {
+  rgb2hsl: rgb2hsl,
+  rgb2hsv: rgb2hsv,
+  rgb2hwb: rgb2hwb,
+  rgb2cmyk: rgb2cmyk,
+  rgb2keyword: rgb2keyword,
+  rgb2xyz: rgb2xyz,
+  rgb2lab: rgb2lab,
+  rgb2lch: rgb2lch,
+
+  hsl2rgb: hsl2rgb,
+  hsl2hsv: hsl2hsv,
+  hsl2hwb: hsl2hwb,
+  hsl2cmyk: hsl2cmyk,
+  hsl2keyword: hsl2keyword,
+
+  hsv2rgb: hsv2rgb,
+  hsv2hsl: hsv2hsl,
+  hsv2hwb: hsv2hwb,
+  hsv2cmyk: hsv2cmyk,
+  hsv2keyword: hsv2keyword,
+
+  hwb2rgb: hwb2rgb,
+  hwb2hsl: hwb2hsl,
+  hwb2hsv: hwb2hsv,
+  hwb2cmyk: hwb2cmyk,
+  hwb2keyword: hwb2keyword,
+
+  cmyk2rgb: cmyk2rgb,
+  cmyk2hsl: cmyk2hsl,
+  cmyk2hsv: cmyk2hsv,
+  cmyk2hwb: cmyk2hwb,
+  cmyk2keyword: cmyk2keyword,
+
+  keyword2rgb: keyword2rgb,
+  keyword2hsl: keyword2hsl,
+  keyword2hsv: keyword2hsv,
+  keyword2hwb: keyword2hwb,
+  keyword2cmyk: keyword2cmyk,
+  keyword2lab: keyword2lab,
+  keyword2xyz: keyword2xyz,
+
+  xyz2rgb: xyz2rgb,
+  xyz2lab: xyz2lab,
+  xyz2lch: xyz2lch,
+
+  lab2xyz: lab2xyz,
+  lab2rgb: lab2rgb,
+  lab2lch: lab2lch,
+
+  lch2lab: lch2lab,
+  lch2xyz: lch2xyz,
+  lch2rgb: lch2rgb
+}
+
+
+function rgb2hsl(rgb) {
+  var r = rgb[0]/255,
+      g = rgb[1]/255,
+      b = rgb[2]/255,
+      min = Math.min(r, g, b),
+      max = Math.max(r, g, b),
+      delta = max - min,
+      h, s, l;
+
+  if (max == min)
+    h = 0;
+  else if (r == max)
+    h = (g - b) / delta;
+  else if (g == max)
+    h = 2 + (b - r) / delta;
+  else if (b == max)
+    h = 4 + (r - g)/ delta;
+
+  h = Math.min(h * 60, 360);
+
+  if (h < 0)
+    h += 360;
+
+  l = (min + max) / 2;
+
+  if (max == min)
+    s = 0;
+  else if (l <= 0.5)
+    s = delta / (max + min);
+  else
+    s = delta / (2 - max - min);
+
+  return [h, s * 100, l * 100];
+}
+
+function rgb2hsv(rgb) {
+  var r = rgb[0],
+      g = rgb[1],
+      b = rgb[2],
+      min = Math.min(r, g, b),
+      max = Math.max(r, g, b),
+      delta = max - min,
+      h, s, v;
+
+  if (max == 0)
+    s = 0;
+  else
+    s = (delta/max * 1000)/10;
+
+  if (max == min)
+    h = 0;
+  else if (r == max)
+    h = (g - b) / delta;
+  else if (g == max)
+    h = 2 + (b - r) / delta;
+  else if (b == max)
+    h = 4 + (r - g) / delta;
+
+  h = Math.min(h * 60, 360);
+
+  if (h < 0)
+    h += 360;
+
+  v = ((max / 255) * 1000) / 10;
+
+  return [h, s, v];
+}
+
+function rgb2hwb(rgb) {
+  var r = rgb[0],
+      g = rgb[1],
+      b = rgb[2],
+      h = rgb2hsl(rgb)[0],
+      w = 1/255 * Math.min(r, Math.min(g, b)),
+      b = 1 - 1/255 * Math.max(r, Math.max(g, b));
+
+  return [h, w * 100, b * 100];
+}
+
+function rgb2cmyk(rgb) {
+  var r = rgb[0] / 255,
+      g = rgb[1] / 255,
+      b = rgb[2] / 255,
+      c, m, y, k;
+
+  k = Math.min(1 - r, 1 - g, 1 - b);
+  c = (1 - r - k) / (1 - k) || 0;
+  m = (1 - g - k) / (1 - k) || 0;
+  y = (1 - b - k) / (1 - k) || 0;
+  return [c * 100, m * 100, y * 100, k * 100];
+}
+
+function rgb2keyword(rgb) {
+  return reverseKeywords[JSON.stringify(rgb)];
+}
+
+function rgb2xyz(rgb) {
+  var r = rgb[0] / 255,
+      g = rgb[1] / 255,
+      b = rgb[2] / 255;
+
+  // assume sRGB
+  r = r > 0.04045 ? Math.pow(((r + 0.055) / 1.055), 2.4) : (r / 12.92);
+  g = g > 0.04045 ? Math.pow(((g + 0.055) / 1.055), 2.4) : (g / 12.92);
+  b = b > 0.04045 ? Math.pow(((b + 0.055) / 1.055), 2.4) : (b / 12.92);
+
+  var x = (r * 0.4124) + (g * 0.3576) + (b * 0.1805);
+  var y = (r * 0.2126) + (g * 0.7152) + (b * 0.0722);
+  var z = (r * 0.0193) + (g * 0.1192) + (b * 0.9505);
+
+  return [x * 100, y *100, z * 100];
+}
+
+function rgb2lab(rgb) {
+  var xyz = rgb2xyz(rgb),
+        x = xyz[0],
+        y = xyz[1],
+        z = xyz[2],
+        l, a, b;
+
+  x /= 95.047;
+  y /= 100;
+  z /= 108.883;
+
+  x = x > 0.008856 ? Math.pow(x, 1/3) : (7.787 * x) + (16 / 116);
+  y = y > 0.008856 ? Math.pow(y, 1/3) : (7.787 * y) + (16 / 116);
+  z = z > 0.008856 ? Math.pow(z, 1/3) : (7.787 * z) + (16 / 116);
+
+  l = (116 * y) - 16;
+  a = 500 * (x - y);
+  b = 200 * (y - z);
+
+  return [l, a, b];
+}
+
+function rgb2lch(args) {
+  return lab2lch(rgb2lab(args));
+}
+
+function hsl2rgb(hsl) {
+  var h = hsl[0] / 360,
+      s = hsl[1] / 100,
+      l = hsl[2] / 100,
+      t1, t2, t3, rgb, val;
+
+  if (s == 0) {
+    val = l * 255;
+    return [val, val, val];
+  }
+
+  if (l < 0.5)
+    t2 = l * (1 + s);
+  else
+    t2 = l + s - l * s;
+  t1 = 2 * l - t2;
+
+  rgb = [0, 0, 0];
+  for (var i = 0; i < 3; i++) {
+    t3 = h + 1 / 3 * - (i - 1);
+    t3 < 0 && t3++;
+    t3 > 1 && t3--;
+
+    if (6 * t3 < 1)
+      val = t1 + (t2 - t1) * 6 * t3;
+    else if (2 * t3 < 1)
+      val = t2;
+    else if (3 * t3 < 2)
+      val = t1 + (t2 - t1) * (2 / 3 - t3) * 6;
+    else
+      val = t1;
+
+    rgb[i] = val * 255;
+  }
+
+  return rgb;
+}
+
+function hsl2hsv(hsl) {
+  var h = hsl[0],
+      s = hsl[1] / 100,
+      l = hsl[2] / 100,
+      sv, v;
+
+  if(l === 0) {
+      // no need to do calc on black
+      // also avoids divide by 0 error
+      return [0, 0, 0];
+  }
+
+  l *= 2;
+  s *= (l <= 1) ? l : 2 - l;
+  v = (l + s) / 2;
+  sv = (2 * s) / (l + s);
+  return [h, sv * 100, v * 100];
+}
+
+function hsl2hwb(args) {
+  return rgb2hwb(hsl2rgb(args));
+}
+
+function hsl2cmyk(args) {
+  return rgb2cmyk(hsl2rgb(args));
+}
+
+function hsl2keyword(args) {
+  return rgb2keyword(hsl2rgb(args));
+}
+
+
+function hsv2rgb(hsv) {
+  var h = hsv[0] / 60,
+      s = hsv[1] / 100,
+      v = hsv[2] / 100,
+      hi = Math.floor(h) % 6;
+
+  var f = h - Math.floor(h),
+      p = 255 * v * (1 - s),
+      q = 255 * v * (1 - (s * f)),
+      t = 255 * v * (1 - (s * (1 - f))),
+      v = 255 * v;
+
+  switch(hi) {
+    case 0:
+      return [v, t, p];
+    case 1:
+      return [q, v, p];
+    case 2:
+      return [p, v, t];
+    case 3:
+      return [p, q, v];
+    case 4:
+      return [t, p, v];
+    case 5:
+      return [v, p, q];
+  }
+}
+
+function hsv2hsl(hsv) {
+  var h = hsv[0],
+      s = hsv[1] / 100,
+      v = hsv[2] / 100,
+      sl, l;
+
+  l = (2 - s) * v;
+  sl = s * v;
+  sl /= (l <= 1) ? l : 2 - l;
+  sl = sl || 0;
+  l /= 2;
+  return [h, sl * 100, l * 100];
+}
+
+function hsv2hwb(args) {
+  return rgb2hwb(hsv2rgb(args))
+}
+
+function hsv2cmyk(args) {
+  return rgb2cmyk(hsv2rgb(args));
+}
+
+function hsv2keyword(args) {
+  return rgb2keyword(hsv2rgb(args));
+}
+
+// http://dev.w3.org/csswg/css-color/#hwb-to-rgb
+function hwb2rgb(hwb) {
+  var h = hwb[0] / 360,
+      wh = hwb[1] / 100,
+      bl = hwb[2] / 100,
+      ratio = wh + bl,
+      i, v, f, n;
+
+  // wh + bl cant be > 1
+  if (ratio > 1) {
+    wh /= ratio;
+    bl /= ratio;
+  }
+
+  i = Math.floor(6 * h);
+  v = 1 - bl;
+  f = 6 * h - i;
+  if ((i & 0x01) != 0) {
+    f = 1 - f;
+  }
+  n = wh + f * (v - wh);  // linear interpolation
+
+  switch (i) {
+    default:
+    case 6:
+    case 0: r = v; g = n; b = wh; break;
+    case 1: r = n; g = v; b = wh; break;
+    case 2: r = wh; g = v; b = n; break;
+    case 3: r = wh; g = n; b = v; break;
+    case 4: r = n; g = wh; b = v; break;
+    case 5: r = v; g = wh; b = n; break;
+  }
+
+  return [r * 255, g * 255, b * 255];
+}
+
+function hwb2hsl(args) {
+  return rgb2hsl(hwb2rgb(args));
+}
+
+function hwb2hsv(args) {
+  return rgb2hsv(hwb2rgb(args));
+}
+
+function hwb2cmyk(args) {
+  return rgb2cmyk(hwb2rgb(args));
+}
+
+function hwb2keyword(args) {
+  return rgb2keyword(hwb2rgb(args));
+}
+
+function cmyk2rgb(cmyk) {
+  var c = cmyk[0] / 100,
+      m = cmyk[1] / 100,
+      y = cmyk[2] / 100,
+      k = cmyk[3] / 100,
+      r, g, b;
+
+  r = 1 - Math.min(1, c * (1 - k) + k);
+  g = 1 - Math.min(1, m * (1 - k) + k);
+  b = 1 - Math.min(1, y * (1 - k) + k);
+  return [r * 255, g * 255, b * 255];
+}
+
+function cmyk2hsl(args) {
+  return rgb2hsl(cmyk2rgb(args));
+}
+
+function cmyk2hsv(args) {
+  return rgb2hsv(cmyk2rgb(args));
+}
+
+function cmyk2hwb(args) {
+  return rgb2hwb(cmyk2rgb(args));
+}
+
+function cmyk2keyword(args) {
+  return rgb2keyword(cmyk2rgb(args));
+}
+
+
+function xyz2rgb(xyz) {
+  var x = xyz[0] / 100,
+      y = xyz[1] / 100,
+      z = xyz[2] / 100,
+      r, g, b;
+
+  r = (x * 3.2406) + (y * -1.5372) + (z * -0.4986);
+  g = (x * -0.9689) + (y * 1.8758) + (z * 0.0415);
+  b = (x * 0.0557) + (y * -0.2040) + (z * 1.0570);
+
+  // assume sRGB
+  r = r > 0.0031308 ? ((1.055 * Math.pow(r, 1.0 / 2.4)) - 0.055)
+    : r = (r * 12.92);
+
+  g = g > 0.0031308 ? ((1.055 * Math.pow(g, 1.0 / 2.4)) - 0.055)
+    : g = (g * 12.92);
+
+  b = b > 0.0031308 ? ((1.055 * Math.pow(b, 1.0 / 2.4)) - 0.055)
+    : b = (b * 12.92);
+
+  r = Math.min(Math.max(0, r), 1);
+  g = Math.min(Math.max(0, g), 1);
+  b = Math.min(Math.max(0, b), 1);
+
+  return [r * 255, g * 255, b * 255];
+}
+
+function xyz2lab(xyz) {
+  var x = xyz[0],
+      y = xyz[1],
+      z = xyz[2],
+      l, a, b;
+
+  x /= 95.047;
+  y /= 100;
+  z /= 108.883;
+
+  x = x > 0.008856 ? Math.pow(x, 1/3) : (7.787 * x) + (16 / 116);
+  y = y > 0.008856 ? Math.pow(y, 1/3) : (7.787 * y) + (16 / 116);
+  z = z > 0.008856 ? Math.pow(z, 1/3) : (7.787 * z) + (16 / 116);
+
+  l = (116 * y) - 16;
+  a = 500 * (x - y);
+  b = 200 * (y - z);
+
+  return [l, a, b];
+}
+
+function xyz2lch(args) {
+  return lab2lch(xyz2lab(args));
+}
+
+function lab2xyz(lab) {
+  var l = lab[0],
+      a = lab[1],
+      b = lab[2],
+      x, y, z, y2;
+
+  if (l <= 8) {
+    y = (l * 100) / 903.3;
+    y2 = (7.787 * (y / 100)) + (16 / 116);
+  } else {
+    y = 100 * Math.pow((l + 16) / 116, 3);
+    y2 = Math.pow(y / 100, 1/3);
+  }
+
+  x = x / 95.047 <= 0.008856 ? x = (95.047 * ((a / 500) + y2 - (16 / 116))) / 7.787 : 95.047 * Math.pow((a / 500) + y2, 3);
+
+  z = z / 108.883 <= 0.008859 ? z = (108.883 * (y2 - (b / 200) - (16 / 116))) / 7.787 : 108.883 * Math.pow(y2 - (b / 200), 3);
+
+  return [x, y, z];
+}
+
+function lab2lch(lab) {
+  var l = lab[0],
+      a = lab[1],
+      b = lab[2],
+      hr, h, c;
+
+  hr = Math.atan2(b, a);
+  h = hr * 360 / 2 / Math.PI;
+  if (h < 0) {
+    h += 360;
+  }
+  c = Math.sqrt(a * a + b * b);
+  return [l, c, h];
+}
+
+function lab2rgb(args) {
+  return xyz2rgb(lab2xyz(args));
+}
+
+function lch2lab(lch) {
+  var l = lch[0],
+      c = lch[1],
+      h = lch[2],
+      a, b, hr;
+
+  hr = h / 360 * 2 * Math.PI;
+  a = c * Math.cos(hr);
+  b = c * Math.sin(hr);
+  return [l, a, b];
+}
+
+function lch2xyz(args) {
+  return lab2xyz(lch2lab(args));
+}
+
+function lch2rgb(args) {
+  return lab2rgb(lch2lab(args));
+}
+
+function keyword2rgb(keyword) {
+  return cssKeywords[keyword];
+}
+
+function keyword2hsl(args) {
+  return rgb2hsl(keyword2rgb(args));
+}
+
+function keyword2hsv(args) {
+  return rgb2hsv(keyword2rgb(args));
+}
+
+function keyword2hwb(args) {
+  return rgb2hwb(keyword2rgb(args));
+}
+
+function keyword2cmyk(args) {
+  return rgb2cmyk(keyword2rgb(args));
+}
+
+function keyword2lab(args) {
+  return rgb2lab(keyword2rgb(args));
+}
+
+function keyword2xyz(args) {
+  return rgb2xyz(keyword2rgb(args));
+}
+
+var cssKeywords = {
+  aliceblue:  [240,248,255],
+  antiquewhite: [250,235,215],
+  aqua: [0,255,255],
+  aquamarine: [127,255,212],
+  azure:  [240,255,255],
+  beige:  [245,245,220],
+  bisque: [255,228,196],
+  black:  [0,0,0],
+  blanchedalmond: [255,235,205],
+  blue: [0,0,255],
+  blueviolet: [138,43,226],
+  brown:  [165,42,42],
+  burlywood:  [222,184,135],
+  cadetblue:  [95,158,160],
+  chartreuse: [127,255,0],
+  chocolate:  [210,105,30],
+  coral:  [255,127,80],
+  cornflowerblue: [100,149,237],
+  cornsilk: [255,248,220],
+  crimson:  [220,20,60],
+  cyan: [0,255,255],
+  darkblue: [0,0,139],
+  darkcyan: [0,139,139],
+  darkgoldenrod:  [184,134,11],
+  darkgray: [169,169,169],
+  darkgreen:  [0,100,0],
+  darkgrey: [169,169,169],
+  darkkhaki:  [189,183,107],
+  darkmagenta:  [139,0,139],
+  darkolivegreen: [85,107,47],
+  darkorange: [255,140,0],
+  darkorchid: [153,50,204],
+  darkred:  [139,0,0],
+  darksalmon: [233,150,122],
+  darkseagreen: [143,188,143],
+  darkslateblue:  [72,61,139],
+  darkslategray:  [47,79,79],
+  darkslategrey:  [47,79,79],
+  darkturquoise:  [0,206,209],
+  darkviolet: [148,0,211],
+  deeppink: [255,20,147],
+  deepskyblue:  [0,191,255],
+  dimgray:  [105,105,105],
+  dimgrey:  [105,105,105],
+  dodgerblue: [30,144,255],
+  firebrick:  [178,34,34],
+  floralwhite:  [255,250,240],
+  forestgreen:  [34,139,34],
+  fuchsia:  [255,0,255],
+  gainsboro:  [220,220,220],
+  ghostwhite: [248,248,255],
+  gold: [255,215,0],
+  goldenrod:  [218,165,32],
+  gray: [128,128,128],
+  green:  [0,128,0],
+  greenyellow:  [173,255,47],
+  grey: [128,128,128],
+  honeydew: [240,255,240],
+  hotpink:  [255,105,180],
+  indianred:  [205,92,92],
+  indigo: [75,0,130],
+  ivory:  [255,255,240],
+  khaki:  [240,230,140],
+  lavender: [230,230,250],
+  lavenderblush:  [255,240,245],
+  lawngreen:  [124,252,0],
+  lemonchiffon: [255,250,205],
+  lightblue:  [173,216,230],
+  lightcoral: [240,128,128],
+  lightcyan:  [224,255,255],
+  lightgoldenrodyellow: [250,250,210],
+  lightgray:  [211,211,211],
+  lightgreen: [144,238,144],
+  lightgrey:  [211,211,211],
+  lightpink:  [255,182,193],
+  lightsalmon:  [255,160,122],
+  lightseagreen:  [32,178,170],
+  lightskyblue: [135,206,250],
+  lightslategray: [119,136,153],
+  lightslategrey: [119,136,153],
+  lightsteelblue: [176,196,222],
+  lightyellow:  [255,255,224],
+  lime: [0,255,0],
+  limegreen:  [50,205,50],
+  linen:  [250,240,230],
+  magenta:  [255,0,255],
+  maroon: [128,0,0],
+  mediumaquamarine: [102,205,170],
+  mediumblue: [0,0,205],
+  mediumorchid: [186,85,211],
+  mediumpurple: [147,112,219],
+  mediumseagreen: [60,179,113],
+  mediumslateblue:  [123,104,238],
+  mediumspringgreen:  [0,250,154],
+  mediumturquoise:  [72,209,204],
+  mediumvioletred:  [199,21,133],
+  midnightblue: [25,25,112],
+  mintcream:  [245,255,250],
+  mistyrose:  [255,228,225],
+  moccasin: [255,228,181],
+  navajowhite:  [255,222,173],
+  navy: [0,0,128],
+  oldlace:  [253,245,230],
+  olive:  [128,128,0],
+  olivedrab:  [107,142,35],
+  orange: [255,165,0],
+  orangered:  [255,69,0],
+  orchid: [218,112,214],
+  palegoldenrod:  [238,232,170],
+  palegreen:  [152,251,152],
+  paleturquoise:  [175,238,238],
+  palevioletred:  [219,112,147],
+  papayawhip: [255,239,213],
+  peachpuff:  [255,218,185],
+  peru: [205,133,63],
+  pink: [255,192,203],
+  plum: [221,160,221],
+  powderblue: [176,224,230],
+  purple: [128,0,128],
+  rebeccapurple: [102, 51, 153],
+  red:  [255,0,0],
+  rosybrown:  [188,143,143],
+  royalblue:  [65,105,225],
+  saddlebrown:  [139,69,19],
+  salmon: [250,128,114],
+  sandybrown: [244,164,96],
+  seagreen: [46,139,87],
+  seashell: [255,245,238],
+  sienna: [160,82,45],
+  silver: [192,192,192],
+  skyblue:  [135,206,235],
+  slateblue:  [106,90,205],
+  slategray:  [112,128,144],
+  slategrey:  [112,128,144],
+  snow: [255,250,250],
+  springgreen:  [0,255,127],
+  steelblue:  [70,130,180],
+  tan:  [210,180,140],
+  teal: [0,128,128],
+  thistle:  [216,191,216],
+  tomato: [255,99,71],
+  turquoise:  [64,224,208],
+  violet: [238,130,238],
+  wheat:  [245,222,179],
+  white:  [255,255,255],
+  whitesmoke: [245,245,245],
+  yellow: [255,255,0],
+  yellowgreen:  [154,205,50]
+};
+
+var reverseKeywords = {};
+for (var key in cssKeywords) {
+  reverseKeywords[JSON.stringify(cssKeywords[key])] = key;
+}
+
+},{}],13:[function(require,module,exports){
+var conversions = require("./conversions");
+
+var convert = function() {
+   return new Converter();
+}
+
+for (var func in conversions) {
+  // export Raw versions
+  convert[func + "Raw"] =  (function(func) {
+    // accept array or plain args
+    return function(arg) {
+      if (typeof arg == "number")
+        arg = Array.prototype.slice.call(arguments);
+      return conversions[func](arg);
+    }
+  })(func);
+
+  var pair = /(\w+)2(\w+)/.exec(func),
+      from = pair[1],
+      to = pair[2];
+
+  // export rgb2hsl and ["rgb"]["hsl"]
+  convert[from] = convert[from] || {};
+
+  convert[from][to] = convert[func] = (function(func) { 
+    return function(arg) {
+      if (typeof arg == "number")
+        arg = Array.prototype.slice.call(arguments);
+      
+      var val = conversions[func](arg);
+      if (typeof val == "string" || val === undefined)
+        return val; // keyword
+
+      for (var i = 0; i < val.length; i++)
+        val[i] = Math.round(val[i]);
+      return val;
+    }
+  })(func);
+}
+
+
+/* Converter does lazy conversion and caching */
+var Converter = function() {
+   this.convs = {};
+};
+
+/* Either get the values for a space or
+  set the values for a space, depending on args */
+Converter.prototype.routeSpace = function(space, args) {
+   var values = args[0];
+   if (values === undefined) {
+      // color.rgb()
+      return this.getValues(space);
+   }
+   // color.rgb(10, 10, 10)
+   if (typeof values == "number") {
+      values = Array.prototype.slice.call(args);        
+   }
+
+   return this.setValues(space, values);
+};
+  
+/* Set the values for a space, invalidating cache */
+Converter.prototype.setValues = function(space, values) {
+   this.space = space;
+   this.convs = {};
+   this.convs[space] = values;
+   return this;
+};
+
+/* Get the values for a space. If there's already
+  a conversion for the space, fetch it, otherwise
+  compute it */
+Converter.prototype.getValues = function(space) {
+   var vals = this.convs[space];
+   if (!vals) {
+      var fspace = this.space,
+          from = this.convs[fspace];
+      vals = convert[fspace][space](from);
+
+      this.convs[space] = vals;
+   }
+  return vals;
+};
+
+["rgb", "hsl", "hsv", "cmyk", "keyword"].forEach(function(space) {
+   Converter.prototype[space] = function(vals) {
+      return this.routeSpace(space, arguments);
+   }
+});
+
+module.exports = convert;
+},{"./conversions":12}],14:[function(require,module,exports){
 /* MIT license */
 var colorNames = require('color-name');
 
@@ -14502,9 +13690,158 @@ var reverseNames = {};
 for (var name in colorNames) {
    reverseNames[colorNames[name]] = name;
 }
-},{"color-name":20}],20:[function(require,module,exports){
-arguments[4][11][0].apply(exports,arguments)
-},{"dup":11}],21:[function(require,module,exports){
+},{"color-name":15}],15:[function(require,module,exports){
+module.exports={
+	"aliceblue": [240, 248, 255],
+	"antiquewhite": [250, 235, 215],
+	"aqua": [0, 255, 255],
+	"aquamarine": [127, 255, 212],
+	"azure": [240, 255, 255],
+	"beige": [245, 245, 220],
+	"bisque": [255, 228, 196],
+	"black": [0, 0, 0],
+	"blanchedalmond": [255, 235, 205],
+	"blue": [0, 0, 255],
+	"blueviolet": [138, 43, 226],
+	"brown": [165, 42, 42],
+	"burlywood": [222, 184, 135],
+	"cadetblue": [95, 158, 160],
+	"chartreuse": [127, 255, 0],
+	"chocolate": [210, 105, 30],
+	"coral": [255, 127, 80],
+	"cornflowerblue": [100, 149, 237],
+	"cornsilk": [255, 248, 220],
+	"crimson": [220, 20, 60],
+	"cyan": [0, 255, 255],
+	"darkblue": [0, 0, 139],
+	"darkcyan": [0, 139, 139],
+	"darkgoldenrod": [184, 134, 11],
+	"darkgray": [169, 169, 169],
+	"darkgreen": [0, 100, 0],
+	"darkgrey": [169, 169, 169],
+	"darkkhaki": [189, 183, 107],
+	"darkmagenta": [139, 0, 139],
+	"darkolivegreen": [85, 107, 47],
+	"darkorange": [255, 140, 0],
+	"darkorchid": [153, 50, 204],
+	"darkred": [139, 0, 0],
+	"darksalmon": [233, 150, 122],
+	"darkseagreen": [143, 188, 143],
+	"darkslateblue": [72, 61, 139],
+	"darkslategray": [47, 79, 79],
+	"darkslategrey": [47, 79, 79],
+	"darkturquoise": [0, 206, 209],
+	"darkviolet": [148, 0, 211],
+	"deeppink": [255, 20, 147],
+	"deepskyblue": [0, 191, 255],
+	"dimgray": [105, 105, 105],
+	"dimgrey": [105, 105, 105],
+	"dodgerblue": [30, 144, 255],
+	"firebrick": [178, 34, 34],
+	"floralwhite": [255, 250, 240],
+	"forestgreen": [34, 139, 34],
+	"fuchsia": [255, 0, 255],
+	"gainsboro": [220, 220, 220],
+	"ghostwhite": [248, 248, 255],
+	"gold": [255, 215, 0],
+	"goldenrod": [218, 165, 32],
+	"gray": [128, 128, 128],
+	"green": [0, 128, 0],
+	"greenyellow": [173, 255, 47],
+	"grey": [128, 128, 128],
+	"honeydew": [240, 255, 240],
+	"hotpink": [255, 105, 180],
+	"indianred": [205, 92, 92],
+	"indigo": [75, 0, 130],
+	"ivory": [255, 255, 240],
+	"khaki": [240, 230, 140],
+	"lavender": [230, 230, 250],
+	"lavenderblush": [255, 240, 245],
+	"lawngreen": [124, 252, 0],
+	"lemonchiffon": [255, 250, 205],
+	"lightblue": [173, 216, 230],
+	"lightcoral": [240, 128, 128],
+	"lightcyan": [224, 255, 255],
+	"lightgoldenrodyellow": [250, 250, 210],
+	"lightgray": [211, 211, 211],
+	"lightgreen": [144, 238, 144],
+	"lightgrey": [211, 211, 211],
+	"lightpink": [255, 182, 193],
+	"lightsalmon": [255, 160, 122],
+	"lightseagreen": [32, 178, 170],
+	"lightskyblue": [135, 206, 250],
+	"lightslategray": [119, 136, 153],
+	"lightslategrey": [119, 136, 153],
+	"lightsteelblue": [176, 196, 222],
+	"lightyellow": [255, 255, 224],
+	"lime": [0, 255, 0],
+	"limegreen": [50, 205, 50],
+	"linen": [250, 240, 230],
+	"magenta": [255, 0, 255],
+	"maroon": [128, 0, 0],
+	"mediumaquamarine": [102, 205, 170],
+	"mediumblue": [0, 0, 205],
+	"mediumorchid": [186, 85, 211],
+	"mediumpurple": [147, 112, 219],
+	"mediumseagreen": [60, 179, 113],
+	"mediumslateblue": [123, 104, 238],
+	"mediumspringgreen": [0, 250, 154],
+	"mediumturquoise": [72, 209, 204],
+	"mediumvioletred": [199, 21, 133],
+	"midnightblue": [25, 25, 112],
+	"mintcream": [245, 255, 250],
+	"mistyrose": [255, 228, 225],
+	"moccasin": [255, 228, 181],
+	"navajowhite": [255, 222, 173],
+	"navy": [0, 0, 128],
+	"oldlace": [253, 245, 230],
+	"olive": [128, 128, 0],
+	"olivedrab": [107, 142, 35],
+	"orange": [255, 165, 0],
+	"orangered": [255, 69, 0],
+	"orchid": [218, 112, 214],
+	"palegoldenrod": [238, 232, 170],
+	"palegreen": [152, 251, 152],
+	"paleturquoise": [175, 238, 238],
+	"palevioletred": [219, 112, 147],
+	"papayawhip": [255, 239, 213],
+	"peachpuff": [255, 218, 185],
+	"peru": [205, 133, 63],
+	"pink": [255, 192, 203],
+	"plum": [221, 160, 221],
+	"powderblue": [176, 224, 230],
+	"purple": [128, 0, 128],
+	"rebeccapurple": [102, 51, 153],
+	"red": [255, 0, 0],
+	"rosybrown": [188, 143, 143],
+	"royalblue": [65, 105, 225],
+	"saddlebrown": [139, 69, 19],
+	"salmon": [250, 128, 114],
+	"sandybrown": [244, 164, 96],
+	"seagreen": [46, 139, 87],
+	"seashell": [255, 245, 238],
+	"sienna": [160, 82, 45],
+	"silver": [192, 192, 192],
+	"skyblue": [135, 206, 235],
+	"slateblue": [106, 90, 205],
+	"slategray": [112, 128, 144],
+	"slategrey": [112, 128, 144],
+	"snow": [255, 250, 250],
+	"springgreen": [0, 255, 127],
+	"steelblue": [70, 130, 180],
+	"tan": [210, 180, 140],
+	"teal": [0, 128, 128],
+	"thistle": [216, 191, 216],
+	"tomato": [255, 99, 71],
+	"turquoise": [64, 224, 208],
+	"violet": [238, 130, 238],
+	"wheat": [245, 222, 179],
+	"white": [255, 255, 255],
+	"whitesmoke": [245, 245, 245],
+	"yellow": [255, 255, 0],
+	"yellowgreen": [154, 205, 50]
+}
+},{}],16:[function(require,module,exports){
 if (typeof Map === "undefined") {
   Map = function() { this.clear(); };
   Map.prototype = {
@@ -15195,7 +14532,7 @@ if (typeof Map === "undefined") {
   exports.interpolateCubehelixGammaLong = interpolateCubehelixGammaLong;
 
 }));
-},{}],22:[function(require,module,exports){
+},{}],17:[function(require,module,exports){
 if (typeof Map === "undefined") {
   Map = function() { this.clear(); };
   Map.prototype = {
@@ -17714,7 +17051,7 @@ if (typeof Map === "undefined") {
   exports.utcTime = utcTime;
 
 }));
-},{}],23:[function(require,module,exports){
+},{}],18:[function(require,module,exports){
 (function (global){
 /**
  * @license
@@ -24504,7 +23841,7 @@ if (typeof Map === "undefined") {
 }.call(this));
 
 }).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{}],24:[function(require,module,exports){
+},{}],19:[function(require,module,exports){
 /**
  * Module dependencies.
  */
@@ -25587,7 +24924,7 @@ request.put = function(url, data, fn){
 
 module.exports = request;
 
-},{"emitter":25,"reduce":26}],25:[function(require,module,exports){
+},{"emitter":20,"reduce":21}],20:[function(require,module,exports){
 
 /**
  * Expose `Emitter`.
@@ -25753,7 +25090,7 @@ Emitter.prototype.hasListeners = function(event){
   return !! this.listeners(event).length;
 };
 
-},{}],26:[function(require,module,exports){
+},{}],21:[function(require,module,exports){
 
 /**
  * Reduce `arr` with `fn`.
@@ -25778,447 +25115,143 @@ module.exports = function(arr, fn, initial){
   
   return curr;
 };
-},{}],27:[function(require,module,exports){
-var _ = require('lodash');
-var insertCSS = require('insert-css');
-var inherits = require('inherits');
-var qwery = require('qwery');
-
-var LightningVisualization = function(selector, data, images, options) {
-
-    this.options = _.defaults(options || {}, this.getDefaultOptions());
-    this.styles = this.getDefaultStyles();
-    this.el = qwery(selector)[0];
-    this.width = (this.options.width || this.el.offsetWidth);
-    this.height = (this.options.height || (this.getHeight ? this.getHeight() : this.width * 0.6));
-    
-    this.data = this.formatData(data);
-    this.images = images || [];
-
-    this.selector = selector;
-    this.init();
-};
-
-inherits(LightningVisualization, require('events').EventEmitter);
-
-LightningVisualization.prototype.getDefaultOptions = function() {
-    return {};
-}
-
-LightningVisualization.prototype.getDefaultStyles = function() {
-    return {};
-}
-
-LightningVisualization.prototype.init = function() {
-    console.warn('init not implemented');
-}
-
-/*
- * Take the provided data and return it in whatever data format is needed
- */
-LightningVisualization.prototype.formatData = function(data) {
-    console.warn('formatData not implemented');
-    return data;
-}
-
-/*
- * Optional function, use this if you want to users to send updated data to this plot
- */
-LightningVisualization.prototype.updateData = function(data) {
-    console.warn('updateData not implemented');
-}
-
-/*
- * Optional function, use this if you want to enable streaming updates to this plot
- */
-LightningVisualization.prototype.appendData = function(data) {
-    console.warn('appendData not implemented');
-}
-
-
-// Modified from backbone.js
-LightningVisualization.extend = function(protoProps, staticProps) {
-    var parent = this;
-    var child;
-
-    // Wrap these functions so that the user can assume
-    // the data has already been formatted by the time
-    // it gets here.
-    var wrapFuncs = ['appendData', 'updateData'];
-    _.each(wrapFuncs, function(d) {
-        if(protoProps[d]) {
-            var fn = protoProps[d];
-            protoProps[d] = function(data) {
-                var d = this.formatData(data);
-                return fn.call(this, d);
-            };
-        }
-    });
-
-    // The constructor function for the new subclass is either defined by you
-    // (the "constructor" property in your `extend` definition), or defaulted
-    // by us to simply call the parent constructor.
-    if (protoProps && _.has(protoProps, 'constructor')) {
-        child = protoProps.constructor;
-    } else {
-        child = function(){
-            if(this.css && !child._stylesInitialized) {
-                insertCSS(this.css);
-                child._stylesInitialized = true;
-            }
-            return parent.apply(this, arguments);
-        };
-        child._initializedStyles = false;
-    }
-
-    // Add static properties to the constructor function, if supplied.
-    _.extend(child, parent, staticProps);
-
-    // Set the prototype chain to inherit from `parent`, without calling
-    // `parent` constructor function.
-    var Surrogate = function(){ this.constructor = child; };
-    Surrogate.prototype = parent.prototype;
-    child.prototype = new Surrogate;
-
-    // Add prototype properties (instance properties) to the subclass,
-    // if supplied.
-    if (protoProps) _.extend(child.prototype, protoProps);
-
-    // Set a convenience property in case the parent's prototype is needed
-    // later.
-    child.__super__ = parent.prototype;
-
-    return child;
-};
-
-
-module.exports = LightningVisualization;
-
-
-},{"events":5,"inherits":28,"insert-css":29,"lodash":327,"qwery":30}],28:[function(require,module,exports){
-if (typeof Object.create === 'function') {
-  // implementation from standard node.js 'util' module
-  module.exports = function inherits(ctor, superCtor) {
-    ctor.super_ = superCtor
-    ctor.prototype = Object.create(superCtor.prototype, {
-      constructor: {
-        value: ctor,
-        enumerable: false,
-        writable: true,
-        configurable: true
-      }
-    });
-  };
-} else {
-  // old school shim for old browsers
-  module.exports = function inherits(ctor, superCtor) {
-    ctor.super_ = superCtor
-    var TempCtor = function () {}
-    TempCtor.prototype = superCtor.prototype
-    ctor.prototype = new TempCtor()
-    ctor.prototype.constructor = ctor
-  }
-}
-
-},{}],29:[function(require,module,exports){
-var inserted = {};
-
-module.exports = function (css, options) {
-    if (inserted[css]) return;
-    inserted[css] = true;
-    
-    var elem = document.createElement('style');
-    elem.setAttribute('type', 'text/css');
-
-    if ('textContent' in elem) {
-      elem.textContent = css;
-    } else {
-      elem.styleSheet.cssText = css;
-    }
-    
-    var head = document.getElementsByTagName('head')[0];
-    if (options && options.prepend) {
-        head.insertBefore(elem, head.childNodes[0]);
-    } else {
-        head.appendChild(elem);
-    }
-};
-
-},{}],30:[function(require,module,exports){
-/*!
-  * @preserve Qwery - A selector engine
-  * https://github.com/ded/qwery
-  * (c) Dustin Diaz 2014 | License MIT
-  */
-
-(function (name, context, definition) {
-  if (typeof module != 'undefined' && module.exports) module.exports = definition()
-  else if (typeof define == 'function' && define.amd) define(definition)
-  else context[name] = definition()
-})('qwery', this, function () {
-
-  var classOnly = /^\.([\w\-]+)$/
-    , doc = document
-    , win = window
-    , html = doc.documentElement
-    , nodeType = 'nodeType'
-  var isAncestor = 'compareDocumentPosition' in html ?
-    function (element, container) {
-      return (container.compareDocumentPosition(element) & 16) == 16
-    } :
-    function (element, container) {
-      container = container == doc || container == window ? html : container
-      return container !== element && container.contains(element)
-    }
-
-  function toArray(ar) {
-    return [].slice.call(ar, 0)
-  }
-
-  function isNode(el) {
-    var t
-    return el && typeof el === 'object' && (t = el.nodeType) && (t == 1 || t == 9)
-  }
-
-  function arrayLike(o) {
-    return (typeof o === 'object' && isFinite(o.length))
-  }
-
-  function flatten(ar) {
-    for (var r = [], i = 0, l = ar.length; i < l; ++i) arrayLike(ar[i]) ? (r = r.concat(ar[i])) : (r[r.length] = ar[i])
-    return r
-  }
-
-  function uniq(ar) {
-    var a = [], i, j
-    label:
-    for (i = 0; i < ar.length; i++) {
-      for (j = 0; j < a.length; j++) {
-        if (a[j] == ar[i]) {
-          continue label
-        }
-      }
-      a[a.length] = ar[i]
-    }
-    return a
-  }
-
-
-  function normalizeRoot(root) {
-    if (!root) return doc
-    if (typeof root == 'string') return qwery(root)[0]
-    if (!root[nodeType] && arrayLike(root)) return root[0]
-    return root
-  }
-
-  /**
-   * @param {string|Array.<Element>|Element|Node} selector
-   * @param {string|Array.<Element>|Element|Node=} opt_root
-   * @return {Array.<Element>}
-   */
-  function qwery(selector, opt_root) {
-    var m, root = normalizeRoot(opt_root)
-    if (!root || !selector) return []
-    if (selector === win || isNode(selector)) {
-      return !opt_root || (selector !== win && isNode(root) && isAncestor(selector, root)) ? [selector] : []
-    }
-    if (selector && arrayLike(selector)) return flatten(selector)
-
-
-    if (doc.getElementsByClassName && selector == 'string' && (m = selector.match(classOnly))) {
-      return toArray((root).getElementsByClassName(m[1]))
-    }
-    // using duck typing for 'a' window or 'a' document (not 'the' window || document)
-    if (selector && (selector.document || (selector.nodeType && selector.nodeType == 9))) {
-      return !opt_root ? [selector] : []
-    }
-    return toArray((root).querySelectorAll(selector))
-  }
-
-  qwery.uniq = uniq
-
-  return qwery
-}, this);
-
-},{}],31:[function(require,module,exports){
+},{}],22:[function(require,module,exports){
 'use strict';
-var LightningVisualization = require('lightning-visualization');
+var Matrix = require('lightning-matrix');
 var d3 = require('d3');
 var utils = require('lightning-client-utils');
 var _ = require('lodash');
-var Color = require('color');
-var colorbrewer = require('colorbrewer')
 
-/*
- * Extend the base visualization object
- */
-var Visualization = LightningVisualization.extend({
+var Visualization = Matrix.extend({
 
-    init: function() {
-        this.render();  
-    },
-
-    render: function() {
-        var width = this.width
-        var height = this.height
-        var data = this.data
-        var selector = this.selector
-        var self = this
-
-        var entries = data.entries
-        var nrow = data.nrow
-        var ncol = data.ncol
-        var label = data.label
-
-        // automatically scale stroke width by number of cells
-        var strokeWidth = Math.max(1 - 0.00009 * nrow * ncol, 0.1);
-
-        // get min and max of matrix value data
-        var zmin = d3.min(entries, function(d) {
-            return d.z
-        });
-        var zmax = d3.max(entries, function(d) {
-            return d.z
-        });
-
-        // set up x and y scales and ranges
-        var y = d3.scale.ordinal().rangeBands([0, Math.min(width, height)]).domain(d3.range(nrow));
-        var x = d3.scale.ordinal().rangeBands([0, Math.min(width, height)]).domain(d3.range(ncol));
-        var maxY = nrow * y.rangeBand();
-        var maxX = ncol * x.rangeBand();
-
-        // sort by label
-        y.domain(d3.range(nrow).sort(function(a, b) { return label[a] - label[b]; }));
-        x.domain(d3.range(ncol).sort(function(a, b) { return label[a] - label[b]; }))
-
-        // set up colors
-        var color = utils.getColors(_.uniq(label).length);
-
-        // set up opacity scale
-        var zdomain = [0, zmax]
-        var z = d3.scale.linear().domain(zdomain).range([0.3,1]).clamp(true);
-
-        // set up variables to toggle with keypresses
-        var scale = 0
-
-        // bounds for the graphic
-        var bounds = [[0, 0], [maxY, maxX]];
-
-        // create canvas
-        var canvas = d3.select(selector)
-            .append('canvas')
-            .attr('width', width)
-            .attr('height', height)
-            .node().getContext("2d")
-
-        // create dummy container for data binding
-        var detachedContainer = document.createElement("custom");
-        var dataContainer = d3.select(detachedContainer);
-
-        // drawing wrapper to handle binding
-        function drawCustom(data) {
-
-            var dataBinding = dataContainer.selectAll("custom.rect")
-                .data(data);
-
-            dataBinding
-                .attr("fillStyle", function(d) {return d.z > 0 ? utils.buildRGBA(d.c, z(d.z)) : "#eee"});
-              
-            dataBinding.enter()
-                .append("custom")
-                .classed("rect", true)
-                .attr("x", function(d) {return x(d.x)})
-                .attr("y", function(d, i) {return y(d.y)})
-                .attr("width", y.rangeBand())
-                .attr("height", x.rangeBand())
-                .attr("fillStyle", function(d) {return (d.z > 0) ? utils.buildRGBA(d.c, z(d.z)) : "#eee"})
-                .attr("strokeStyle", "white")
-                .attr("lineWidth", strokeWidth)
-      
-            drawCanvas();
-        
+    getDefaultOptions: function() {
+        return {
+            labels: false,
+            symmetric: true,
+            sort: "label"
         }
-
-        // draw the matrix
-        function drawCanvas() {
-
-          // clear canvas
-          canvas.clearRect(0, 0, width, height);
-          
-          // select nodes and draw their data to canvas
-          var elements = dataContainer.selectAll("custom.rect");
-          elements.each(function(d) {
-            var node = d3.select(this);
-            canvas.beginPath();
-            canvas.fillStyle = node.attr("fillStyle");
-            canvas.strokeStyle = node.attr("strokeStyle");
-            canvas.lineWidth = node.attr("lineWidth");
-            canvas.rect(node.attr("x"), node.attr("y"), node.attr("height"), node.attr("width"));
-            canvas.fill();
-            canvas.stroke();
-            canvas.closePath();
-          })
-        }
-
-        // add keydown events
-        d3.select(selector).attr('tabindex', -1)
-        d3.select(selector).on('keydown', update)
-
-        function update() {
-            if (d3.event.keyCode == 38 | d3.event.keyCode == 40) {
-                d3.event.preventDefault();
-                if (d3.event.keyCode == 38) {
-                    scale = scale + 0.1
-                    if (scale > 0.95) {
-                        scale = 0.95
-                    }
-                }
-                if (d3.event.keyCode == 40) {
-                    scale = scale - 0.1
-                    if (scale < -1) {
-                        scale = -1
-                    }
-                }
-                console.log(zmax - zmax * scale)
-                zdomain = [0, zmax - zmax * scale]
-                z.domain(zdomain)
-                drawCustom(entries);
-            }
-        }
-
-        drawCustom(entries)
     },
 
     formatData: function(data) {
         var matrix = [];
-        var n = data.nodes.length
-        var label = data.label ? data.label : _.times(n, _.constant(0));
-        var min = d3.min(label);
-        label = label.map(function(d) {return d - min});
-        var color = utils.getColors(_.uniq(label).length);
+        var self = this;
 
+        // parse labels
+        var n = data.nodes.length;
+        var label = data.label ? data.label : _.times(n, _.constant(0));
+        label = label.map(function(d) {return d - d3.min(label)});
+
+        // fill matrix with node and link info
         data.nodes.forEach(function(node, i) {
             matrix[i] = d3.range(n).map(function(j) { return {x: j, y: i, z: 0, c: "black"}; });
         });
         data.links.forEach(function(link) {
             matrix[link[0]][link[1]].z = link[2];
             if (label[link[0]] == label[link[1]]) {
-                matrix[link[0]][link[1]].c = color[label[link[0]]];
+                matrix[link[0]][link[1]].l = label[link[0]];
+            } else {
+                matrix[link[0]][link[1]].l = -1;
             }
         });
-        var zMin = d3.min(data.links, function(d) {return d[2]})
-        console.log(zMin)
-        d3.range(n).forEach(function(i) { 
-            matrix[i][i].z = zMin
-            matrix[i][i].c = color[label[i]]
-        })
 
-        var entries = _.flatten(matrix)
+        // add extra entries to symmetrize
+        if (self.options.symmetric) {
+            data.links.forEach(function(link) {
+                matrix[link[1]][link[0]].z = link[2];
+                if (label[link[0]] == label[link[1]]) {
+                    matrix[link[1]][link[0]].l = label[link[0]];
+                } else {
+                    matrix[link[1]][link[0]].l = -1;
+                }
+            });
+        }
 
-        var nrow = matrix.length
-        var ncol = matrix[0].length
+        // fill in diagnonals
+        d3.range(n).forEach(function(i) {
+            matrix[i][i].z = zmin;
+            matrix[i][i].l = label[i];
+        });
+        var entries = _.flatten(matrix);
 
-        return {entries: entries, nrow: nrow, ncol: ncol, label: label}
+        // get summary statistics
+        var nrow = matrix.length;
+        var ncol = matrix[0].length;
+        var zmin = d3.min(data.links, function(d) {return d[2]});
+        var zmax = d3.max(data.links, function(d) {return d[2]});
+        var rowsum = _.map(_.range(nrow), function(i) {
+            return d3.sum(_.filter(entries, function(d) {return d.y == i}), function(d) {return d.z})
+        });
+        var colsum = _.map(_.range(ncol), function(j) {
+            return d3.sum(_.filter(entries, function(d) {return d.x == j}), function(d) {return d.z})
+        });
+
+        return {entries: entries, nrow: nrow, ncol: ncol, rowsum: rowsum, colsum: colsum,
+            zmin: zmin, zmax: zmax, label: label, rows: data.names, columns: data.names}
+    },
+
+    sortRows: function() {
+        var self = this;
+        if (this.options.sort == 'label') {
+            var sorter = function(a, b) {
+                return self.data.label[b] - self.data.label[a]
+            };
+            this.y.domain(d3.range(this.data.nrow).sort(sorter));
+            this.x.domain(d3.range(this.data.ncol).sort(sorter));
+        }
+        if (this.options.sort == 'degree') {
+            var colsorter = function(a, b) {
+                return self.data.colsum[b] - self.data.colsum[a]
+            };
+            var rowsorter = function(a, b) {
+                return self.data.colsum[b] - self.data.colsum[a]
+            };
+            this.y.domain(d3.range(this.data.nrow).sort(rowsorter));
+            this.x.domain(d3.range(this.data.ncol).sort(colsorter));
+        }
+    },
+
+    makeScales: function() {
+        var self = this;
+        var n = _.uniq(this.data.label).length;
+        var color = utils.getColors(n);
+        this.c = d3.scale.ordinal();
+        this.c.domain([0, n])
+            .range(color);
+        this.z = d3.scale.linear();
+        this.z.domain(utils.linspace(self.data.zmin, self.data.zmax, 9))
+            .range([0.3, 1]).clamp(true)
+    },
+
+    updateRange: function(d) {
+        this.c.range(colorbrewer[d][9])
+    },
+
+    updateDomain: function(d) {
+        this.z.domain(d)
+    },
+
+    formatLabel: function(val) {
+        if (val == 0 || isNaN(val)) {
+            return '';
+        } else {
+            return parseFloat(d3.format(".2f")(val)).toString();
+        }
+    },
+
+    getColor: function(d, opacity) {
+        var color;
+        if (d.l == -1) {
+            color = 'rgb(150,150,150)';
+        } else {
+            color = this.c(d.l);
+        }
+        if (d.z == 0) {
+            color =  "#eee";
+        }
+        if (opacity < 1.0) {
+            return utils.buildRGBA(color, 0.15);
+        }
+        return (d.z != 0) ? utils.buildRGBA(color, this.z(d.z) * opacity) : "#eee"
     }
 
 });
@@ -26226,41 +25259,41 @@ var Visualization = LightningVisualization.extend({
 
 module.exports = Visualization;
 
-},{"color":7,"colorbrewer":13,"d3":14,"lightning-client-utils":15,"lightning-visualization":27,"lodash":327}],32:[function(require,module,exports){
+},{"d3":9,"lightning-client-utils":10,"lightning-matrix":220,"lodash":319}],23:[function(require,module,exports){
 arguments[4][6][0].apply(exports,arguments)
-},{"./src":56,"dup":6}],33:[function(require,module,exports){
-arguments[4][14][0].apply(exports,arguments)
-},{"dup":14}],34:[function(require,module,exports){
-arguments[4][15][0].apply(exports,arguments)
-},{"color":35,"colorbrewer":41,"d3-color":42,"d3-scale":43,"dup":15,"lodash":44,"superagent":45}],35:[function(require,module,exports){
-arguments[4][16][0].apply(exports,arguments)
-},{"color-convert":37,"color-string":38,"dup":16}],36:[function(require,module,exports){
-arguments[4][8][0].apply(exports,arguments)
-},{"dup":8}],37:[function(require,module,exports){
+},{"./src":47,"dup":6}],24:[function(require,module,exports){
 arguments[4][9][0].apply(exports,arguments)
-},{"./conversions":36,"dup":9}],38:[function(require,module,exports){
-arguments[4][19][0].apply(exports,arguments)
-},{"color-name":39,"dup":19}],39:[function(require,module,exports){
+},{"dup":9}],25:[function(require,module,exports){
+arguments[4][10][0].apply(exports,arguments)
+},{"color":26,"colorbrewer":32,"d3-color":33,"d3-scale":34,"dup":10,"lodash":35,"superagent":36}],26:[function(require,module,exports){
 arguments[4][11][0].apply(exports,arguments)
-},{"dup":11}],40:[function(require,module,exports){
+},{"color-convert":28,"color-string":29,"dup":11}],27:[function(require,module,exports){
 arguments[4][12][0].apply(exports,arguments)
-},{"dup":12}],41:[function(require,module,exports){
+},{"dup":12}],28:[function(require,module,exports){
 arguments[4][13][0].apply(exports,arguments)
-},{"./colorbrewer.js":40,"dup":13}],42:[function(require,module,exports){
+},{"./conversions":27,"dup":13}],29:[function(require,module,exports){
+arguments[4][14][0].apply(exports,arguments)
+},{"color-name":30,"dup":14}],30:[function(require,module,exports){
+arguments[4][15][0].apply(exports,arguments)
+},{"dup":15}],31:[function(require,module,exports){
+arguments[4][7][0].apply(exports,arguments)
+},{"dup":7}],32:[function(require,module,exports){
+arguments[4][8][0].apply(exports,arguments)
+},{"./colorbrewer.js":31,"dup":8}],33:[function(require,module,exports){
+arguments[4][16][0].apply(exports,arguments)
+},{"dup":16}],34:[function(require,module,exports){
+arguments[4][17][0].apply(exports,arguments)
+},{"dup":17}],35:[function(require,module,exports){
+arguments[4][18][0].apply(exports,arguments)
+},{"dup":18}],36:[function(require,module,exports){
+arguments[4][19][0].apply(exports,arguments)
+},{"dup":19,"emitter":37,"reduce":38}],37:[function(require,module,exports){
+arguments[4][20][0].apply(exports,arguments)
+},{"dup":20}],38:[function(require,module,exports){
 arguments[4][21][0].apply(exports,arguments)
-},{"dup":21}],43:[function(require,module,exports){
-arguments[4][22][0].apply(exports,arguments)
-},{"dup":22}],44:[function(require,module,exports){
-arguments[4][23][0].apply(exports,arguments)
-},{"dup":23}],45:[function(require,module,exports){
-arguments[4][24][0].apply(exports,arguments)
-},{"dup":24,"emitter":46,"reduce":47}],46:[function(require,module,exports){
-arguments[4][25][0].apply(exports,arguments)
-},{"dup":25}],47:[function(require,module,exports){
-arguments[4][26][0].apply(exports,arguments)
-},{"dup":26}],48:[function(require,module,exports){
+},{"dup":21}],39:[function(require,module,exports){
 arguments[4][6][0].apply(exports,arguments)
-},{"./src":55,"dup":6}],49:[function(require,module,exports){
+},{"./src":46,"dup":6}],40:[function(require,module,exports){
 var d3_multiaxis_zoom = require('./src');
  
 // export as a Node module, an AMD module or a global browser variable
@@ -26276,7 +25309,7 @@ if (typeof module !== 'undefined') {
     window.d3_multiaxis_zoom = d3_multiaxis_zoom;
 }
 
-},{"./src":50}],50:[function(require,module,exports){
+},{"./src":41}],41:[function(require,module,exports){
 
 
 var Plugin = function(d3) {
@@ -28752,15 +27785,269 @@ var d3_behavior_zoomDelta, d3_behavior_zoomWheel = "onwheel" in d3_document ? (d
 }
 
 module.exports = Plugin;
-},{}],51:[function(require,module,exports){
-arguments[4][27][0].apply(exports,arguments)
-},{"dup":27,"events":5,"inherits":52,"insert-css":53,"lodash":327,"qwery":54}],52:[function(require,module,exports){
-arguments[4][28][0].apply(exports,arguments)
-},{"dup":28}],53:[function(require,module,exports){
-arguments[4][29][0].apply(exports,arguments)
-},{"dup":29}],54:[function(require,module,exports){
-arguments[4][30][0].apply(exports,arguments)
-},{"dup":30}],55:[function(require,module,exports){
+},{}],42:[function(require,module,exports){
+var _ = require('lodash');
+var insertCSS = require('insert-css');
+var inherits = require('inherits');
+var qwery = require('qwery');
+
+var LightningVisualization = function(selector, data, images, options) {
+
+    this.options = _.defaults(options || {}, this.getDefaultOptions());
+    this.styles = this.getDefaultStyles();
+    this.el = qwery(selector)[0];
+    this.width = (this.options.width || this.el.offsetWidth);
+    this.height = (this.options.height || (this.getHeight ? this.getHeight() : this.width * 0.6));
+    
+    this.data = this.formatData(data);
+    this.images = images || [];
+
+    this.selector = selector;
+    this.init();
+};
+
+inherits(LightningVisualization, require('events').EventEmitter);
+
+LightningVisualization.prototype.getDefaultOptions = function() {
+    return {};
+}
+
+LightningVisualization.prototype.getDefaultStyles = function() {
+    return {};
+}
+
+LightningVisualization.prototype.init = function() {
+    console.warn('init not implemented');
+}
+
+/*
+ * Take the provided data and return it in whatever data format is needed
+ */
+LightningVisualization.prototype.formatData = function(data) {
+    console.warn('formatData not implemented');
+    return data;
+}
+
+/*
+ * Optional function, use this if you want to users to send updated data to this plot
+ */
+LightningVisualization.prototype.updateData = function(data) {
+    console.warn('updateData not implemented');
+}
+
+/*
+ * Optional function, use this if you want to enable streaming updates to this plot
+ */
+LightningVisualization.prototype.appendData = function(data) {
+    console.warn('appendData not implemented');
+}
+
+
+// Modified from backbone.js
+LightningVisualization.extend = function(protoProps, staticProps) {
+    var parent = this;
+    var child;
+
+    // Wrap these functions so that the user can assume
+    // the data has already been formatted by the time
+    // it gets here.
+    var wrapFuncs = ['appendData', 'updateData'];
+    _.each(wrapFuncs, function(d) {
+        if(protoProps[d]) {
+            var fn = protoProps[d];
+            protoProps[d] = function(data) {
+                var d = this.formatData(data);
+                return fn.call(this, d);
+            };
+        }
+    });
+
+    // The constructor function for the new subclass is either defined by you
+    // (the "constructor" property in your `extend` definition), or defaulted
+    // by us to simply call the parent constructor.
+    if (protoProps && _.has(protoProps, 'constructor')) {
+        child = protoProps.constructor;
+    } else {
+        child = function(){
+            if(this.css && !child._stylesInitialized) {
+                insertCSS(this.css);
+                child._stylesInitialized = true;
+            }
+            return parent.apply(this, arguments);
+        };
+        child._initializedStyles = false;
+    }
+
+    // Add static properties to the constructor function, if supplied.
+    _.extend(child, parent, staticProps);
+
+    // Set the prototype chain to inherit from `parent`, without calling
+    // `parent` constructor function.
+    var Surrogate = function(){ this.constructor = child; };
+    Surrogate.prototype = parent.prototype;
+    child.prototype = new Surrogate;
+
+    // Add prototype properties (instance properties) to the subclass,
+    // if supplied.
+    if (protoProps) _.extend(child.prototype, protoProps);
+
+    // Set a convenience property in case the parent's prototype is needed
+    // later.
+    child.__super__ = parent.prototype;
+
+    return child;
+};
+
+
+module.exports = LightningVisualization;
+
+
+},{"events":5,"inherits":43,"insert-css":44,"lodash":319,"qwery":45}],43:[function(require,module,exports){
+if (typeof Object.create === 'function') {
+  // implementation from standard node.js 'util' module
+  module.exports = function inherits(ctor, superCtor) {
+    ctor.super_ = superCtor
+    ctor.prototype = Object.create(superCtor.prototype, {
+      constructor: {
+        value: ctor,
+        enumerable: false,
+        writable: true,
+        configurable: true
+      }
+    });
+  };
+} else {
+  // old school shim for old browsers
+  module.exports = function inherits(ctor, superCtor) {
+    ctor.super_ = superCtor
+    var TempCtor = function () {}
+    TempCtor.prototype = superCtor.prototype
+    ctor.prototype = new TempCtor()
+    ctor.prototype.constructor = ctor
+  }
+}
+
+},{}],44:[function(require,module,exports){
+var inserted = {};
+
+module.exports = function (css, options) {
+    if (inserted[css]) return;
+    inserted[css] = true;
+    
+    var elem = document.createElement('style');
+    elem.setAttribute('type', 'text/css');
+
+    if ('textContent' in elem) {
+      elem.textContent = css;
+    } else {
+      elem.styleSheet.cssText = css;
+    }
+    
+    var head = document.getElementsByTagName('head')[0];
+    if (options && options.prepend) {
+        head.insertBefore(elem, head.childNodes[0]);
+    } else {
+        head.appendChild(elem);
+    }
+};
+
+},{}],45:[function(require,module,exports){
+/*!
+  * @preserve Qwery - A selector engine
+  * https://github.com/ded/qwery
+  * (c) Dustin Diaz 2014 | License MIT
+  */
+
+(function (name, context, definition) {
+  if (typeof module != 'undefined' && module.exports) module.exports = definition()
+  else if (typeof define == 'function' && define.amd) define(definition)
+  else context[name] = definition()
+})('qwery', this, function () {
+
+  var classOnly = /^\.([\w\-]+)$/
+    , doc = document
+    , win = window
+    , html = doc.documentElement
+    , nodeType = 'nodeType'
+  var isAncestor = 'compareDocumentPosition' in html ?
+    function (element, container) {
+      return (container.compareDocumentPosition(element) & 16) == 16
+    } :
+    function (element, container) {
+      container = container == doc || container == window ? html : container
+      return container !== element && container.contains(element)
+    }
+
+  function toArray(ar) {
+    return [].slice.call(ar, 0)
+  }
+
+  function isNode(el) {
+    var t
+    return el && typeof el === 'object' && (t = el.nodeType) && (t == 1 || t == 9)
+  }
+
+  function arrayLike(o) {
+    return (typeof o === 'object' && isFinite(o.length))
+  }
+
+  function flatten(ar) {
+    for (var r = [], i = 0, l = ar.length; i < l; ++i) arrayLike(ar[i]) ? (r = r.concat(ar[i])) : (r[r.length] = ar[i])
+    return r
+  }
+
+  function uniq(ar) {
+    var a = [], i, j
+    label:
+    for (i = 0; i < ar.length; i++) {
+      for (j = 0; j < a.length; j++) {
+        if (a[j] == ar[i]) {
+          continue label
+        }
+      }
+      a[a.length] = ar[i]
+    }
+    return a
+  }
+
+
+  function normalizeRoot(root) {
+    if (!root) return doc
+    if (typeof root == 'string') return qwery(root)[0]
+    if (!root[nodeType] && arrayLike(root)) return root[0]
+    return root
+  }
+
+  /**
+   * @param {string|Array.<Element>|Element|Node} selector
+   * @param {string|Array.<Element>|Element|Node=} opt_root
+   * @return {Array.<Element>}
+   */
+  function qwery(selector, opt_root) {
+    var m, root = normalizeRoot(opt_root)
+    if (!root || !selector) return []
+    if (selector === win || isNode(selector)) {
+      return !opt_root || (selector !== win && isNode(root) && isAncestor(selector, root)) ? [selector] : []
+    }
+    if (selector && arrayLike(selector)) return flatten(selector)
+
+
+    if (doc.getElementsByClassName && selector == 'string' && (m = selector.match(classOnly))) {
+      return toArray((root).getElementsByClassName(m[1]))
+    }
+    // using duck typing for 'a' window or 'a' document (not 'the' window || document)
+    if (selector && (selector.document || (selector.nodeType && selector.nodeType == 9))) {
+      return !opt_root ? [selector] : []
+    }
+    return toArray((root).querySelectorAll(selector))
+  }
+
+  qwery.uniq = uniq
+
+  return qwery
+}, this);
+
+},{}],46:[function(require,module,exports){
 (function (Buffer){
 var LightningVisualization = require('lightning-visualization');
 var d3 = require('d3');
@@ -29120,7 +28407,7 @@ var Visualization = LightningVisualization.extend({
 module.exports = Visualization;
 
 }).call(this,require("buffer").Buffer)
-},{"buffer":1,"d3":33,"d3-multiaxis-zoom":49,"lightning-client-utils":34,"lightning-visualization":51,"lodash":327}],56:[function(require,module,exports){
+},{"buffer":1,"d3":24,"d3-multiaxis-zoom":40,"lightning-client-utils":25,"lightning-visualization":42,"lodash":319}],47:[function(require,module,exports){
 'use strict';
 var d3 = require('d3');
 var Graph = require('lightning-graph')
@@ -29208,17 +28495,17 @@ var Visualization = Graph.extend({
 
 module.exports = Visualization;
 
-},{"d3":33,"lightning-client-utils":34,"lightning-graph":48,"lodash":327}],57:[function(require,module,exports){
+},{"d3":24,"lightning-client-utils":25,"lightning-graph":39,"lodash":319}],48:[function(require,module,exports){
 arguments[4][6][0].apply(exports,arguments)
-},{"./src":62,"dup":6}],58:[function(require,module,exports){
-arguments[4][27][0].apply(exports,arguments)
-},{"dup":27,"events":5,"inherits":59,"insert-css":60,"lodash":327,"qwery":61}],59:[function(require,module,exports){
-arguments[4][28][0].apply(exports,arguments)
-},{"dup":28}],60:[function(require,module,exports){
-arguments[4][29][0].apply(exports,arguments)
-},{"dup":29}],61:[function(require,module,exports){
-arguments[4][30][0].apply(exports,arguments)
-},{"dup":30}],62:[function(require,module,exports){
+},{"./src":53,"dup":6}],49:[function(require,module,exports){
+arguments[4][42][0].apply(exports,arguments)
+},{"dup":42,"events":5,"inherits":50,"insert-css":51,"lodash":319,"qwery":52}],50:[function(require,module,exports){
+arguments[4][43][0].apply(exports,arguments)
+},{"dup":43}],51:[function(require,module,exports){
+arguments[4][44][0].apply(exports,arguments)
+},{"dup":44}],52:[function(require,module,exports){
+arguments[4][45][0].apply(exports,arguments)
+},{"dup":45}],53:[function(require,module,exports){
 (function (Buffer){
 'use strict';
 
@@ -29301,7 +28588,7 @@ var Visualization = LightningVisualization.extend({
 module.exports = Visualization;
 
 }).call(this,require("buffer").Buffer)
-},{"buffer":1,"lightning-image":147,"lightning-visualization":58,"lodash":327}],63:[function(require,module,exports){
+},{"buffer":1,"lightning-image":138,"lightning-visualization":49,"lodash":319}],54:[function(require,module,exports){
 
 var ForceEdgeBundling = function(){
         var data_nodes = {},        // {'nodeid':{'x':,'y':},..}
@@ -29714,55 +29001,55 @@ var ForceEdgeBundling = function(){
 
 
 module.exports = ForceEdgeBundling;
-},{}],64:[function(require,module,exports){
+},{}],55:[function(require,module,exports){
 arguments[4][6][0].apply(exports,arguments)
-},{"./src":88,"dup":6}],65:[function(require,module,exports){
-arguments[4][14][0].apply(exports,arguments)
-},{"dup":14}],66:[function(require,module,exports){
-arguments[4][15][0].apply(exports,arguments)
-},{"color":67,"colorbrewer":73,"d3-color":74,"d3-scale":75,"dup":15,"lodash":76,"superagent":77}],67:[function(require,module,exports){
-arguments[4][16][0].apply(exports,arguments)
-},{"color-convert":69,"color-string":70,"dup":16}],68:[function(require,module,exports){
-arguments[4][8][0].apply(exports,arguments)
-},{"dup":8}],69:[function(require,module,exports){
+},{"./src":79,"dup":6}],56:[function(require,module,exports){
 arguments[4][9][0].apply(exports,arguments)
-},{"./conversions":68,"dup":9}],70:[function(require,module,exports){
-arguments[4][19][0].apply(exports,arguments)
-},{"color-name":71,"dup":19}],71:[function(require,module,exports){
+},{"dup":9}],57:[function(require,module,exports){
+arguments[4][10][0].apply(exports,arguments)
+},{"color":58,"colorbrewer":64,"d3-color":65,"d3-scale":66,"dup":10,"lodash":67,"superagent":68}],58:[function(require,module,exports){
 arguments[4][11][0].apply(exports,arguments)
-},{"dup":11}],72:[function(require,module,exports){
+},{"color-convert":60,"color-string":61,"dup":11}],59:[function(require,module,exports){
 arguments[4][12][0].apply(exports,arguments)
-},{"dup":12}],73:[function(require,module,exports){
+},{"dup":12}],60:[function(require,module,exports){
 arguments[4][13][0].apply(exports,arguments)
-},{"./colorbrewer.js":72,"dup":13}],74:[function(require,module,exports){
+},{"./conversions":59,"dup":13}],61:[function(require,module,exports){
+arguments[4][14][0].apply(exports,arguments)
+},{"color-name":62,"dup":14}],62:[function(require,module,exports){
+arguments[4][15][0].apply(exports,arguments)
+},{"dup":15}],63:[function(require,module,exports){
+arguments[4][7][0].apply(exports,arguments)
+},{"dup":7}],64:[function(require,module,exports){
+arguments[4][8][0].apply(exports,arguments)
+},{"./colorbrewer.js":63,"dup":8}],65:[function(require,module,exports){
+arguments[4][16][0].apply(exports,arguments)
+},{"dup":16}],66:[function(require,module,exports){
+arguments[4][17][0].apply(exports,arguments)
+},{"dup":17}],67:[function(require,module,exports){
+arguments[4][18][0].apply(exports,arguments)
+},{"dup":18}],68:[function(require,module,exports){
+arguments[4][19][0].apply(exports,arguments)
+},{"dup":19,"emitter":69,"reduce":70}],69:[function(require,module,exports){
+arguments[4][20][0].apply(exports,arguments)
+},{"dup":20}],70:[function(require,module,exports){
 arguments[4][21][0].apply(exports,arguments)
-},{"dup":21}],75:[function(require,module,exports){
-arguments[4][22][0].apply(exports,arguments)
-},{"dup":22}],76:[function(require,module,exports){
-arguments[4][23][0].apply(exports,arguments)
-},{"dup":23}],77:[function(require,module,exports){
-arguments[4][24][0].apply(exports,arguments)
-},{"dup":24,"emitter":78,"reduce":79}],78:[function(require,module,exports){
-arguments[4][25][0].apply(exports,arguments)
-},{"dup":25}],79:[function(require,module,exports){
-arguments[4][26][0].apply(exports,arguments)
-},{"dup":26}],80:[function(require,module,exports){
+},{"dup":21}],71:[function(require,module,exports){
 arguments[4][6][0].apply(exports,arguments)
-},{"./src":87,"dup":6}],81:[function(require,module,exports){
-arguments[4][49][0].apply(exports,arguments)
-},{"./src":82,"dup":49}],82:[function(require,module,exports){
-arguments[4][50][0].apply(exports,arguments)
-},{"dup":50}],83:[function(require,module,exports){
-arguments[4][27][0].apply(exports,arguments)
-},{"dup":27,"events":5,"inherits":84,"insert-css":85,"lodash":327,"qwery":86}],84:[function(require,module,exports){
-arguments[4][28][0].apply(exports,arguments)
-},{"dup":28}],85:[function(require,module,exports){
-arguments[4][29][0].apply(exports,arguments)
-},{"dup":29}],86:[function(require,module,exports){
-arguments[4][30][0].apply(exports,arguments)
-},{"dup":30}],87:[function(require,module,exports){
-arguments[4][55][0].apply(exports,arguments)
-},{"buffer":1,"d3":65,"d3-multiaxis-zoom":81,"dup":55,"lightning-client-utils":66,"lightning-visualization":83,"lodash":327}],88:[function(require,module,exports){
+},{"./src":78,"dup":6}],72:[function(require,module,exports){
+arguments[4][40][0].apply(exports,arguments)
+},{"./src":73,"dup":40}],73:[function(require,module,exports){
+arguments[4][41][0].apply(exports,arguments)
+},{"dup":41}],74:[function(require,module,exports){
+arguments[4][42][0].apply(exports,arguments)
+},{"dup":42,"events":5,"inherits":75,"insert-css":76,"lodash":319,"qwery":77}],75:[function(require,module,exports){
+arguments[4][43][0].apply(exports,arguments)
+},{"dup":43}],76:[function(require,module,exports){
+arguments[4][44][0].apply(exports,arguments)
+},{"dup":44}],77:[function(require,module,exports){
+arguments[4][45][0].apply(exports,arguments)
+},{"dup":45}],78:[function(require,module,exports){
+arguments[4][46][0].apply(exports,arguments)
+},{"buffer":1,"d3":56,"d3-multiaxis-zoom":72,"dup":46,"lightning-client-utils":57,"lightning-visualization":74,"lodash":319}],79:[function(require,module,exports){
 'use strict';
 var Graph = require('lightning-graph');
 var d3 = require('d3');
@@ -29839,55 +29126,55 @@ var Visualization = Graph.extend({
 
 module.exports = Visualization;
 
-},{"../deps/force-edge-bundling":63,"d3":65,"lightning-client-utils":66,"lightning-graph":80,"lodash":327}],89:[function(require,module,exports){
+},{"../deps/force-edge-bundling":54,"d3":56,"lightning-client-utils":57,"lightning-graph":71,"lodash":319}],80:[function(require,module,exports){
 arguments[4][6][0].apply(exports,arguments)
-},{"./src":111,"dup":6}],90:[function(require,module,exports){
-arguments[4][49][0].apply(exports,arguments)
-},{"./src":91,"dup":49}],91:[function(require,module,exports){
-arguments[4][50][0].apply(exports,arguments)
-},{"dup":50}],92:[function(require,module,exports){
-arguments[4][14][0].apply(exports,arguments)
-},{"dup":14}],93:[function(require,module,exports){
-arguments[4][15][0].apply(exports,arguments)
-},{"color":94,"colorbrewer":100,"d3-color":101,"d3-scale":102,"dup":15,"lodash":103,"superagent":104}],94:[function(require,module,exports){
-arguments[4][16][0].apply(exports,arguments)
-},{"color-convert":96,"color-string":97,"dup":16}],95:[function(require,module,exports){
-arguments[4][8][0].apply(exports,arguments)
-},{"dup":8}],96:[function(require,module,exports){
+},{"./src":102,"dup":6}],81:[function(require,module,exports){
+arguments[4][40][0].apply(exports,arguments)
+},{"./src":82,"dup":40}],82:[function(require,module,exports){
+arguments[4][41][0].apply(exports,arguments)
+},{"dup":41}],83:[function(require,module,exports){
 arguments[4][9][0].apply(exports,arguments)
-},{"./conversions":95,"dup":9}],97:[function(require,module,exports){
-arguments[4][19][0].apply(exports,arguments)
-},{"color-name":98,"dup":19}],98:[function(require,module,exports){
+},{"dup":9}],84:[function(require,module,exports){
+arguments[4][10][0].apply(exports,arguments)
+},{"color":85,"colorbrewer":91,"d3-color":92,"d3-scale":93,"dup":10,"lodash":94,"superagent":95}],85:[function(require,module,exports){
 arguments[4][11][0].apply(exports,arguments)
-},{"dup":11}],99:[function(require,module,exports){
+},{"color-convert":87,"color-string":88,"dup":11}],86:[function(require,module,exports){
 arguments[4][12][0].apply(exports,arguments)
-},{"dup":12}],100:[function(require,module,exports){
+},{"dup":12}],87:[function(require,module,exports){
 arguments[4][13][0].apply(exports,arguments)
-},{"./colorbrewer.js":99,"dup":13}],101:[function(require,module,exports){
+},{"./conversions":86,"dup":13}],88:[function(require,module,exports){
+arguments[4][14][0].apply(exports,arguments)
+},{"color-name":89,"dup":14}],89:[function(require,module,exports){
+arguments[4][15][0].apply(exports,arguments)
+},{"dup":15}],90:[function(require,module,exports){
+arguments[4][7][0].apply(exports,arguments)
+},{"dup":7}],91:[function(require,module,exports){
+arguments[4][8][0].apply(exports,arguments)
+},{"./colorbrewer.js":90,"dup":8}],92:[function(require,module,exports){
+arguments[4][16][0].apply(exports,arguments)
+},{"dup":16}],93:[function(require,module,exports){
+arguments[4][17][0].apply(exports,arguments)
+},{"dup":17}],94:[function(require,module,exports){
+arguments[4][18][0].apply(exports,arguments)
+},{"dup":18}],95:[function(require,module,exports){
+arguments[4][19][0].apply(exports,arguments)
+},{"dup":19,"emitter":96,"reduce":97}],96:[function(require,module,exports){
+arguments[4][20][0].apply(exports,arguments)
+},{"dup":20}],97:[function(require,module,exports){
 arguments[4][21][0].apply(exports,arguments)
-},{"dup":21}],102:[function(require,module,exports){
-arguments[4][22][0].apply(exports,arguments)
-},{"dup":22}],103:[function(require,module,exports){
-arguments[4][23][0].apply(exports,arguments)
-},{"dup":23}],104:[function(require,module,exports){
-arguments[4][24][0].apply(exports,arguments)
-},{"dup":24,"emitter":105,"reduce":106}],105:[function(require,module,exports){
-arguments[4][25][0].apply(exports,arguments)
-},{"dup":25}],106:[function(require,module,exports){
-arguments[4][26][0].apply(exports,arguments)
-},{"dup":26}],107:[function(require,module,exports){
-arguments[4][27][0].apply(exports,arguments)
-},{"dup":27,"events":5,"inherits":108,"insert-css":109,"lodash":327,"qwery":110}],108:[function(require,module,exports){
-arguments[4][28][0].apply(exports,arguments)
-},{"dup":28}],109:[function(require,module,exports){
-arguments[4][29][0].apply(exports,arguments)
-},{"dup":29}],110:[function(require,module,exports){
-arguments[4][30][0].apply(exports,arguments)
-},{"dup":30}],111:[function(require,module,exports){
-arguments[4][55][0].apply(exports,arguments)
-},{"buffer":1,"d3":92,"d3-multiaxis-zoom":90,"dup":55,"lightning-client-utils":93,"lightning-visualization":107,"lodash":327}],112:[function(require,module,exports){
+},{"dup":21}],98:[function(require,module,exports){
+arguments[4][42][0].apply(exports,arguments)
+},{"dup":42,"events":5,"inherits":99,"insert-css":100,"lodash":319,"qwery":101}],99:[function(require,module,exports){
+arguments[4][43][0].apply(exports,arguments)
+},{"dup":43}],100:[function(require,module,exports){
+arguments[4][44][0].apply(exports,arguments)
+},{"dup":44}],101:[function(require,module,exports){
+arguments[4][45][0].apply(exports,arguments)
+},{"dup":45}],102:[function(require,module,exports){
+arguments[4][46][0].apply(exports,arguments)
+},{"buffer":1,"d3":83,"d3-multiaxis-zoom":81,"dup":46,"lightning-client-utils":84,"lightning-visualization":98,"lodash":319}],103:[function(require,module,exports){
 arguments[4][6][0].apply(exports,arguments)
-},{"./src":146,"dup":6}],113:[function(require,module,exports){
+},{"./src":137,"dup":6}],104:[function(require,module,exports){
 /**
 * geoJSON validation according to the GeoJSON spefication Version 1
 * @module geoJSONValidation
@@ -30772,7 +30059,7 @@ arguments[4][6][0].apply(exports,arguments)
 
 })(typeof exports === 'undefined'? this['GJV']={}: exports);
 
-},{}],114:[function(require,module,exports){
+},{}],105:[function(require,module,exports){
 /*!
  * jQuery JavaScript Library v2.1.4
  * http://jquery.com/
@@ -39984,7 +39271,7 @@ return jQuery;
 
 }));
 
-},{}],115:[function(require,module,exports){
+},{}],106:[function(require,module,exports){
 "use strict";
 
 var $math = Math;
@@ -40284,7 +39571,7 @@ ConcaveHull.prototype = {
 };
 
 module.exports = ConcaveHull;
-},{}],116:[function(require,module,exports){
+},{}],107:[function(require,module,exports){
 "use strict";
 var d3 = require('d3');
 var ClipperLib = require('js-clipper');
@@ -41875,7 +41162,7 @@ module.exports = function(L) {
 };
 
 
-},{"./Hull":117,"./Memory":118,"./Options":119,"./Utilities":120,"d3":122,"js-clipper":124}],117:[function(require,module,exports){
+},{"./Hull":108,"./Memory":109,"./Options":110,"./Utilities":111,"d3":113,"js-clipper":115}],108:[function(require,module,exports){
 
 "use strict";
 
@@ -41968,7 +41255,7 @@ Hull.prototype = {
 
 
 module.exports = Hull;
-},{"./ConcaveHull":115,"graham_scan":123}],118:[function(require,module,exports){
+},{"./ConcaveHull":106,"graham_scan":114}],109:[function(require,module,exports){
 
 
 "use strict";
@@ -42108,7 +41395,7 @@ Memory.prototype = {
 };
 
 module.exports = Memory;
-},{}],119:[function(require,module,exports){
+},{}],110:[function(require,module,exports){
 
 
 "use strict";
@@ -42397,7 +41684,7 @@ Options.prototype = {
 
 
 module.exports = Options;
-},{}],120:[function(require,module,exports){
+},{}],111:[function(require,module,exports){
 
 
 "use strict";
@@ -42466,7 +41753,7 @@ module.exports = {
     }
 
 };
-},{}],121:[function(require,module,exports){
+},{}],112:[function(require,module,exports){
 
 
 
@@ -42475,9 +41762,9 @@ module.exports = function(L) {
 };
 
 
-},{"./components/FreeDraw":116}],122:[function(require,module,exports){
-arguments[4][14][0].apply(exports,arguments)
-},{"dup":14}],123:[function(require,module,exports){
+},{"./components/FreeDraw":107}],113:[function(require,module,exports){
+arguments[4][9][0].apply(exports,arguments)
+},{"dup":9}],114:[function(require,module,exports){
 /**
  * Graham's Scan Convex Hull Algorithm
  * @desc An implementation of the Graham's Scan Convex Hull algorithm in Javascript.
@@ -42640,7 +41927,7 @@ if (typeof module !== 'undefined') {
     module.exports = ConvexHullGrahamScan;
 }
 
-},{}],124:[function(require,module,exports){
+},{}],115:[function(require,module,exports){
 // rev 452
 /********************************************************************************
 *                                                                              *
@@ -49627,7 +48914,7 @@ ClipperLib.JS.PolyTreeToExPolygons = function (polytree)
 
 
 module.exports = ClipperLib;
-},{}],125:[function(require,module,exports){
+},{}],116:[function(require,module,exports){
 /*
  Leaflet, a JavaScript library for mobile-friendly interactive maps. http://leafletjs.com
  (c) 2010-2013, Vladimir Agafonkin
@@ -58808,37 +58095,37 @@ L.Map.include({
 
 
 }(window, document));
-},{}],126:[function(require,module,exports){
-arguments[4][15][0].apply(exports,arguments)
-},{"color":127,"colorbrewer":133,"d3-color":134,"d3-scale":135,"dup":15,"lodash":136,"superagent":137}],127:[function(require,module,exports){
-arguments[4][16][0].apply(exports,arguments)
-},{"color-convert":129,"color-string":130,"dup":16}],128:[function(require,module,exports){
-arguments[4][8][0].apply(exports,arguments)
-},{"dup":8}],129:[function(require,module,exports){
-arguments[4][9][0].apply(exports,arguments)
-},{"./conversions":128,"dup":9}],130:[function(require,module,exports){
-arguments[4][19][0].apply(exports,arguments)
-},{"color-name":131,"dup":19}],131:[function(require,module,exports){
+},{}],117:[function(require,module,exports){
+arguments[4][10][0].apply(exports,arguments)
+},{"color":118,"colorbrewer":124,"d3-color":125,"d3-scale":126,"dup":10,"lodash":127,"superagent":128}],118:[function(require,module,exports){
 arguments[4][11][0].apply(exports,arguments)
-},{"dup":11}],132:[function(require,module,exports){
+},{"color-convert":120,"color-string":121,"dup":11}],119:[function(require,module,exports){
 arguments[4][12][0].apply(exports,arguments)
-},{"dup":12}],133:[function(require,module,exports){
+},{"dup":12}],120:[function(require,module,exports){
 arguments[4][13][0].apply(exports,arguments)
-},{"./colorbrewer.js":132,"dup":13}],134:[function(require,module,exports){
+},{"./conversions":119,"dup":13}],121:[function(require,module,exports){
+arguments[4][14][0].apply(exports,arguments)
+},{"color-name":122,"dup":14}],122:[function(require,module,exports){
+arguments[4][15][0].apply(exports,arguments)
+},{"dup":15}],123:[function(require,module,exports){
+arguments[4][7][0].apply(exports,arguments)
+},{"dup":7}],124:[function(require,module,exports){
+arguments[4][8][0].apply(exports,arguments)
+},{"./colorbrewer.js":123,"dup":8}],125:[function(require,module,exports){
+arguments[4][16][0].apply(exports,arguments)
+},{"dup":16}],126:[function(require,module,exports){
+arguments[4][17][0].apply(exports,arguments)
+},{"dup":17}],127:[function(require,module,exports){
+arguments[4][18][0].apply(exports,arguments)
+},{"dup":18}],128:[function(require,module,exports){
+arguments[4][19][0].apply(exports,arguments)
+},{"dup":19,"emitter":129,"reduce":130}],129:[function(require,module,exports){
+arguments[4][20][0].apply(exports,arguments)
+},{"dup":20}],130:[function(require,module,exports){
 arguments[4][21][0].apply(exports,arguments)
-},{"dup":21}],135:[function(require,module,exports){
-arguments[4][22][0].apply(exports,arguments)
-},{"dup":22}],136:[function(require,module,exports){
-arguments[4][23][0].apply(exports,arguments)
-},{"dup":23}],137:[function(require,module,exports){
-arguments[4][24][0].apply(exports,arguments)
-},{"dup":24,"emitter":138,"reduce":139}],138:[function(require,module,exports){
-arguments[4][25][0].apply(exports,arguments)
-},{"dup":25}],139:[function(require,module,exports){
-arguments[4][26][0].apply(exports,arguments)
-},{"dup":26}],140:[function(require,module,exports){
+},{"dup":21}],131:[function(require,module,exports){
 arguments[4][6][0].apply(exports,arguments)
-},{"./src":141,"dup":6}],141:[function(require,module,exports){
+},{"./src":132,"dup":6}],132:[function(require,module,exports){
 (function (Buffer){
 'use strict';
 
@@ -58939,15 +58226,15 @@ var Visualization = LightningVisualization.extend({
 module.exports = Visualization;
 
 }).call(this,require("buffer").Buffer)
-},{"buffer":1,"jquery":114,"leaflet":125,"lightning-client-utils":126,"lightning-visualization":142,"lodash":327}],142:[function(require,module,exports){
-arguments[4][27][0].apply(exports,arguments)
-},{"dup":27,"events":5,"inherits":143,"insert-css":144,"lodash":327,"qwery":145}],143:[function(require,module,exports){
-arguments[4][28][0].apply(exports,arguments)
-},{"dup":28}],144:[function(require,module,exports){
-arguments[4][29][0].apply(exports,arguments)
-},{"dup":29}],145:[function(require,module,exports){
-arguments[4][30][0].apply(exports,arguments)
-},{"dup":30}],146:[function(require,module,exports){
+},{"buffer":1,"jquery":105,"leaflet":116,"lightning-client-utils":117,"lightning-visualization":133,"lodash":319}],133:[function(require,module,exports){
+arguments[4][42][0].apply(exports,arguments)
+},{"dup":42,"events":5,"inherits":134,"insert-css":135,"lodash":319,"qwery":136}],134:[function(require,module,exports){
+arguments[4][43][0].apply(exports,arguments)
+},{"dup":43}],135:[function(require,module,exports){
+arguments[4][44][0].apply(exports,arguments)
+},{"dup":44}],136:[function(require,module,exports){
+arguments[4][45][0].apply(exports,arguments)
+},{"dup":45}],137:[function(require,module,exports){
 (function (Buffer){
 'use strict';
 
@@ -59259,97 +58546,97 @@ var Visualization = ImageViz.extend({
 module.exports = Visualization;
 
 }).call(this,require("buffer").Buffer)
-},{"buffer":1,"geojson-validation":113,"leaflet":125,"leaflet.freedraw-browserify":121,"lightning-client-utils":126,"lightning-image":140,"lodash":327}],147:[function(require,module,exports){
+},{"buffer":1,"geojson-validation":104,"leaflet":116,"leaflet.freedraw-browserify":112,"lightning-client-utils":117,"lightning-image":131,"lodash":319}],138:[function(require,module,exports){
 arguments[4][6][0].apply(exports,arguments)
-},{"./src":168,"dup":6}],148:[function(require,module,exports){
-arguments[4][114][0].apply(exports,arguments)
-},{"dup":114}],149:[function(require,module,exports){
-arguments[4][125][0].apply(exports,arguments)
-},{"dup":125}],150:[function(require,module,exports){
-arguments[4][15][0].apply(exports,arguments)
-},{"color":151,"colorbrewer":157,"d3-color":158,"d3-scale":159,"dup":15,"lodash":160,"superagent":161}],151:[function(require,module,exports){
-arguments[4][16][0].apply(exports,arguments)
-},{"color-convert":153,"color-string":154,"dup":16}],152:[function(require,module,exports){
-arguments[4][8][0].apply(exports,arguments)
-},{"dup":8}],153:[function(require,module,exports){
-arguments[4][9][0].apply(exports,arguments)
-},{"./conversions":152,"dup":9}],154:[function(require,module,exports){
-arguments[4][19][0].apply(exports,arguments)
-},{"color-name":155,"dup":19}],155:[function(require,module,exports){
+},{"./src":159,"dup":6}],139:[function(require,module,exports){
+arguments[4][105][0].apply(exports,arguments)
+},{"dup":105}],140:[function(require,module,exports){
+arguments[4][116][0].apply(exports,arguments)
+},{"dup":116}],141:[function(require,module,exports){
+arguments[4][10][0].apply(exports,arguments)
+},{"color":142,"colorbrewer":148,"d3-color":149,"d3-scale":150,"dup":10,"lodash":151,"superagent":152}],142:[function(require,module,exports){
 arguments[4][11][0].apply(exports,arguments)
-},{"dup":11}],156:[function(require,module,exports){
+},{"color-convert":144,"color-string":145,"dup":11}],143:[function(require,module,exports){
 arguments[4][12][0].apply(exports,arguments)
-},{"dup":12}],157:[function(require,module,exports){
+},{"dup":12}],144:[function(require,module,exports){
 arguments[4][13][0].apply(exports,arguments)
-},{"./colorbrewer.js":156,"dup":13}],158:[function(require,module,exports){
-arguments[4][21][0].apply(exports,arguments)
-},{"dup":21}],159:[function(require,module,exports){
-arguments[4][22][0].apply(exports,arguments)
-},{"dup":22}],160:[function(require,module,exports){
-arguments[4][23][0].apply(exports,arguments)
-},{"dup":23}],161:[function(require,module,exports){
-arguments[4][24][0].apply(exports,arguments)
-},{"dup":24,"emitter":162,"reduce":163}],162:[function(require,module,exports){
-arguments[4][25][0].apply(exports,arguments)
-},{"dup":25}],163:[function(require,module,exports){
-arguments[4][26][0].apply(exports,arguments)
-},{"dup":26}],164:[function(require,module,exports){
-arguments[4][27][0].apply(exports,arguments)
-},{"dup":27,"events":5,"inherits":165,"insert-css":166,"lodash":327,"qwery":167}],165:[function(require,module,exports){
-arguments[4][28][0].apply(exports,arguments)
-},{"dup":28}],166:[function(require,module,exports){
-arguments[4][29][0].apply(exports,arguments)
-},{"dup":29}],167:[function(require,module,exports){
-arguments[4][30][0].apply(exports,arguments)
-},{"dup":30}],168:[function(require,module,exports){
-arguments[4][141][0].apply(exports,arguments)
-},{"buffer":1,"dup":141,"jquery":148,"leaflet":149,"lightning-client-utils":150,"lightning-visualization":164,"lodash":327}],169:[function(require,module,exports){
-arguments[4][6][0].apply(exports,arguments)
-},{"./src":193,"dup":6}],170:[function(require,module,exports){
-arguments[4][6][0].apply(exports,arguments)
-},{"./src":192,"dup":6}],171:[function(require,module,exports){
-arguments[4][49][0].apply(exports,arguments)
-},{"./src":172,"dup":49}],172:[function(require,module,exports){
-arguments[4][50][0].apply(exports,arguments)
-},{"dup":50}],173:[function(require,module,exports){
+},{"./conversions":143,"dup":13}],145:[function(require,module,exports){
 arguments[4][14][0].apply(exports,arguments)
-},{"dup":14}],174:[function(require,module,exports){
+},{"color-name":146,"dup":14}],146:[function(require,module,exports){
 arguments[4][15][0].apply(exports,arguments)
-},{"color":175,"colorbrewer":181,"d3-color":182,"d3-scale":183,"dup":15,"lodash":184,"superagent":185}],175:[function(require,module,exports){
-arguments[4][16][0].apply(exports,arguments)
-},{"color-convert":177,"color-string":178,"dup":16}],176:[function(require,module,exports){
+},{"dup":15}],147:[function(require,module,exports){
+arguments[4][7][0].apply(exports,arguments)
+},{"dup":7}],148:[function(require,module,exports){
 arguments[4][8][0].apply(exports,arguments)
-},{"dup":8}],177:[function(require,module,exports){
-arguments[4][9][0].apply(exports,arguments)
-},{"./conversions":176,"dup":9}],178:[function(require,module,exports){
+},{"./colorbrewer.js":147,"dup":8}],149:[function(require,module,exports){
+arguments[4][16][0].apply(exports,arguments)
+},{"dup":16}],150:[function(require,module,exports){
+arguments[4][17][0].apply(exports,arguments)
+},{"dup":17}],151:[function(require,module,exports){
+arguments[4][18][0].apply(exports,arguments)
+},{"dup":18}],152:[function(require,module,exports){
 arguments[4][19][0].apply(exports,arguments)
-},{"color-name":179,"dup":19}],179:[function(require,module,exports){
-arguments[4][11][0].apply(exports,arguments)
-},{"dup":11}],180:[function(require,module,exports){
-arguments[4][12][0].apply(exports,arguments)
-},{"dup":12}],181:[function(require,module,exports){
-arguments[4][13][0].apply(exports,arguments)
-},{"./colorbrewer.js":180,"dup":13}],182:[function(require,module,exports){
+},{"dup":19,"emitter":153,"reduce":154}],153:[function(require,module,exports){
+arguments[4][20][0].apply(exports,arguments)
+},{"dup":20}],154:[function(require,module,exports){
 arguments[4][21][0].apply(exports,arguments)
-},{"dup":21}],183:[function(require,module,exports){
-arguments[4][22][0].apply(exports,arguments)
-},{"dup":22}],184:[function(require,module,exports){
-arguments[4][23][0].apply(exports,arguments)
-},{"dup":23}],185:[function(require,module,exports){
-arguments[4][24][0].apply(exports,arguments)
-},{"dup":24,"emitter":186,"reduce":187}],186:[function(require,module,exports){
-arguments[4][25][0].apply(exports,arguments)
-},{"dup":25}],187:[function(require,module,exports){
-arguments[4][26][0].apply(exports,arguments)
-},{"dup":26}],188:[function(require,module,exports){
-arguments[4][27][0].apply(exports,arguments)
-},{"dup":27,"events":5,"inherits":189,"insert-css":190,"lodash":327,"qwery":191}],189:[function(require,module,exports){
-arguments[4][28][0].apply(exports,arguments)
-},{"dup":28}],190:[function(require,module,exports){
-arguments[4][29][0].apply(exports,arguments)
-},{"dup":29}],191:[function(require,module,exports){
-arguments[4][30][0].apply(exports,arguments)
-},{"dup":30}],192:[function(require,module,exports){
+},{"dup":21}],155:[function(require,module,exports){
+arguments[4][42][0].apply(exports,arguments)
+},{"dup":42,"events":5,"inherits":156,"insert-css":157,"lodash":319,"qwery":158}],156:[function(require,module,exports){
+arguments[4][43][0].apply(exports,arguments)
+},{"dup":43}],157:[function(require,module,exports){
+arguments[4][44][0].apply(exports,arguments)
+},{"dup":44}],158:[function(require,module,exports){
+arguments[4][45][0].apply(exports,arguments)
+},{"dup":45}],159:[function(require,module,exports){
+arguments[4][132][0].apply(exports,arguments)
+},{"buffer":1,"dup":132,"jquery":139,"leaflet":140,"lightning-client-utils":141,"lightning-visualization":155,"lodash":319}],160:[function(require,module,exports){
+arguments[4][6][0].apply(exports,arguments)
+},{"./src":184,"dup":6}],161:[function(require,module,exports){
+arguments[4][6][0].apply(exports,arguments)
+},{"./src":183,"dup":6}],162:[function(require,module,exports){
+arguments[4][40][0].apply(exports,arguments)
+},{"./src":163,"dup":40}],163:[function(require,module,exports){
+arguments[4][41][0].apply(exports,arguments)
+},{"dup":41}],164:[function(require,module,exports){
+arguments[4][9][0].apply(exports,arguments)
+},{"dup":9}],165:[function(require,module,exports){
+arguments[4][10][0].apply(exports,arguments)
+},{"color":166,"colorbrewer":172,"d3-color":173,"d3-scale":174,"dup":10,"lodash":175,"superagent":176}],166:[function(require,module,exports){
+arguments[4][11][0].apply(exports,arguments)
+},{"color-convert":168,"color-string":169,"dup":11}],167:[function(require,module,exports){
+arguments[4][12][0].apply(exports,arguments)
+},{"dup":12}],168:[function(require,module,exports){
+arguments[4][13][0].apply(exports,arguments)
+},{"./conversions":167,"dup":13}],169:[function(require,module,exports){
+arguments[4][14][0].apply(exports,arguments)
+},{"color-name":170,"dup":14}],170:[function(require,module,exports){
+arguments[4][15][0].apply(exports,arguments)
+},{"dup":15}],171:[function(require,module,exports){
+arguments[4][7][0].apply(exports,arguments)
+},{"dup":7}],172:[function(require,module,exports){
+arguments[4][8][0].apply(exports,arguments)
+},{"./colorbrewer.js":171,"dup":8}],173:[function(require,module,exports){
+arguments[4][16][0].apply(exports,arguments)
+},{"dup":16}],174:[function(require,module,exports){
+arguments[4][17][0].apply(exports,arguments)
+},{"dup":17}],175:[function(require,module,exports){
+arguments[4][18][0].apply(exports,arguments)
+},{"dup":18}],176:[function(require,module,exports){
+arguments[4][19][0].apply(exports,arguments)
+},{"dup":19,"emitter":177,"reduce":178}],177:[function(require,module,exports){
+arguments[4][20][0].apply(exports,arguments)
+},{"dup":20}],178:[function(require,module,exports){
+arguments[4][21][0].apply(exports,arguments)
+},{"dup":21}],179:[function(require,module,exports){
+arguments[4][42][0].apply(exports,arguments)
+},{"dup":42,"events":5,"inherits":180,"insert-css":181,"lodash":319,"qwery":182}],180:[function(require,module,exports){
+arguments[4][43][0].apply(exports,arguments)
+},{"dup":43}],181:[function(require,module,exports){
+arguments[4][44][0].apply(exports,arguments)
+},{"dup":44}],182:[function(require,module,exports){
+arguments[4][45][0].apply(exports,arguments)
+},{"dup":45}],183:[function(require,module,exports){
 (function (Buffer){
 'use strict';
 var d3 = require('d3');
@@ -59651,7 +58938,7 @@ var Visualization = LightningVisualization.extend({
 module.exports = Visualization;
 
 }).call(this,require("buffer").Buffer)
-},{"buffer":1,"d3":173,"d3-multiaxis-zoom":171,"lightning-client-utils":174,"lightning-visualization":188,"lodash":327}],193:[function(require,module,exports){
+},{"buffer":1,"d3":164,"d3-multiaxis-zoom":162,"lightning-client-utils":165,"lightning-visualization":179,"lodash":319}],184:[function(require,module,exports){
 'use strict';
 var Line = require('lightning-line');
 var _ = require('lodash');
@@ -59698,59 +58985,59 @@ var Visualization = Line.extend({
 
 
 module.exports = Visualization;
-},{"lightning-line":170,"lodash":327}],194:[function(require,module,exports){
+},{"lightning-line":161,"lodash":319}],185:[function(require,module,exports){
 arguments[4][6][0].apply(exports,arguments)
-},{"./src":216,"dup":6}],195:[function(require,module,exports){
-arguments[4][49][0].apply(exports,arguments)
-},{"./src":196,"dup":49}],196:[function(require,module,exports){
-arguments[4][50][0].apply(exports,arguments)
-},{"dup":50}],197:[function(require,module,exports){
-arguments[4][14][0].apply(exports,arguments)
-},{"dup":14}],198:[function(require,module,exports){
-arguments[4][15][0].apply(exports,arguments)
-},{"color":199,"colorbrewer":205,"d3-color":206,"d3-scale":207,"dup":15,"lodash":208,"superagent":209}],199:[function(require,module,exports){
-arguments[4][16][0].apply(exports,arguments)
-},{"color-convert":201,"color-string":202,"dup":16}],200:[function(require,module,exports){
-arguments[4][8][0].apply(exports,arguments)
-},{"dup":8}],201:[function(require,module,exports){
+},{"./src":207,"dup":6}],186:[function(require,module,exports){
+arguments[4][40][0].apply(exports,arguments)
+},{"./src":187,"dup":40}],187:[function(require,module,exports){
+arguments[4][41][0].apply(exports,arguments)
+},{"dup":41}],188:[function(require,module,exports){
 arguments[4][9][0].apply(exports,arguments)
-},{"./conversions":200,"dup":9}],202:[function(require,module,exports){
-arguments[4][19][0].apply(exports,arguments)
-},{"color-name":203,"dup":19}],203:[function(require,module,exports){
+},{"dup":9}],189:[function(require,module,exports){
+arguments[4][10][0].apply(exports,arguments)
+},{"color":190,"colorbrewer":196,"d3-color":197,"d3-scale":198,"dup":10,"lodash":199,"superagent":200}],190:[function(require,module,exports){
 arguments[4][11][0].apply(exports,arguments)
-},{"dup":11}],204:[function(require,module,exports){
+},{"color-convert":192,"color-string":193,"dup":11}],191:[function(require,module,exports){
 arguments[4][12][0].apply(exports,arguments)
-},{"dup":12}],205:[function(require,module,exports){
+},{"dup":12}],192:[function(require,module,exports){
 arguments[4][13][0].apply(exports,arguments)
-},{"./colorbrewer.js":204,"dup":13}],206:[function(require,module,exports){
+},{"./conversions":191,"dup":13}],193:[function(require,module,exports){
+arguments[4][14][0].apply(exports,arguments)
+},{"color-name":194,"dup":14}],194:[function(require,module,exports){
+arguments[4][15][0].apply(exports,arguments)
+},{"dup":15}],195:[function(require,module,exports){
+arguments[4][7][0].apply(exports,arguments)
+},{"dup":7}],196:[function(require,module,exports){
+arguments[4][8][0].apply(exports,arguments)
+},{"./colorbrewer.js":195,"dup":8}],197:[function(require,module,exports){
+arguments[4][16][0].apply(exports,arguments)
+},{"dup":16}],198:[function(require,module,exports){
+arguments[4][17][0].apply(exports,arguments)
+},{"dup":17}],199:[function(require,module,exports){
+arguments[4][18][0].apply(exports,arguments)
+},{"dup":18}],200:[function(require,module,exports){
+arguments[4][19][0].apply(exports,arguments)
+},{"dup":19,"emitter":201,"reduce":202}],201:[function(require,module,exports){
+arguments[4][20][0].apply(exports,arguments)
+},{"dup":20}],202:[function(require,module,exports){
 arguments[4][21][0].apply(exports,arguments)
-},{"dup":21}],207:[function(require,module,exports){
-arguments[4][22][0].apply(exports,arguments)
-},{"dup":22}],208:[function(require,module,exports){
-arguments[4][23][0].apply(exports,arguments)
-},{"dup":23}],209:[function(require,module,exports){
-arguments[4][24][0].apply(exports,arguments)
-},{"dup":24,"emitter":210,"reduce":211}],210:[function(require,module,exports){
-arguments[4][25][0].apply(exports,arguments)
-},{"dup":25}],211:[function(require,module,exports){
-arguments[4][26][0].apply(exports,arguments)
-},{"dup":26}],212:[function(require,module,exports){
-arguments[4][27][0].apply(exports,arguments)
-},{"dup":27,"events":5,"inherits":213,"insert-css":214,"lodash":327,"qwery":215}],213:[function(require,module,exports){
-arguments[4][28][0].apply(exports,arguments)
-},{"dup":28}],214:[function(require,module,exports){
-arguments[4][29][0].apply(exports,arguments)
-},{"dup":29}],215:[function(require,module,exports){
-arguments[4][30][0].apply(exports,arguments)
-},{"dup":30}],216:[function(require,module,exports){
-arguments[4][192][0].apply(exports,arguments)
-},{"buffer":1,"d3":197,"d3-multiaxis-zoom":195,"dup":192,"lightning-client-utils":198,"lightning-visualization":212,"lodash":327}],217:[function(require,module,exports){
+},{"dup":21}],203:[function(require,module,exports){
+arguments[4][42][0].apply(exports,arguments)
+},{"dup":42,"events":5,"inherits":204,"insert-css":205,"lodash":319,"qwery":206}],204:[function(require,module,exports){
+arguments[4][43][0].apply(exports,arguments)
+},{"dup":43}],205:[function(require,module,exports){
+arguments[4][44][0].apply(exports,arguments)
+},{"dup":44}],206:[function(require,module,exports){
+arguments[4][45][0].apply(exports,arguments)
+},{"dup":45}],207:[function(require,module,exports){
+arguments[4][183][0].apply(exports,arguments)
+},{"buffer":1,"d3":188,"d3-multiaxis-zoom":186,"dup":183,"lightning-client-utils":189,"lightning-visualization":203,"lodash":319}],208:[function(require,module,exports){
 arguments[4][6][0].apply(exports,arguments)
-},{"./src":228,"dup":6}],218:[function(require,module,exports){
-arguments[4][12][0].apply(exports,arguments)
-},{"dup":12}],219:[function(require,module,exports){
-arguments[4][13][0].apply(exports,arguments)
-},{"./colorbrewer.js":218,"dup":13}],220:[function(require,module,exports){
+},{"./src":219,"dup":6}],209:[function(require,module,exports){
+arguments[4][7][0].apply(exports,arguments)
+},{"dup":7}],210:[function(require,module,exports){
+arguments[4][8][0].apply(exports,arguments)
+},{"./colorbrewer.js":209,"dup":8}],211:[function(require,module,exports){
 var d3 = require('d3');
 var topojson = require('topojson');
 
@@ -71921,9 +71208,9 @@ if ( window.jQuery ) {
 }
 
 module.exports = Datamap;
-},{"d3":221,"topojson":222}],221:[function(require,module,exports){
-arguments[4][14][0].apply(exports,arguments)
-},{"dup":14}],222:[function(require,module,exports){
+},{"d3":212,"topojson":213}],212:[function(require,module,exports){
+arguments[4][9][0].apply(exports,arguments)
+},{"dup":9}],213:[function(require,module,exports){
 !function() {
   var topojson = {
     version: "1.6.19",
@@ -72459,17 +71746,17 @@ arguments[4][14][0].apply(exports,arguments)
   else this.topojson = topojson;
 }();
 
-},{}],223:[function(require,module,exports){
-arguments[4][114][0].apply(exports,arguments)
-},{"dup":114}],224:[function(require,module,exports){
-arguments[4][27][0].apply(exports,arguments)
-},{"dup":27,"events":5,"inherits":225,"insert-css":226,"lodash":327,"qwery":227}],225:[function(require,module,exports){
-arguments[4][28][0].apply(exports,arguments)
-},{"dup":28}],226:[function(require,module,exports){
-arguments[4][29][0].apply(exports,arguments)
-},{"dup":29}],227:[function(require,module,exports){
-arguments[4][30][0].apply(exports,arguments)
-},{"dup":30}],228:[function(require,module,exports){
+},{}],214:[function(require,module,exports){
+arguments[4][105][0].apply(exports,arguments)
+},{"dup":105}],215:[function(require,module,exports){
+arguments[4][42][0].apply(exports,arguments)
+},{"dup":42,"events":5,"inherits":216,"insert-css":217,"lodash":319,"qwery":218}],216:[function(require,module,exports){
+arguments[4][43][0].apply(exports,arguments)
+},{"dup":43}],217:[function(require,module,exports){
+arguments[4][44][0].apply(exports,arguments)
+},{"dup":44}],218:[function(require,module,exports){
+arguments[4][45][0].apply(exports,arguments)
+},{"dup":45}],219:[function(require,module,exports){
 'use strict';
 var LightningVisualization = require('lightning-visualization');
 var Datamaps = require('datamaps-all-browserify');
@@ -72575,221 +71862,109 @@ var Visualization = LightningVisualization.extend({
 
 module.exports = Visualization;
 
-},{"colorbrewer":219,"datamaps-all-browserify":220,"jquery":223,"lightning-visualization":224,"lodash":327}],229:[function(require,module,exports){
+},{"colorbrewer":210,"datamaps-all-browserify":211,"jquery":214,"lightning-visualization":215,"lodash":319}],220:[function(require,module,exports){
 arguments[4][6][0].apply(exports,arguments)
-},{"./src":248,"dup":6}],230:[function(require,module,exports){
-arguments[4][12][0].apply(exports,arguments)
-},{"dup":12}],231:[function(require,module,exports){
-arguments[4][13][0].apply(exports,arguments)
-},{"./colorbrewer.js":230,"dup":13}],232:[function(require,module,exports){
-arguments[4][14][0].apply(exports,arguments)
-},{"dup":14}],233:[function(require,module,exports){
-arguments[4][15][0].apply(exports,arguments)
-},{"color":234,"colorbrewer":231,"d3-color":239,"d3-scale":240,"dup":15,"lodash":241,"superagent":242}],234:[function(require,module,exports){
-arguments[4][16][0].apply(exports,arguments)
-},{"color-convert":236,"color-string":237,"dup":16}],235:[function(require,module,exports){
+},{"./src":240,"dup":6}],221:[function(require,module,exports){
+arguments[4][7][0].apply(exports,arguments)
+},{"dup":7}],222:[function(require,module,exports){
 arguments[4][8][0].apply(exports,arguments)
-},{"dup":8}],236:[function(require,module,exports){
+},{"./colorbrewer.js":221,"dup":8}],223:[function(require,module,exports){
 arguments[4][9][0].apply(exports,arguments)
-},{"./conversions":235,"dup":9}],237:[function(require,module,exports){
-arguments[4][19][0].apply(exports,arguments)
-},{"color-name":238,"dup":19}],238:[function(require,module,exports){
+},{"dup":9}],224:[function(require,module,exports){
+arguments[4][10][0].apply(exports,arguments)
+},{"color":225,"colorbrewer":222,"d3-color":230,"d3-scale":231,"dup":10,"lodash":232,"superagent":233}],225:[function(require,module,exports){
 arguments[4][11][0].apply(exports,arguments)
-},{"dup":11}],239:[function(require,module,exports){
+},{"color-convert":227,"color-string":228,"dup":11}],226:[function(require,module,exports){
+arguments[4][12][0].apply(exports,arguments)
+},{"dup":12}],227:[function(require,module,exports){
+arguments[4][13][0].apply(exports,arguments)
+},{"./conversions":226,"dup":13}],228:[function(require,module,exports){
+arguments[4][14][0].apply(exports,arguments)
+},{"color-name":229,"dup":14}],229:[function(require,module,exports){
+arguments[4][15][0].apply(exports,arguments)
+},{"dup":15}],230:[function(require,module,exports){
+arguments[4][16][0].apply(exports,arguments)
+},{"dup":16}],231:[function(require,module,exports){
+arguments[4][17][0].apply(exports,arguments)
+},{"dup":17}],232:[function(require,module,exports){
+arguments[4][18][0].apply(exports,arguments)
+},{"dup":18}],233:[function(require,module,exports){
+arguments[4][19][0].apply(exports,arguments)
+},{"dup":19,"emitter":234,"reduce":235}],234:[function(require,module,exports){
+arguments[4][20][0].apply(exports,arguments)
+},{"dup":20}],235:[function(require,module,exports){
 arguments[4][21][0].apply(exports,arguments)
-},{"dup":21}],240:[function(require,module,exports){
-arguments[4][22][0].apply(exports,arguments)
-},{"dup":22}],241:[function(require,module,exports){
-arguments[4][23][0].apply(exports,arguments)
-},{"dup":23}],242:[function(require,module,exports){
-arguments[4][24][0].apply(exports,arguments)
-},{"dup":24,"emitter":243,"reduce":244}],243:[function(require,module,exports){
-arguments[4][25][0].apply(exports,arguments)
-},{"dup":25}],244:[function(require,module,exports){
-arguments[4][26][0].apply(exports,arguments)
-},{"dup":26}],245:[function(require,module,exports){
-var _ = require('lodash');
-var insertCSS = require('insert-css');
-var inherits = require('inherits');
-var stylesInitialized = false;
-
-var LightningVisualization = function(selector, data, images, opts) {
-
-    this.opts = opts || {};
-    
-    this.width = (this.opts.width || $(selector).width());
-    this.height = (this.opts.height || (this.getHeight ? this.getHeight() : this.width * 0.6));
-    
-    this.data = this.formatData(data);
-    this.images = images || [];
-
-    this.selector = selector;
-    if(this.styles && !stylesInitialized) {
-        insertCSS(this.styles);
-        stylesInitialized = true;
-    }
-    this.init();
-};
-
-inherits(LightningVisualization, require('events').EventEmitter);
-
-
-LightningVisualization.prototype.init = function() {
-    console.warn('init not implemented');
-}
-
-/*
- * Take the provided data and return it in whatever data format is needed
- */
-LightningVisualization.prototype.formatData = function(data) {
-    console.warn('formatData not implemented');
-    return data;
-}
-
-/*
- * Optional function, use this if you want to users to send updated data to this plot
- */
-LightningVisualization.prototype.updateData = function(data) {
-    console.warn('updateData not implemented');
-}
-
-/*
- * Optional function, use this if you want to enable streaming updates to this plot
- */
-LightningVisualization.prototype.appendData = function(data) {
-    console.warn('appendData not implemented');
-}
-
-
-// Modified from backbone.js
-LightningVisualization.extend = function(protoProps, staticProps) {
-    var parent = this;
-    var child;
-
-    // Wrap these functions so that the user can assume
-    // the data has already been formatted by the time
-    // it gets here.
-    var wrapFuncs = ['appendData', 'updateData'];
-    _.each(wrapFuncs, function(d) {
-        if(protoProps[d]) {
-            var fn = protoProps[d];
-            protoProps[d] = function(data) {
-                var d = this.formatData(data);
-                return fn.call(this, d);
-            };
-        }
-    });
-
-    // The constructor function for the new subclass is either defined by you
-    // (the "constructor" property in your `extend` definition), or defaulted
-    // by us to simply call the parent constructor.
-    if (protoProps && _.has(protoProps, 'constructor')) {
-        child = protoProps.constructor;
-    } else {
-        child = function(){ return parent.apply(this, arguments); };
-    }
-
-    // Add static properties to the constructor function, if supplied.
-    _.extend(child, parent, staticProps);
-
-    // Set the prototype chain to inherit from `parent`, without calling
-    // `parent` constructor function.
-    var Surrogate = function(){ this.constructor = child; };
-    Surrogate.prototype = parent.prototype;
-    child.prototype = new Surrogate;
-
-    // Add prototype properties (instance properties) to the subclass,
-    // if supplied.
-    if (protoProps) _.extend(child.prototype, protoProps);
-
-    // Set a convenience property in case the parent's prototype is needed
-    // later.
-    child.__super__ = parent.prototype;
-
-    return child;
-};
-
-
-module.exports = LightningVisualization;
-
-
-},{"events":5,"inherits":246,"insert-css":247,"lodash":327}],246:[function(require,module,exports){
-arguments[4][28][0].apply(exports,arguments)
-},{"dup":28}],247:[function(require,module,exports){
-arguments[4][29][0].apply(exports,arguments)
-},{"dup":29}],248:[function(require,module,exports){
+},{"dup":21}],236:[function(require,module,exports){
+arguments[4][42][0].apply(exports,arguments)
+},{"dup":42,"events":5,"inherits":237,"insert-css":238,"lodash":319,"qwery":239}],237:[function(require,module,exports){
+arguments[4][43][0].apply(exports,arguments)
+},{"dup":43}],238:[function(require,module,exports){
+arguments[4][44][0].apply(exports,arguments)
+},{"dup":44}],239:[function(require,module,exports){
+arguments[4][45][0].apply(exports,arguments)
+},{"dup":45}],240:[function(require,module,exports){
 (function (Buffer){
 'use strict';
-
 var d3 = require('d3');
 var _ = require('lodash');
-var utils = require('lightning-client-utils')
-var colorbrewer = require('colorbrewer')
+var utils = require('lightning-client-utils');
+var colorbrewer = require('colorbrewer');
 var LightningVisualization = require('lightning-visualization');
 
+var css = Buffer("QGltcG9ydCB1cmwoaHR0cDovL2ZvbnRzLmdvb2dsZWFwaXMuY29tL2Nzcz9mYW1pbHk9T3BlbitTYW5zKTsKCi5heGlzLWxhYmVsIHsKCWZpbGw6ICM5Mzk1OTg7CiAgICBmb250LWZhbWlseTogJ09wZW4gU2FucycsIHNhbnMtc2VyaWY7CiAgICBmb250LXdlaWdodDogbm9ybWFsOwogICAgY3Vyc29yOiBwb2ludGVyOwogICAgLXdlYmtpdC10b3VjaC1jYWxsb3V0OiBub25lOwogICAgLXdlYmtpdC11c2VyLXNlbGVjdDogbm9uZTsKICAgIC1tb3otdXNlci1zZWxlY3Q6IG5vbmU7CiAgICAtbXMtdXNlci1zZWxlY3Q6IG5vbmU7CiAgICB1c2VyLXNlbGVjdDogbm9uZTsKfQoKLnNlbGVjdGVkIHsKCWZpbGw6IGJsYWNrOwp9Cgouc2VsZWN0ZWQtc3RpY2t5IHsKCWZpbGw6IGJsYWNrOwp9","base64");
 
-var styles = Buffer("LmF4aXMtbGFiZWwgewoJZmlsbDogI0E3QTlBQzsKICAgIGZvbnQtZmFtaWx5OiBtb25vc3BhY2U7CiAgICBmb250LXdlaWdodDogbm9ybWFsOwogICAgY3Vyc29yOiBwb2ludGVyOwogICAgLXdlYmtpdC10b3VjaC1jYWxsb3V0OiBub25lOwogICAgLXdlYmtpdC11c2VyLXNlbGVjdDogbm9uZTsKICAgIC1raHRtbC11c2VyLXNlbGVjdDogbm9uZTsKICAgIC1tb3otdXNlci1zZWxlY3Q6IG5vbmU7CiAgICAtbXMtdXNlci1zZWxlY3Q6IG5vbmU7CiAgICB1c2VyLXNlbGVjdDogbm9uZTsKfQoKLnNlbGVjdGVkIHsKCWZpbGw6IGJsYWNrOwp9Cgouc2VsZWN0ZWQtc3RpY2t5IHsKCWZpbGw6IGJsYWNrOwp9","base64");
-
-/*
- * Extend the base visualization object
- */
 var Visualization = LightningVisualization.extend({
 
-    defaultColormap: 'Purples',
+    getDefaultStyles: function() {
+        return {
+            colormap: 'Purples'
+        }
+    },
+
+    getDefaultOptions: function() {
+        return {
+            labels: false
+        }
+    },
 
     init: function() {
         this.margin = {left: 0, top: 0};
         if (this.data.rows) {
-            this.margin.left = 120;
+            this.margin.left = 80;
         }
         if (this.data.columns) {
-            this.margin.top = 120;
+            this.margin.top = 80;
         }
         this.render();
     },
 
-    styles: styles,
+    css: css,
 
     render: function() {
-        var width = this.width
-        var height = this.height
-        var margin = this.margin
-        var data = this.data
-        var selector = this.selector
-        var self = this
+        var width = this.width;
+        var height = this.height;
+        var margin = this.margin;
+        var data = this.data;
+        var options = this.options;
+        var selector = this.selector;
+        var self = this;
 
-        var entries = data.entries;
-        var nrow = data.nrow
-        var ncol = data.ncol
+        var nrow = data.nrow;
+        var ncol = data.ncol;
 
         // automatically scale stroke width by number of cells
         var strokeWidth = Math.max(1 - 0.00009 * nrow * ncol, 0.1);
 
-        // get min and max of matrix value data
-        var zmin = d3.min(entries, function(d) {
-            return d.z
-        });
-        var zmax = d3.max(entries, function(d) {
-            return d.z
-        });
-
-        // create colormap
-        function colormap(name) {
-            return colorbrewer[name][9]
-        }
-
-        // set up colormap
-        var name = data.colormap ? data.colormap : self.defaultColormap
-        var color = colormap(name)
-        var zdomain = utils.linspace(zmin, zmax, 9)
-        var z = d3.scale.linear().domain(zdomain).range(color);
+        // make a scale for fill coloring
+        var name = data.colormap ? data.colormap : this.styles.colormap;
+        this.makeScales(name);
 
         // create container
         var container = d3.select(selector)
             .append('div')
             .style('width', width)
             .style('height', height)
-            .style('position', 'relative')
+            .style('position', 'relative');
 
         // create svg
         var svg = container
@@ -72797,25 +71972,29 @@ var Visualization = LightningVisualization.extend({
             .attr('width', width)
             .attr('height', height)
             .style('position', 'absolute')
-            .on('dblclick', reset)
+            .on('dblclick', reset);
 
         // automatically determine cell size to fill the grid
+        var size;
         if (ncol > nrow) {
-            var size = Math.min((height - margin.top) / nrow, (width - margin.left) / ncol)
+            size = Math.min((height - margin.top) / nrow, (width - margin.left) / ncol)
         } else {
-            var size = (height - margin.top) / nrow
+            size = (height - margin.top) / nrow
         }
-        var y = d3.scale.ordinal().rangeBands([0, (nrow * size)]).domain(d3.range(nrow));
-        var x = d3.scale.ordinal().rangeBands([0, (ncol * size)]).domain(d3.range(ncol));
+        this.y = d3.scale.ordinal().rangeBands([0, (nrow * size)]).domain(d3.range(nrow));
+        this.x = d3.scale.ordinal().rangeBands([0, (ncol * size)]).domain(d3.range(ncol));
+
+        // sort rows (currently unusused)
+        this.sortRows('');
 
         // adjust height and weight for canvas based on estimated size
-        height = nrow * y.rangeBand();
-        width = ncol * x.rangeBand();
+        height = nrow * self.y.rangeBand();
+        width = ncol * self.x.rangeBand();
 
         // set up variables to toggle with keypresses
-        var clist = ['Purples', 'Blues', 'Greens', 'Oranges', 'Reds', 'Greys']
-        var cindex = 0
-        var scale = 0
+        var clist = ['Purples', 'Blues', 'Greens', 'Oranges', 'Reds', 'Greys'];
+        var cindex = 0;
+        var scale = 0;
 
         // create canvas
         var canvas = container
@@ -72824,17 +72003,19 @@ var Visualization = LightningVisualization.extend({
             .attr('height', height)
             .attr('id', 'canvas1')
             .style('margin-left', margin.left + 'px')
-            .style('margin-top', margin.top + 'px')
+            .style('margin-top', margin.top + 'px');
 
         var ctx = canvas
-            .node().getContext("2d")
+            .node().getContext("2d");
 
         // add keydown events
-        d3.select(selector).attr('tabindex', -1)
-        d3.select(selector).on('keydown', update)
+        d3.select(selector).attr('tabindex', -1);
+        d3.select(selector).on('keydown', update);
 
-        // compute a good font size
-        var labelsize = (size * 72 / 96) / 5
+        // compute good font sizes for axis and cell labels
+        var axisfont = Math.min((size * 72 / 96) / 2, 14);
+        axisfont = Math.max(axisfont, 8);
+        var cellfont = (size * 72 / 96) / 2.5;
 
         // draw the axis labels
         if (data.columns) {
@@ -72844,11 +72025,11 @@ var Visualization = LightningVisualization.extend({
                 .append("text")
                 .attr("text-anchor", "start")
                 .attr("transform", function(d, i) {
-                    return "translate(" + (margin.left + x(i) + x.rangeBand() / 2) + 
-                        "," +  margin.top * 0.8 + ")rotate(-60)" 
+                    return "translate(" + (margin.left + self.x(i) + self.x.rangeBand() / 2) +
+                        "," +  margin.top * 0.9 + ")rotate(-50)"
                 })
                 .attr("class", "axis-label column-label")
-                .style("font-size", labelsize + "px")
+                .style("font-size", axisfont + "px")
                 .text(function(d) {return d})
                 .on('mouseover', highlight)
                 .on('mouseout', unhighlight)
@@ -72860,11 +72041,11 @@ var Visualization = LightningVisualization.extend({
                 .enter()
                 .append("text")
                 .attr("text-anchor", "end")
-                .attr("x", margin.left * 0.8)
-                .attr("y", function(d, i) {return margin.top + y(i) + y.rangeBand() / 2})
+                .attr("x", margin.left * 0.9)
+                .attr("y", function(d, i) {return margin.top + self.y(i) + self.y.rangeBand() / 2})
                 .attr("dy","0.35em")
                 .attr("class", "axis-label row-label")
-                .style("font-size", labelsize + "px")
+                .style("font-size", axisfont + "px")
                 .text(function(d) {return d})
                 .on('mouseover', highlight)
                 .on('mouseout', unhighlight)
@@ -72872,8 +72053,8 @@ var Visualization = LightningVisualization.extend({
         }
 
         // begin with nothing selected
-        var selectedx = []
-        var selectedy = []
+        var selectedx = [];
+        var selectedy = [];
 
         // highlight row or column
         function highlight() {
@@ -72887,18 +72068,16 @@ var Visualization = LightningVisualization.extend({
 
         // select row or column
         function select() {
-            var el = d3.select(this)
-            var thislabel = el.node().__data__
-            var indx = _.indexOf(data.columns, thislabel)
-            var indy = _.indexOf(data.rows, thislabel)
+            var el = d3.select(this);
+            var thislabel = el.node().__data__;
+            var indx = _.indexOf(data.columns, thislabel);
+            var indy = _.indexOf(data.rows, thislabel);
             if (indx > -1) {
                 selectedx = getselected(selectedx, indx)
             }
             if (indy > -1) {
                 selectedy = getselected(selectedy, indy)
             }
-            console.log(selectedx)
-            console.log(selectedy)
             draw()
         }
 
@@ -72913,8 +72092,8 @@ var Visualization = LightningVisualization.extend({
 
         // reset selections
         function reset() {
-            selectedx = []
-            selectedy = []
+            selectedx = [];
+            selectedy = [];
             draw()
         }
 
@@ -72923,38 +72102,30 @@ var Visualization = LightningVisualization.extend({
 
             d3.selectAll('.row-label').classed('selected-sticky', function(d) {
                 if (selectedy.length > 0) {
-                    if (_.indexOf(data.rows, d) == selectedy) {
-                        return true
-                    } else {
-                        return false
-                    }
+                    return (_.indexOf(data.rows, d) == selectedy)
                 } else {
                     return false
                 }
-            })
+            });
 
             d3.selectAll('.column-label').classed('selected-sticky', function(d) {
                 if (selectedx.length > 0) {
-                    if (_.indexOf(data.columns, d) == selectedx) {
-                        return true
-                    } else {
-                        return false
-                    }
+                    return (_.indexOf(data.columns, d) == selectedx)
                 } else {
                     return false
                 }
-            })
+            });
 
           // clear canvas
           ctx.clearRect(0, 0, width, height);
           
           _.forEach(data.entries, function(d) {
 
-            var opacity
-            if (selectedx.length > 0 | selectedy.length > 0) {
-                if (selectedx.length > 0 & _.indexOf(selectedx, d.x) > -1) {
+            var opacity;
+            if (selectedx.length > 0 || selectedy.length > 0) {
+                if (selectedx.length > 0 && _.indexOf(selectedx, d.x) > -1) {
                     opacity = 1.0
-                } else if (selectedy.length > 0 & _.indexOf(selectedy, d.y) > -1) {
+                } else if (selectedy.length > 0 && _.indexOf(selectedy, d.y) > -1) {
                     opacity = 1.0
                 } else {
                     opacity = 0.2
@@ -72963,91 +72134,118 @@ var Visualization = LightningVisualization.extend({
                 opacity = 1.0
             }
 
-            var fill = utils.buildRGBA(z(d.z), opacity)
+            var fill = self.getColor(d, opacity);
 
             ctx.beginPath();
             ctx.fillStyle = fill;
             ctx.strokeStyle = 'white';
             ctx.lineWidth = strokeWidth;
-            ctx.rect(x(d.x), y(d.y), x.rangeBand(), y.rangeBand());
+            ctx.rect(self.x(d.x), self.y(d.y), self.x.rangeBand(), self.y.rangeBand());
             ctx.fill();
             ctx.stroke();
             ctx.closePath();
 
             // draw text labels
-            if (data.labels) {
-                var fontsize = (size * 72 / 96) / 2.5
-                ctx.font = fontsize + "px monospace"
-                if (d.z <= (zmax - zmin) / 2) {
+            if (options.labels) {
+                var str = self.formatLabel(d.z);
+                ctx.font = cellfont + "px monospace";
+                if (d.z <= self.data.zmin + (self.data.zmax - self.data.zmin) / 2) {
                     if (opacity < 1.0) {
-                        ctx.fillStyle = utils.buildRGBA('black', opacity / 5)
+                        ctx.fillStyle = utils.buildRGBA('black', opacity / 5);
                     } else {
-                        ctx.fillStyle = utils.buildRGBA('black', opacity)
+                        ctx.fillStyle = utils.buildRGBA('black', opacity);
                     }
                 } else {
-                    ctx.fillStyle = utils.buildRGBA('white', opacity)
+                    ctx.fillStyle = utils.buildRGBA('white', opacity);
                 }
                 ctx.textBaseline = 'middle'; 
                 ctx.textAlign = 'center'; 
-                ctx.fillText(d.z, x(d.x) + x.rangeBand() / 2, y(d.y) + y.rangeBand() / 2)
+                ctx.fillText(str, self.x(d.x) + self.x.rangeBand() / 2,
+                    self.y(d.y) + self.y.rangeBand() / 2);
             }
 
           })
         }
 
         // update event for keypresses
-        // TODO supplement with a window
         function update() {
-            if (d3.event.keyCode == 38 | d3.event.keyCode == 40) {
+            if (d3.event.keyCode == 38 || d3.event.keyCode == 40) {
                 d3.event.preventDefault();
                 if (d3.event.keyCode == 38) {
-                    scale = scale + 0.05
+                    scale = scale + 0.05;
                     if (scale > 0.4) {
-                        scale = 0.4
+                        scale = 0.4;
+                        return
                     }
                 }
                 if (d3.event.keyCode == 40) {
-                    scale = scale - 0.05
-                    if (scale < -3) {
-                        scale = -3
+                    scale = scale - 0.05;
+                    if (scale < -2) {
+                        scale = -2;
+                        return
                     }
                 }
-                var extent = zmax - zmin
-                zdomain = utils.linspace(zmin + extent * scale, zmax - extent * scale, 9)
-                z.domain(zdomain)
+                var extent = self.data.zmax - self.data.zmin;
+                var domain = utils.linspace(self.data.zmin + extent * scale,
+                    self.data.zmax - extent * scale, 9);
+                self.updateDomain(domain);
                 draw();
             }
-            if (d3.event.keyCode == 37 | d3.event.keyCode == 39) {
+            if (d3.event.keyCode == 37 || d3.event.keyCode == 39) {
                 d3.event.preventDefault();
                 if (d3.event.keyCode == 37) {
-                    cindex = cindex - 1
+                    cindex = cindex - 1;
                     if (cindex < 0) {
                         cindex = clist.length - 1
                     }
                 }
                 if (d3.event.keyCode == 39) {
-                    cindex = cindex + 1
+                    cindex = cindex + 1;
                     if (cindex > clist.length - 1) {
                         cindex = 0
                     }
                 }
-                color = colormap(clist[cindex])
-                z.range(color)
+                self.updateRange(clist[cindex]);
                 draw();
             }
         }
 
-        draw()
+        draw();
+
+    },
+
+    sortRows: function(method) {},
+
+    makeScales: function(d) {
+        this.c = d3.scale.linear();
+        this.c.domain(utils.linspace(this.data.zmin, this.data.zmax, 9));
+        this.c.range(colorbrewer[d][9])
+    },
+
+    updateRange: function(d) {
+        this.c.range(colorbrewer[d][9])
+    },
+
+    updateDomain: function(d) {
+        this.c.domain(d)
+    },
+
+    getColor: function(d, opacity) {
+        return utils.buildRGBA(this.c(d.z), opacity)
+    },
+
+    formatLabel: function(v) {
+        return parseFloat(d3.format(".2f")(v)).toString();
     },
 
     formatData: function(data) {
-        var entries = []
+        var entries = [];
         _.each(data.matrix, function(d, i) {
             _.each(d, function(e, j) {
-                var p = {}
-                p.x = j
-                p.y = i
-                p.z = e
+                var p = {};
+                p.x = j;
+                p.y = i;
+                p.z = e;
                 if (data.rows) {
                     p.r = data.rows[i]
                 }
@@ -73058,24 +72256,23 @@ var Visualization = LightningVisualization.extend({
             })
         });
 
-        var nrow = data.matrix.length
-        var ncol = data.matrix[0].length
-        console.log(data)
-        var labels = data.labels ? data.labels : false
+        // get bounds on dimensions
+        var nrow = data.matrix.length;
+        var ncol = data.matrix[0].length;
+        var zmin = d3.min(entries, function(d) {
+            return d.z
+        });
+        var zmax = d3.max(entries, function(d) {
+            return d.z
+        });
+
         return {entries: entries, nrow: nrow, ncol: ncol, colormap: data.colormap,
-                rows: data.rows, columns: data.columns, labels: labels}
+                rows: data.rows, columns: data.columns, zmin: zmin, zmax: zmax}
     },
 
     updateData: function(formattedData) {
         this.data = formattedData;
-        // TODO: re-render the visualization
-    },
-
-    appendData: function(formattedData) {        
-        // TODO: update this.data to include the newly
-        //       added formattedData
-
-        // TODO: re-render the visualization
+        this.draw()
     }
 
 });
@@ -73084,45 +72281,45 @@ var Visualization = LightningVisualization.extend({
 module.exports = Visualization;
 
 }).call(this,require("buffer").Buffer)
-},{"buffer":1,"colorbrewer":231,"d3":232,"lightning-client-utils":233,"lightning-visualization":245,"lodash":327}],249:[function(require,module,exports){
+},{"buffer":1,"colorbrewer":222,"d3":223,"lightning-client-utils":224,"lightning-visualization":236,"lodash":319}],241:[function(require,module,exports){
 arguments[4][6][0].apply(exports,arguments)
-},{"./src":270,"dup":6}],250:[function(require,module,exports){
-arguments[4][21][0].apply(exports,arguments)
-},{"dup":21}],251:[function(require,module,exports){
-arguments[4][15][0].apply(exports,arguments)
-},{"color":252,"colorbrewer":258,"d3-color":250,"d3-scale":259,"dup":15,"lodash":260,"superagent":261}],252:[function(require,module,exports){
+},{"./src":262,"dup":6}],242:[function(require,module,exports){
 arguments[4][16][0].apply(exports,arguments)
-},{"color-convert":254,"color-string":255,"dup":16}],253:[function(require,module,exports){
-arguments[4][8][0].apply(exports,arguments)
-},{"dup":8}],254:[function(require,module,exports){
-arguments[4][9][0].apply(exports,arguments)
-},{"./conversions":253,"dup":9}],255:[function(require,module,exports){
-arguments[4][19][0].apply(exports,arguments)
-},{"color-name":256,"dup":19}],256:[function(require,module,exports){
+},{"dup":16}],243:[function(require,module,exports){
+arguments[4][10][0].apply(exports,arguments)
+},{"color":244,"colorbrewer":250,"d3-color":242,"d3-scale":251,"dup":10,"lodash":252,"superagent":253}],244:[function(require,module,exports){
 arguments[4][11][0].apply(exports,arguments)
-},{"dup":11}],257:[function(require,module,exports){
+},{"color-convert":246,"color-string":247,"dup":11}],245:[function(require,module,exports){
 arguments[4][12][0].apply(exports,arguments)
-},{"dup":12}],258:[function(require,module,exports){
+},{"dup":12}],246:[function(require,module,exports){
 arguments[4][13][0].apply(exports,arguments)
-},{"./colorbrewer.js":257,"dup":13}],259:[function(require,module,exports){
-arguments[4][22][0].apply(exports,arguments)
-},{"dup":22}],260:[function(require,module,exports){
-arguments[4][23][0].apply(exports,arguments)
-},{"dup":23}],261:[function(require,module,exports){
-arguments[4][24][0].apply(exports,arguments)
-},{"dup":24,"emitter":262,"reduce":263}],262:[function(require,module,exports){
-arguments[4][25][0].apply(exports,arguments)
-},{"dup":25}],263:[function(require,module,exports){
-arguments[4][26][0].apply(exports,arguments)
-},{"dup":26}],264:[function(require,module,exports){
-arguments[4][27][0].apply(exports,arguments)
-},{"dup":27,"events":5,"inherits":265,"insert-css":266,"lodash":327,"qwery":267}],265:[function(require,module,exports){
-arguments[4][28][0].apply(exports,arguments)
-},{"dup":28}],266:[function(require,module,exports){
-arguments[4][29][0].apply(exports,arguments)
-},{"dup":29}],267:[function(require,module,exports){
-arguments[4][30][0].apply(exports,arguments)
-},{"dup":30}],268:[function(require,module,exports){
+},{"./conversions":245,"dup":13}],247:[function(require,module,exports){
+arguments[4][14][0].apply(exports,arguments)
+},{"color-name":248,"dup":14}],248:[function(require,module,exports){
+arguments[4][15][0].apply(exports,arguments)
+},{"dup":15}],249:[function(require,module,exports){
+arguments[4][7][0].apply(exports,arguments)
+},{"dup":7}],250:[function(require,module,exports){
+arguments[4][8][0].apply(exports,arguments)
+},{"./colorbrewer.js":249,"dup":8}],251:[function(require,module,exports){
+arguments[4][17][0].apply(exports,arguments)
+},{"dup":17}],252:[function(require,module,exports){
+arguments[4][18][0].apply(exports,arguments)
+},{"dup":18}],253:[function(require,module,exports){
+arguments[4][19][0].apply(exports,arguments)
+},{"dup":19,"emitter":254,"reduce":255}],254:[function(require,module,exports){
+arguments[4][20][0].apply(exports,arguments)
+},{"dup":20}],255:[function(require,module,exports){
+arguments[4][21][0].apply(exports,arguments)
+},{"dup":21}],256:[function(require,module,exports){
+arguments[4][42][0].apply(exports,arguments)
+},{"dup":42,"events":5,"inherits":257,"insert-css":258,"lodash":319,"qwery":259}],257:[function(require,module,exports){
+arguments[4][43][0].apply(exports,arguments)
+},{"dup":43}],258:[function(require,module,exports){
+arguments[4][44][0].apply(exports,arguments)
+},{"dup":44}],259:[function(require,module,exports){
+arguments[4][45][0].apply(exports,arguments)
+},{"dup":45}],260:[function(require,module,exports){
 
 
 /**
@@ -73427,7 +72624,7 @@ module.exports = function(THREE) {
     };
 
 };
-},{}],269:[function(require,module,exports){
+},{}],261:[function(require,module,exports){
 // threejs.org/license
 'use strict';var THREE={REVISION:"70"};"object"===typeof module&&(module.exports=THREE);void 0===Math.sign&&(Math.sign=function(a){return 0>a?-1:0<a?1:0});THREE.MOUSE={LEFT:0,MIDDLE:1,RIGHT:2};THREE.CullFaceNone=0;THREE.CullFaceBack=1;THREE.CullFaceFront=2;THREE.CullFaceFrontBack=3;THREE.FrontFaceDirectionCW=0;THREE.FrontFaceDirectionCCW=1;THREE.BasicShadowMap=0;THREE.PCFShadowMap=1;THREE.PCFSoftShadowMap=2;THREE.FrontSide=0;THREE.BackSide=1;THREE.DoubleSide=2;THREE.NoShading=0;
 THREE.FlatShading=1;THREE.SmoothShading=2;THREE.NoColors=0;THREE.FaceColors=1;THREE.VertexColors=2;THREE.NoBlending=0;THREE.NormalBlending=1;THREE.AdditiveBlending=2;THREE.SubtractiveBlending=3;THREE.MultiplyBlending=4;THREE.CustomBlending=5;THREE.AddEquation=100;THREE.SubtractEquation=101;THREE.ReverseSubtractEquation=102;THREE.MinEquation=103;THREE.MaxEquation=104;THREE.ZeroFactor=200;THREE.OneFactor=201;THREE.SrcColorFactor=202;THREE.OneMinusSrcColorFactor=203;THREE.SrcAlphaFactor=204;
@@ -74250,7 +73447,7 @@ THREE.MorphBlendMesh.prototype.getAnimationDuration=function(a){var b=-1;if(a=th
 THREE.MorphBlendMesh.prototype.update=function(a){for(var b=0,c=this.animationsList.length;b<c;b++){var d=this.animationsList[b];if(d.active){var e=d.duration/d.length;d.time+=d.direction*a;if(d.mirroredLoop){if(d.time>d.duration||0>d.time)d.direction*=-1,d.time>d.duration&&(d.time=d.duration,d.directionBackwards=!0),0>d.time&&(d.time=0,d.directionBackwards=!1)}else d.time%=d.duration,0>d.time&&(d.time+=d.duration);var f=d.startFrame+THREE.Math.clamp(Math.floor(d.time/e),0,d.length-1),g=d.weight;
 f!==d.currentFrame&&(this.morphTargetInfluences[d.lastFrame]=0,this.morphTargetInfluences[d.currentFrame]=1*g,this.morphTargetInfluences[f]=0,d.lastFrame=d.currentFrame,d.currentFrame=f);e=d.time%e/e;d.directionBackwards&&(e=1-e);this.morphTargetInfluences[d.currentFrame]=e*g;this.morphTargetInfluences[d.lastFrame]=(1-e)*g}}};module.exports=THREE;
 
-},{}],270:[function(require,module,exports){
+},{}],262:[function(require,module,exports){
 'use strict';
 
 var LightningVisualization = require('lightning-visualization');
@@ -74510,53 +73707,53 @@ var Scatter3 = LightningVisualization.extend({
 
 module.exports = Scatter3;
 
-},{"d3-color":250,"lightning-client-utils":251,"lightning-visualization":264,"lodash":327,"three-fly-controls":268,"three.js":269}],271:[function(require,module,exports){
+},{"d3-color":242,"lightning-client-utils":243,"lightning-visualization":256,"lodash":319,"three-fly-controls":260,"three.js":261}],263:[function(require,module,exports){
 arguments[4][6][0].apply(exports,arguments)
-},{"./src":295,"dup":6}],272:[function(require,module,exports){
+},{"./src":287,"dup":6}],264:[function(require,module,exports){
 arguments[4][6][0].apply(exports,arguments)
-},{"./src":294,"dup":6}],273:[function(require,module,exports){
-arguments[4][49][0].apply(exports,arguments)
-},{"./src":274,"dup":49}],274:[function(require,module,exports){
-arguments[4][50][0].apply(exports,arguments)
-},{"dup":50}],275:[function(require,module,exports){
-arguments[4][14][0].apply(exports,arguments)
-},{"dup":14}],276:[function(require,module,exports){
-arguments[4][15][0].apply(exports,arguments)
-},{"color":277,"colorbrewer":283,"d3-color":284,"d3-scale":285,"dup":15,"lodash":286,"superagent":287}],277:[function(require,module,exports){
-arguments[4][16][0].apply(exports,arguments)
-},{"color-convert":279,"color-string":280,"dup":16}],278:[function(require,module,exports){
-arguments[4][8][0].apply(exports,arguments)
-},{"dup":8}],279:[function(require,module,exports){
+},{"./src":286,"dup":6}],265:[function(require,module,exports){
+arguments[4][40][0].apply(exports,arguments)
+},{"./src":266,"dup":40}],266:[function(require,module,exports){
+arguments[4][41][0].apply(exports,arguments)
+},{"dup":41}],267:[function(require,module,exports){
 arguments[4][9][0].apply(exports,arguments)
-},{"./conversions":278,"dup":9}],280:[function(require,module,exports){
-arguments[4][19][0].apply(exports,arguments)
-},{"color-name":281,"dup":19}],281:[function(require,module,exports){
+},{"dup":9}],268:[function(require,module,exports){
+arguments[4][10][0].apply(exports,arguments)
+},{"color":269,"colorbrewer":275,"d3-color":276,"d3-scale":277,"dup":10,"lodash":278,"superagent":279}],269:[function(require,module,exports){
 arguments[4][11][0].apply(exports,arguments)
-},{"dup":11}],282:[function(require,module,exports){
+},{"color-convert":271,"color-string":272,"dup":11}],270:[function(require,module,exports){
 arguments[4][12][0].apply(exports,arguments)
-},{"dup":12}],283:[function(require,module,exports){
+},{"dup":12}],271:[function(require,module,exports){
 arguments[4][13][0].apply(exports,arguments)
-},{"./colorbrewer.js":282,"dup":13}],284:[function(require,module,exports){
+},{"./conversions":270,"dup":13}],272:[function(require,module,exports){
+arguments[4][14][0].apply(exports,arguments)
+},{"color-name":273,"dup":14}],273:[function(require,module,exports){
+arguments[4][15][0].apply(exports,arguments)
+},{"dup":15}],274:[function(require,module,exports){
+arguments[4][7][0].apply(exports,arguments)
+},{"dup":7}],275:[function(require,module,exports){
+arguments[4][8][0].apply(exports,arguments)
+},{"./colorbrewer.js":274,"dup":8}],276:[function(require,module,exports){
+arguments[4][16][0].apply(exports,arguments)
+},{"dup":16}],277:[function(require,module,exports){
+arguments[4][17][0].apply(exports,arguments)
+},{"dup":17}],278:[function(require,module,exports){
+arguments[4][18][0].apply(exports,arguments)
+},{"dup":18}],279:[function(require,module,exports){
+arguments[4][19][0].apply(exports,arguments)
+},{"dup":19,"emitter":280,"reduce":281}],280:[function(require,module,exports){
+arguments[4][20][0].apply(exports,arguments)
+},{"dup":20}],281:[function(require,module,exports){
 arguments[4][21][0].apply(exports,arguments)
-},{"dup":21}],285:[function(require,module,exports){
-arguments[4][22][0].apply(exports,arguments)
-},{"dup":22}],286:[function(require,module,exports){
-arguments[4][23][0].apply(exports,arguments)
-},{"dup":23}],287:[function(require,module,exports){
-arguments[4][24][0].apply(exports,arguments)
-},{"dup":24,"emitter":288,"reduce":289}],288:[function(require,module,exports){
-arguments[4][25][0].apply(exports,arguments)
-},{"dup":25}],289:[function(require,module,exports){
-arguments[4][26][0].apply(exports,arguments)
-},{"dup":26}],290:[function(require,module,exports){
-arguments[4][27][0].apply(exports,arguments)
-},{"dup":27,"events":5,"inherits":291,"insert-css":292,"lodash":327,"qwery":293}],291:[function(require,module,exports){
-arguments[4][28][0].apply(exports,arguments)
-},{"dup":28}],292:[function(require,module,exports){
-arguments[4][29][0].apply(exports,arguments)
-},{"dup":29}],293:[function(require,module,exports){
-arguments[4][30][0].apply(exports,arguments)
-},{"dup":30}],294:[function(require,module,exports){
+},{"dup":21}],282:[function(require,module,exports){
+arguments[4][42][0].apply(exports,arguments)
+},{"dup":42,"events":5,"inherits":283,"insert-css":284,"lodash":319,"qwery":285}],283:[function(require,module,exports){
+arguments[4][43][0].apply(exports,arguments)
+},{"dup":43}],284:[function(require,module,exports){
+arguments[4][44][0].apply(exports,arguments)
+},{"dup":44}],285:[function(require,module,exports){
+arguments[4][45][0].apply(exports,arguments)
+},{"dup":45}],286:[function(require,module,exports){
 (function (Buffer){
 'use strict';
 var d3 = require('d3');
@@ -74981,7 +74178,7 @@ var Visualization = LightningVisualization.extend({
 module.exports = Visualization;
 
 }).call(this,require("buffer").Buffer)
-},{"buffer":1,"d3":275,"d3-multiaxis-zoom":273,"lightning-client-utils":276,"lightning-visualization":290,"lodash":327}],295:[function(require,module,exports){
+},{"buffer":1,"d3":267,"d3-multiaxis-zoom":265,"lightning-client-utils":268,"lightning-visualization":282,"lodash":319}],287:[function(require,module,exports){
 'use strict';
 var Scatter = require('lightning-scatter');
 var _ = require('lodash');
@@ -75016,51 +74213,51 @@ var Visualization = Scatter.extend({
 
 module.exports = Visualization;
 
-},{"lightning-scatter":272,"lodash":327}],296:[function(require,module,exports){
+},{"lightning-scatter":264,"lodash":319}],288:[function(require,module,exports){
 arguments[4][6][0].apply(exports,arguments)
-},{"./src":318,"dup":6}],297:[function(require,module,exports){
-arguments[4][49][0].apply(exports,arguments)
-},{"./src":298,"dup":49}],298:[function(require,module,exports){
-arguments[4][50][0].apply(exports,arguments)
-},{"dup":50}],299:[function(require,module,exports){
-arguments[4][14][0].apply(exports,arguments)
-},{"dup":14}],300:[function(require,module,exports){
-arguments[4][15][0].apply(exports,arguments)
-},{"color":301,"colorbrewer":307,"d3-color":308,"d3-scale":309,"dup":15,"lodash":310,"superagent":311}],301:[function(require,module,exports){
-arguments[4][16][0].apply(exports,arguments)
-},{"color-convert":303,"color-string":304,"dup":16}],302:[function(require,module,exports){
-arguments[4][8][0].apply(exports,arguments)
-},{"dup":8}],303:[function(require,module,exports){
+},{"./src":310,"dup":6}],289:[function(require,module,exports){
+arguments[4][40][0].apply(exports,arguments)
+},{"./src":290,"dup":40}],290:[function(require,module,exports){
+arguments[4][41][0].apply(exports,arguments)
+},{"dup":41}],291:[function(require,module,exports){
 arguments[4][9][0].apply(exports,arguments)
-},{"./conversions":302,"dup":9}],304:[function(require,module,exports){
-arguments[4][19][0].apply(exports,arguments)
-},{"color-name":305,"dup":19}],305:[function(require,module,exports){
+},{"dup":9}],292:[function(require,module,exports){
+arguments[4][10][0].apply(exports,arguments)
+},{"color":293,"colorbrewer":299,"d3-color":300,"d3-scale":301,"dup":10,"lodash":302,"superagent":303}],293:[function(require,module,exports){
 arguments[4][11][0].apply(exports,arguments)
-},{"dup":11}],306:[function(require,module,exports){
+},{"color-convert":295,"color-string":296,"dup":11}],294:[function(require,module,exports){
 arguments[4][12][0].apply(exports,arguments)
-},{"dup":12}],307:[function(require,module,exports){
+},{"dup":12}],295:[function(require,module,exports){
 arguments[4][13][0].apply(exports,arguments)
-},{"./colorbrewer.js":306,"dup":13}],308:[function(require,module,exports){
+},{"./conversions":294,"dup":13}],296:[function(require,module,exports){
+arguments[4][14][0].apply(exports,arguments)
+},{"color-name":297,"dup":14}],297:[function(require,module,exports){
+arguments[4][15][0].apply(exports,arguments)
+},{"dup":15}],298:[function(require,module,exports){
+arguments[4][7][0].apply(exports,arguments)
+},{"dup":7}],299:[function(require,module,exports){
+arguments[4][8][0].apply(exports,arguments)
+},{"./colorbrewer.js":298,"dup":8}],300:[function(require,module,exports){
+arguments[4][16][0].apply(exports,arguments)
+},{"dup":16}],301:[function(require,module,exports){
+arguments[4][17][0].apply(exports,arguments)
+},{"dup":17}],302:[function(require,module,exports){
+arguments[4][18][0].apply(exports,arguments)
+},{"dup":18}],303:[function(require,module,exports){
+arguments[4][19][0].apply(exports,arguments)
+},{"dup":19,"emitter":304,"reduce":305}],304:[function(require,module,exports){
+arguments[4][20][0].apply(exports,arguments)
+},{"dup":20}],305:[function(require,module,exports){
 arguments[4][21][0].apply(exports,arguments)
-},{"dup":21}],309:[function(require,module,exports){
-arguments[4][22][0].apply(exports,arguments)
-},{"dup":22}],310:[function(require,module,exports){
-arguments[4][23][0].apply(exports,arguments)
-},{"dup":23}],311:[function(require,module,exports){
-arguments[4][24][0].apply(exports,arguments)
-},{"dup":24,"emitter":312,"reduce":313}],312:[function(require,module,exports){
-arguments[4][25][0].apply(exports,arguments)
-},{"dup":25}],313:[function(require,module,exports){
-arguments[4][26][0].apply(exports,arguments)
-},{"dup":26}],314:[function(require,module,exports){
-arguments[4][27][0].apply(exports,arguments)
-},{"dup":27,"events":5,"inherits":315,"insert-css":316,"lodash":327,"qwery":317}],315:[function(require,module,exports){
-arguments[4][28][0].apply(exports,arguments)
-},{"dup":28}],316:[function(require,module,exports){
-arguments[4][29][0].apply(exports,arguments)
-},{"dup":29}],317:[function(require,module,exports){
-arguments[4][30][0].apply(exports,arguments)
-},{"dup":30}],318:[function(require,module,exports){
+},{"dup":21}],306:[function(require,module,exports){
+arguments[4][42][0].apply(exports,arguments)
+},{"dup":42,"events":5,"inherits":307,"insert-css":308,"lodash":319,"qwery":309}],307:[function(require,module,exports){
+arguments[4][43][0].apply(exports,arguments)
+},{"dup":43}],308:[function(require,module,exports){
+arguments[4][44][0].apply(exports,arguments)
+},{"dup":44}],309:[function(require,module,exports){
+arguments[4][45][0].apply(exports,arguments)
+},{"dup":45}],310:[function(require,module,exports){
 (function (Buffer){
 'use strict';
 var d3 = require('d3');
@@ -75480,21 +74677,21 @@ var Visualization = LightningVisualization.extend({
 module.exports = Visualization;
 
 }).call(this,require("buffer").Buffer)
-},{"buffer":1,"d3":299,"d3-multiaxis-zoom":297,"lightning-client-utils":300,"lightning-visualization":314,"lodash":327}],319:[function(require,module,exports){
+},{"buffer":1,"d3":291,"d3-multiaxis-zoom":289,"lightning-client-utils":292,"lightning-visualization":306,"lodash":319}],311:[function(require,module,exports){
 arguments[4][6][0].apply(exports,arguments)
-},{"./src":326,"dup":6}],320:[function(require,module,exports){
-arguments[4][27][0].apply(exports,arguments)
-},{"dup":27,"events":5,"inherits":321,"insert-css":322,"lodash":327,"qwery":323}],321:[function(require,module,exports){
-arguments[4][28][0].apply(exports,arguments)
-},{"dup":28}],322:[function(require,module,exports){
-arguments[4][29][0].apply(exports,arguments)
-},{"dup":29}],323:[function(require,module,exports){
-arguments[4][30][0].apply(exports,arguments)
-},{"dup":30}],324:[function(require,module,exports){
-arguments[4][268][0].apply(exports,arguments)
-},{"dup":268}],325:[function(require,module,exports){
-arguments[4][269][0].apply(exports,arguments)
-},{"dup":269}],326:[function(require,module,exports){
+},{"./src":318,"dup":6}],312:[function(require,module,exports){
+arguments[4][42][0].apply(exports,arguments)
+},{"dup":42,"events":5,"inherits":313,"insert-css":314,"lodash":319,"qwery":315}],313:[function(require,module,exports){
+arguments[4][43][0].apply(exports,arguments)
+},{"dup":43}],314:[function(require,module,exports){
+arguments[4][44][0].apply(exports,arguments)
+},{"dup":44}],315:[function(require,module,exports){
+arguments[4][45][0].apply(exports,arguments)
+},{"dup":45}],316:[function(require,module,exports){
+arguments[4][260][0].apply(exports,arguments)
+},{"dup":260}],317:[function(require,module,exports){
+arguments[4][261][0].apply(exports,arguments)
+},{"dup":261}],318:[function(require,module,exports){
 'use strict';
 
 var LightningVisualization = require('lightning-visualization');
@@ -75603,7 +74800,7 @@ var Visualization = LightningVisualization.extend({
 
 module.exports = Visualization;
 
-},{"lightning-visualization":320,"lodash":327,"three-fly-controls":324,"three.js":325}],327:[function(require,module,exports){
+},{"lightning-visualization":312,"lodash":319,"three-fly-controls":316,"three.js":317}],319:[function(require,module,exports){
 (function (global){
 /**
  * @license
@@ -87958,7 +87155,7 @@ module.exports = Visualization;
 }.call(this));
 
 }).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{}],328:[function(require,module,exports){
+},{}],320:[function(require,module,exports){
 
 var jQueryURL = '//ajax.googleapis.com/ajax/libs/jquery/1.11.0/jquery.min.js';
 
@@ -88025,5 +87222,5 @@ if(!window.$) {
 window.lightning = window.lightning || {};
 window.lightning.initVisualizations = init;
 
-},{"lightning-adjacency":6,"lightning-force":32,"lightning-gallery":57,"lightning-graph":89,"lightning-graph-bundled":64,"lightning-image":147,"lightning-image-poly":112,"lightning-line":194,"lightning-line-streaming":169,"lightning-map":217,"lightning-matrix":229,"lightning-scatter":296,"lightning-scatter-3":249,"lightning-scatter-streaming":271,"lightning-volume":319}]},{},[328]);
+},{"lightning-adjacency":6,"lightning-force":23,"lightning-gallery":48,"lightning-graph":80,"lightning-graph-bundled":55,"lightning-image":138,"lightning-image-poly":103,"lightning-line":185,"lightning-line-streaming":160,"lightning-map":208,"lightning-matrix":220,"lightning-scatter":288,"lightning-scatter-3":241,"lightning-scatter-streaming":263,"lightning-volume":311}]},{},[320]);
 ;window.define = window._define;window.require = window._require;
