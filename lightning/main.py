@@ -60,6 +60,10 @@ class Lightning(object):
         if self.local_enabled:
             f = codecs.open(embed_location, "r", "utf-8")
             display(HTML("<script>" + f.read() + "</script>"))
+            print('Running Lightning in local mode.\n'
+                  'Visualizations are interactive, but not all types are available. \n'
+                  'For the full power of Lightning, run your own server! \n'
+                  'See http://lightning-viz.org/documentation/#server for info.')
             formatter.for_type(VisualizationLocal, lambda viz, kwds=kwargs: viz.get_html())
         else:
             formatter.for_type(Visualization, lambda viz, kwds=kwargs: viz.get_html())
@@ -123,14 +127,12 @@ class Lightning(object):
 
     def enable_local(self):
         """
-        Enable a local mode in which the host lightning server is only
-        queried for javascript and css, and all data is handled locally
+        Enable a local mode.
+
+        Data is handled locally and embedded via templates.
+        Useful for notebooks, and can be used offline.
         """
         self.local_enabled = True
-        print('Running Lightning in local mode.\n'
-              'Visualizations are interactive, but not all types are avaialble. \n'
-              'For the full power of Lightning run your own server! '
-              'See http://lightning-viz.org/documentation/#server')
 
     def disable_local(self):
         """
