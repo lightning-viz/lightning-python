@@ -1,5 +1,5 @@
 import pytest
-from numpy import random, ceil
+from numpy import random
 from lightning import Lightning, Visualization, VisualizationLocal
 
 

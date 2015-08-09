@@ -191,10 +191,3 @@ class Lightning(object):
         viz = Generic._baseplot(self.session, type, data)
         self.session.visualizations.append(viz)
         return viz
-
-
-
-
-
-        
-

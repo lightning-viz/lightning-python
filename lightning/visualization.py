@@ -132,8 +132,8 @@ class VisualizationLocal(object):
     def _create(cls, data=None, images=None, type=None, options=None):
 
         import base64
-        from jinja2 import Template, escape
         import os
+        from jinja2 import Template, escape
 
         loc = os.path.join(os.path.dirname(__file__), 'lib/template.html')
         t = Template(open(loc).read())
