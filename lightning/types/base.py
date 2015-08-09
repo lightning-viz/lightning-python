@@ -97,12 +97,12 @@ class Base(Visualization, VisualizationLocal):
         return options
 
     @classmethod
-    def _baseplot_local(cls, host, type, id, *args, **kwargs):
+    def _baseplot_local(cls, host, type, *args, **kwargs):
 
         data = cls._clean_data(*args)
         options = cls._clean_options(**kwargs)
 
-        payload = {'host': host, 'type': type, 'id': id, 'options': options}
+        payload = {'host': host, 'type': type, 'options': options}
 
         if 'images' in data:
             payload['images'] = data['images']
