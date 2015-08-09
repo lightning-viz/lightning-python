@@ -98,11 +98,9 @@ class Visualization(object):
         url = session.host + '/sessions/' + str(session.id) + '/visualizations'
 
         if not images:
-            payload = {'data': data, 'type': type, 'opts': options}
+            payload = {'data': data, 'type': type, 'options': options}
             headers = {'Content-type': 'application/json', 'Accept': 'text/plain'}
-
             r = requests.post(url, data=json.dumps(payload), headers=headers, auth=session.auth)
-
             if r.status_code == 404:
                 raise Exception(r.text)
             elif not r.status_code == requests.codes.ok:
@@ -111,12 +109,9 @@ class Visualization(object):
             viz = cls(session=session, json=r.json(), auth=session.auth)
 
         else:
-
             first_image, remaining_images = images[0], images[1:]
             files = {'file': first_image}
-            
-            r = requests.post(url, files=files, data={'type': type, 'opts': options}, auth=session.auth)
-
+            r = requests.post(url, files=files, data={'type': type, 'options': options}, auth=session.auth)
             if r.status_code == 404:
                 raise Exception(r.text)
             elif not r.status_code == requests.codes.ok:

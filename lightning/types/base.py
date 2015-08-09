@@ -7,6 +7,17 @@ class Base(Visualization):
 
     _name = 'base'
 
+    _options = {
+        'width': {
+            'default_value': None,
+            'lightning_name': 'width'
+        },
+        'height': {
+            'default_value': None,
+            'lightning_name': 'height'
+        }
+    }
+
     data_dict_inputs = {}
 
     @classmethod
@@ -105,10 +116,10 @@ class Base(Visualization):
             raise Exception("Must provide a plot type")
 
         options = {}
-        if hasattr(cls, '_validOptions'):
+        if hasattr(cls, '_options'):
             for key, value in six.iteritems(kwargs):
-                if key in cls._validOptions:
-                    lgn_option = cls._validOptions[key].get('lightning_name')
+                if key in cls._options:
+                    lgn_option = cls._options[key].get('lightning_name')
                     options[lgn_option] = value
 
         data = cls.clean_data(*args)
