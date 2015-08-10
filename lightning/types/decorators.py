@@ -8,15 +8,25 @@ def viztype(VizType):
     # wrapper that passes inputs to cleaning function and creates viz
     @wraps(VizType.clean)
     def plotter(self, *args, **kwargs):
-        if not hasattr(self, 'session'):
-            self.create_session()
+
         if True and kwargs['height'] is None and kwargs['width'] is None:
             if self.size != 'full':
                 kwargs['width'] = SIZES[self.size]
 
-        viz = VizType.baseplot(self.session, VizType._name, *args, **kwargs)
-        self.session.visualizations.append(viz)
-        return viz
+        if self.local_enabled:
+            if hasattr(VizType, '_local') and VizType._local == False:
+                name = VizType._func if hasattr(VizType, 'func') else VizType._name
+                print("Plots of type '%s' not yet supported in local mode" % name)
+            else:
+                viz = VizType._baseplot_local(VizType._name, *args, **kwargs)
+                return viz
+
+        else:
+            if not hasattr(self, 'session'):
+                self.create_session()
+            viz = VizType._baseplot(self.session, VizType._name, *args, **kwargs)
+            self.session.visualizations.append(viz)
+            return viz
 
     # get desired function name if different than plot type
     if hasattr(VizType, '_func'):

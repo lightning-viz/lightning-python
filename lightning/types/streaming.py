@@ -8,6 +8,7 @@ class LineStreaming(Base):
 
     _name = 'line-streaming'
     _func = 'linestreaming'
+    _local = False
 
     @staticmethod
     def clean(series, index=None, color=None, label=None, size=None, xaxis=None, yaxis=None):
@@ -62,6 +63,7 @@ class ScatterStreaming(Base):
 
     _name = 'scatter-streaming'
     _func = 'scatterstreaming'
+    _local = False
 
     @staticmethod
     def clean(x, y, color=None, label=None, value=None, colormap=None, size=None, xaxis=None, yaxis=None):

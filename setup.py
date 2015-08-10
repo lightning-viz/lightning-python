@@ -9,10 +9,10 @@ __version__ = '1.0.8'
 METADATA = dict(
   name = "lightning-python",
   version = __version__,
-  packages = ['lightning','lightning.types'],
+  packages = ['lightning','lightning.types','lightning.lib'],
   author='Matthew Conlen',
   author_email='github@mathisonian.com',
-  description='A Python client library for Lightning data vizualization notebooks',
+  description='A Python client library for the Lightning data vizualization server',
   license='MIT',
   url='https://github.com/lightning-viz/lightning-python',
   keywords='lightning data data-viz',
@@ -21,7 +21,8 @@ METADATA = dict(
 # Extra package metadata to be used only if setuptools is installed
 SETUPTOOLS_METADATA = dict(
   install_requires = open('requirements.txt').read().split(),
-  include_package_data = True
+  include_package_data = True,
+  package_data = {'lightning.lib': ['template.html']}
 )
 
 def Read(file):
@@ -31,9 +32,6 @@ def BuildLongDescription():
   return '\n'.join([Read('README.md')])
 
 def Main():
-  # Build the long_description from the README and CHANGES
-  # METADATA['long_description'] = BuildLongDescription()
-
   # Use setuptools if available, otherwise fallback and use distutils
   try:
     import setuptools

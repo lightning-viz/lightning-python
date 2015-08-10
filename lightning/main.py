@@ -1,22 +1,27 @@
 import requests
 from .session import Session
-from .visualization import Visualization
+from .visualization import Visualization, VisualizationLocal
 
 
 class Lightning(object):
 
-    def __init__(self, host="http://localhost:3000", ipython=False, auth=None, size='medium'):
-        self.set_host(host)
-        self.auth = auth
+    def __init__(self, host="http://localhost:3000", local=False, ipython=False, auth=None, size='medium'):
 
-        if auth is not None:
-            if isinstance(auth, tuple):
-                self.set_basic_auth(auth[0], auth[1])
+        if local:
+            self.enable_local()
 
-        status = self.check_status()
+        else:
+            self.set_host(host)
+            self.auth = auth
 
-        if not status:
-            raise ValueError("Could not instantiate lightning server")
+            if auth is not None:
+                if isinstance(auth, tuple):
+                    self.set_basic_auth(auth[0], auth[1])
+
+            self.local_enabled = False
+            status = self.check_status()
+            if not status:
+                raise ValueError("Could not instantiate lightning server")
 
         if ipython:
             self.enable_ipython()
@@ -47,16 +52,25 @@ class Lightning(object):
         # https://github.com/jakevdp/mpld3/blob/master/mpld3/_display.py#L357
 
         from IPython.core.getipython import get_ipython
-        from IPython.display import display, Javascript
+        from IPython.display import display, Javascript, HTML
 
         self.ipython_enabled = True
         ip = get_ipython()
         formatter = ip.display_formatter.formatters['text/html']
-        formatter.for_type(Visualization, lambda viz, kwds=kwargs: viz.get_html())
 
-        r = requests.get(self.get_ipython_markup_link(), auth=self.auth)
-
-        display(Javascript(r.text))
+        if self.local_enabled:
+            from lightning.visualization import VisualizationLocal
+            js = VisualizationLocal.load_embed()
+            display(HTML("<script>" + js + "</script>"))
+            print('Running Lightning in local mode.\n'
+                  'Visualizations are interactive, but not all types are available. \n'
+                  'For the full power of Lightning, run your own server! \n'
+                  'See http://lightning-viz.org/documentation/#server for info.')
+            formatter.for_type(VisualizationLocal, lambda viz, kwds=kwargs: viz.get_html())
+        else:
+            formatter.for_type(Visualization, lambda viz, kwds=kwargs: viz.get_html())
+            r = requests.get(self.get_ipython_markup_link(), auth=self.auth)
+            display(Javascript(r.text))
 
     def disable_ipython(self):
         """
@@ -71,6 +85,7 @@ class Lightning(object):
         ip = get_ipython()
         formatter = ip.display_formatter.formatters['text/html']
         formatter.type_printers.pop(Visualization, None)
+        formatter.type_printers.pop(VisualizationLocal, None)
 
     def create_session(self, name=None):
         """
@@ -91,6 +106,21 @@ class Lightning(object):
         """
         self.session = Session(lgn=self, id=session_id)
         return self.session
+
+    def enable_local(self):
+        """
+        Enable a local mode.
+
+        Data is handled locally and embedded via templates.
+        Useful for notebooks, and can be used offline.
+        """
+        self.local_enabled = True
+
+    def disable_local(self):
+        """
+        Disable local mode
+        """
+        self.local_enabled = False
 
     def set_basic_auth(self, username, password):
         """
@@ -170,6 +200,6 @@ class Lightning(object):
         if not hasattr(self, 'session'):
             self.create_session()
         
-        viz = Generic.baseplot(self.session, type, data)
+        viz = Generic._baseplot(self.session, type, data)
         self.session.visualizations.append(viz)
         return viz

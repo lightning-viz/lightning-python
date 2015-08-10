@@ -4,3 +4,4 @@ numpy
 pytest
 matplotlib
 six
+jinja2

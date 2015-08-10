@@ -2,10 +2,10 @@ import requests
 import json
 import webbrowser
 
-
 class Visualization(object):
 
     def __init__(self, session=None, json=None, auth=None):
+
         self.session = session
         self.id = json.get('id')
         self.auth = auth
@@ -90,7 +90,7 @@ class Visualization(object):
             self.comm_handlers[message['type']](message['data'])
 
     @classmethod
-    def create(cls, session=None, data=None, images=None, type=None, options=None):
+    def _create(cls, session=None, data=None, images=None, type=None, options=None):
 
         if options is None:
             options = {}
@@ -122,4 +122,80 @@ class Visualization(object):
                 viz._append_image(image)
 
         return viz
+
+class VisualizationLocal(object):
+
+    def __init__(self, html):
+        self._html = html
+
+    @classmethod
+    def _create(cls, data=None, images=None, type=None, options=None):
+
+        import base64
+        from jinja2 import Template, escape
+
+        t = Template(cls.load_template())
+
+        options = escape(json.dumps(options))
+        fields = {'viz': type, 'options': options}
+
+        if images:
+            bytes = ['data:image/png;base64,' + base64.b64encode(img) + ',' for img in images]
+            fields['images'] = escape(json.dumps(bytes))
+        else:
+            data = escape(json.dumps(data))
+            fields['data'] = data
+
+        html = t.render(**fields)
+        viz = cls(html)
+        return viz
+
+    def get_html(self):
+        """
+        Return html for this local visualization.
+
+        Assumes that Javascript has already been embedded,
+        to be used for rendering in notebooks.
+        """
+        return self._html
+
+    def save_html(self, filename=None, overwrite=False):
+        """
+        Save self-contained html to a file.
+
+        Parameters
+        ----------
+        filename : str
+            The filename to save to
+        """
+
+        if filename is None:
+            raise ValueError('Please provide a filename, e.g. viz.save_html(filename="viz.html").')
+
+        import os
+        base = self._html
+        js = self.load_embed()
+        if os.path.exists(filename):
+            if overwrite is False:
+                raise ValueError("File '%s' exists. To ovewrite call save_html with overwrite=True."
+                                 % os.path.abspath(filename))
+            else:
+                os.remove(filename)
+        with open(filename, "wb") as f:
+            f.write(base.encode('utf-8'))
+            f.write('<script>' + js.encode('utf-8') + '</script>')
+
+    @staticmethod
+    def load_template():
+        import os
+        location = os.path.join(os.path.dirname(__file__), 'lib/template.html')
+        return open(location).read()
+
+    @staticmethod
+    def load_embed():
+        import os
+        location = os.path.join(os.path.dirname(__file__), 'lib/embed.js')
+        import codecs
+        return codecs.open(location, "r", "utf-8").read()
+
 

@@ -8,6 +8,7 @@ from lightning.types.utils import add_property, array_to_im, polygon_to_points, 
 @viztype
 class Image(Base):
     _name = 'image'
+    _local = False
 
     @staticmethod
     def clean(imagedata):
@@ -32,6 +33,7 @@ class Image(Base):
 class ImagePoly(Base):
     _name = 'image-poly'
     _func = 'imagepoly'
+    _local = False
     
     @staticmethod
     def clean(imagedata, coordinates=None, xy=None):
@@ -115,6 +117,7 @@ class ImagePoly(Base):
 
 @viztype
 class Gallery(Base):
+    _local = False
 
     _name = 'gallery'
 

@@ -1,9 +1,9 @@
-from lightning import Visualization
+from lightning import Visualization, VisualizationLocal
 import requests
 import six
 
 
-class Base(Visualization):
+class Base(Visualization, VisualizationLocal):
 
     _name = 'base'
 
@@ -18,12 +18,12 @@ class Base(Visualization):
         }
     }
 
-    data_dict_inputs = {}
+    _data_dict_inputs = {}
 
     @classmethod
-    def check_unkeyed_arrays(cls, key, val):
+    def _check_unkeyed_arrays(cls, key, val):
 
-        if key not in cls.data_dict_inputs:
+        if key not in cls._data_dict_inputs:
             return val
 
         if not isinstance(val, list):
@@ -38,14 +38,14 @@ class Base(Visualization):
         if isinstance(val[0], list) and isinstance(val[-1], list):
             # if both the first and last elements are lists
             out = []
-            mapping = cls.data_dict_inputs[key]
+            mapping = cls._data_dict_inputs[key]
             for l in val:
                 out.append(dict(zip(mapping, l)))
 
             return out
 
     @staticmethod
-    def ensure_dict_or_list(x):
+    def _ensure_dict_or_list(x):
 
         if isinstance(x, dict):
             return x
@@ -67,7 +67,7 @@ class Base(Visualization):
         raise Exception("Could not convert to correct data type")
 
     @classmethod
-    def clean_data(cls, *args, **kwargs):
+    def _clean_data(cls, *args, **kwargs):
         """
         Convert raw data into a dictionary with plot-type specific methods.
 
@@ -83,20 +83,49 @@ class Base(Visualization):
 
         if 'data' in datadict:
             data = datadict['data']
-            data = cls.ensure_dict_or_list(data)
+            data = cls._ensure_dict_or_list(data)
         else:
             data = {}
             for key in datadict:
                 if key == 'images':
                     data[key] = datadict[key]
                 else:
-                    d = cls.ensure_dict_or_list(datadict[key])
-                    data[key] = cls.check_unkeyed_arrays(key, d)
+                    d = cls._ensure_dict_or_list(datadict[key])
+                    data[key] = cls._check_unkeyed_arrays(key, d)
 
         return data
 
     @classmethod
-    def baseplot(cls, session, type, *args, **kwargs):
+    def _clean_options(cls, **kwargs):
+
+        options = {}
+        if hasattr(cls, '_options'):
+            for key, value in six.iteritems(kwargs):
+                if key in cls._options:
+                    lgn_option = cls._options[key].get('lightning_name')
+                    options[lgn_option] = value
+
+        return options
+
+    @classmethod
+    def _baseplot_local(cls, type, *args, **kwargs):
+
+        data = cls._clean_data(*args)
+        options = cls._clean_options(**kwargs)
+
+        payload = {'type': type, 'options': options}
+
+        if 'images' in data:
+            payload['images'] = data['images']
+        else:
+            payload['data'] = data
+
+        viz = VisualizationLocal._create(**payload)
+
+        return viz
+
+    @classmethod
+    def _baseplot(cls, session, type, *args, **kwargs):
         """
         Base method for plotting data and images.
 
@@ -115,19 +144,13 @@ class Base(Visualization):
         if not type:
             raise Exception("Must provide a plot type")
 
-        options = {}
-        if hasattr(cls, '_options'):
-            for key, value in six.iteritems(kwargs):
-                if key in cls._options:
-                    lgn_option = cls._options[key].get('lightning_name')
-                    options[lgn_option] = value
-
-        data = cls.clean_data(*args)
+        options = cls._clean_options(**kwargs)
+        data = cls._clean_data(*args)
 
         if 'images' in data and len(data) > 1:
             images = data['images']
             del data['images']
-            viz = cls.create(session, data=data, type=type)
+            viz = cls._create(session, data=data, type=type)
             first_image, remaining_images = images[0], images[1:]
             viz._append_image(first_image)
             for image in remaining_images:
@@ -135,10 +158,10 @@ class Base(Visualization):
 
         elif 'images' in data:
             images = data['images']
-            viz = cls.create(session, images=images, type=type, options=options)
+            viz = cls._create(session, images=images, type=type, options=options)
 
         else:
-            viz = cls.create(session, data=data, type=type, options=options)
+            viz = cls._create(session, data=data, type=type, options=options)
 
         return viz
 
@@ -150,7 +173,7 @@ class Base(Visualization):
         updates the data in the visualization.
         """
 
-        data = self.clean_data(*args, **kwargs)
+        data = self._clean_data(*args, **kwargs)
         if 'images' in data:
             images = data['images']
             for img in images:
@@ -166,7 +189,7 @@ class Base(Visualization):
         appends data to the visualization.
         """
 
-        data = self.clean_data(*args, **kwargs)
+        data = self._clean_data(*args, **kwargs)
         if 'images' in data:
             images = data['images']
             for img in images:
@@ -174,10 +197,9 @@ class Base(Visualization):
         else:
             self._append_data(data=data)
 
-    def get_user_data(self):
+    def _get_user_data(self):
         """
         Base method for retrieving user data from a viz.
-        
         """
 
         url = self.session.host + '/sessions/' + str(self.session.id) + '/visualizations/' + str(self.id) + '/settings/'
