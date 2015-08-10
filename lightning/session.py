@@ -23,9 +23,11 @@ class Session(object):
         return str(self.id)
 
     def __repr__(self):
+        s = "Session\n"
+        s += "number: " + str(self.id)
         if self.name:
-            return "Session number: " + str(self.id) + ", name: " + self.name
-        return "Session number: " + str(self.id)
+            s += "name: " + str(self.name)
+        return s
 
     def open(self):
         webbrowser.open(self.host + '/sessions/' + str(self.id) + '/feed/')

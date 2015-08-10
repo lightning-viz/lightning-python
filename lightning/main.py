@@ -7,10 +7,12 @@ class Lightning(object):
 
     def __init__(self, host="http://localhost:3000", local=False, ipython=False, auth=None, size='medium'):
 
+        self.startup_message()
+
         if local:
             self.enable_local()
-
         else:
+            self.local_enabled = False
             self.set_host(host)
             self.auth = auth
 
@@ -18,10 +20,9 @@ class Lightning(object):
                 if isinstance(auth, tuple):
                     self.set_basic_auth(auth[0], auth[1])
 
-            self.local_enabled = False
             status = self.check_status()
             if not status:
-                raise ValueError("Could not instantiate lightning server")
+                raise ValueError("Could not access server")
 
         if ipython:
             self.enable_ipython()
@@ -31,10 +32,14 @@ class Lightning(object):
         self.set_size(size)
 
     def __repr__(self):
+        s = 'Lightning\n'
+        if hasattr(self, 'host') and self.host is not None and not self.local_enabled:
+            s += 'host: %s\n' % self.host
+        if self.local_enabled:
+            s += 'host: local\n'
         if hasattr(self, 'session') and self.session is not None:
-            return 'Lightning server at host: %s' % self.host + '\n' + self.session.__repr__()
-        else:
-            return 'Lightning server at host: %s' % self.host
+            s += 'session: %s\n' % self.session.id
+        return s
 
     def get_ipython_markup_link(self):
         return '%s/js/ipython-comm.js' % self.host
@@ -62,10 +67,9 @@ class Lightning(object):
             from lightning.visualization import VisualizationLocal
             js = VisualizationLocal.load_embed()
             display(HTML("<script>" + js + "</script>"))
-            print('Running Lightning in local mode.\n'
-                  'Visualizations are interactive, but not all types are available. \n'
+            print('Running local mode, some functionality is limited.\n'
                   'For the full power of Lightning, run your own server! \n'
-                  'See http://lightning-viz.org/documentation/#server for info.')
+                  'See http://lightning-viz.org/documentation/#server')
             formatter.for_type(VisualizationLocal, lambda viz, kwds=kwargs: viz.get_html())
         else:
             formatter.for_type(Visualization, lambda viz, kwds=kwargs: viz.get_html())
@@ -163,16 +167,28 @@ class Lightning(object):
             r = requests.get(self.host + '/status', auth=self.auth,
                              timeout=(10.0, 10.0))
             if not r.status_code == requests.codes.ok:
-                print("Problem connecting to lightning server at %s" % self.host)
+                print("Problem connecting to server at %s" % self.host)
                 print("status code: %s" % r.status_code)
                 return False
             else:
-                print("Connected to lightning server at %s" % self.host)
+                print("Connected to server at %s" % self.host)
                 return True
         except (requests.exceptions.ConnectionError, requests.exceptions.MissingSchema) as e:
-            print("Problem connecting to lightning server at %s" % self.host)
+            print("Problem connecting to server at %s" % self.host)
             print("error: %s" % e)
             return False
+
+    def startup_message(self):
+        import os
+        import base64
+        from IPython.display import display, HTML
+        icon = os.path.join(os.path.dirname(__file__), 'lib/icon.png')
+        with open(icon, "rb") as imfile:
+            im = 'data:image/png;base64,' + base64.b64encode(imfile.read())
+        t = "<div style='margin-top:8px'><img src='%s' width='30px' height='35px' " \
+            "style='display: inline-block; padding-right: 10px'>" \
+            "</img><span>Lightning initialized</span></div>" % im
+        display(HTML(t))
 
     def plot(self, data=None, type=None):
         """
