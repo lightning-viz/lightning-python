@@ -132,11 +132,9 @@ class VisualizationLocal(object):
     def _create(cls, data=None, images=None, type=None, options=None):
 
         import base64
-        import os
         from jinja2 import Template, escape
 
-        loc = os.path.join(os.path.dirname(__file__), 'lib/template.html')
-        t = Template(open(loc).read())
+        t = Template(cls.load_template())
 
         options = escape(json.dumps(options))
         fields = {'viz': type, 'options': options}
@@ -153,4 +151,47 @@ class VisualizationLocal(object):
         return viz
 
     def get_html(self):
+        """
+        Return html for this local visualization.
+
+        Assumes that Javascript has already been embedded,
+        to be used for rendering in notebooks.
+        """
         return self._html
+
+    def save_html(self, filename, overwrite=False):
+        """
+        Save self-contained html to a file.
+
+        Parameters
+        ----------
+        filename : str
+            The filename to save to
+        """
+        import os
+        base = self._html
+        js = self.load_embed()
+        if os.path.exists(filename):
+            if overwrite is False:
+                raise ValueError("File '%s' exists and overwrite is False"
+                                 % os.path.abspath(filename))
+            else:
+                os.remove(filename)
+        with open(filename, "wb") as f:
+            f.write(base.encode('utf-8'))
+            f.write('<script>' + js.encode('utf-8') + '</script>')
+
+    @staticmethod
+    def load_template():
+        import os
+        location = os.path.join(os.path.dirname(__file__), 'lib/template.html')
+        return open(location).read()
+
+    @staticmethod
+    def load_embed():
+        import os
+        location = os.path.join(os.path.dirname(__file__), 'lib/embed.js')
+        import codecs
+        return codecs.open(location, "r", "utf-8").read()
+
+
