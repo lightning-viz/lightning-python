@@ -111,7 +111,7 @@ class Visualization(object):
         else:
             first_image, remaining_images = images[0], images[1:]
             files = {'file': first_image}
-            r = requests.post(url, files=files, data={'type': type, 'options': options}, auth=session.auth)
+            r = requests.post(url, files=files, data={'type': type, 'options': json.dumps(options)}, auth=session.auth)
             if r.status_code == 404:
                 raise Exception(r.text)
             elif not r.status_code == requests.codes.ok:

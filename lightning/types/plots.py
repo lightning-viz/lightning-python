@@ -155,16 +155,6 @@ class Adjacency(Base):
 class Line(Base):
 
     _name = 'line'
-    _options = dict(Base._options.items() + {
-        'log_scale_x': {
-            'default_value': False,
-            'lightning_name': 'logScaleX'
-        },
-        'log_scale_y': {
-            'default_value': False,
-            'lightning_name': 'logScaleY'
-        }
-    }.items())
 
     @staticmethod
     def clean(series, index=None, color=None, label=None, size=None, xaxis=None, yaxis=None):
