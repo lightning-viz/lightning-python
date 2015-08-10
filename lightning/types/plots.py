@@ -69,6 +69,26 @@ class Scatter(Base):
 
         return outdict
 
+    def selected(self):
+        """
+        Selected points from scatter plot as indices
+        """
+        user_data = self.get_user_data()['settings']
+        if 'selected' in user_data.keys():
+            return user_data['selected']
+        else:
+            return []
+
+    def points(self):
+        """
+        Selected points from scatter plot as x,y coordinates
+        """
+        user_data = self.get_user_data()['settings']
+        if 'x' in user_data.keys() and 'y' in user_data.keys():
+            return user_data['x'], user_data['y']
+        else:
+            return []
+
 @viztype
 class Matrix(Base):
 
@@ -135,7 +155,7 @@ class Adjacency(Base):
 class Line(Base):
 
     _name = 'line'
-    _validOptions = {
+    _options = dict(Base._options.items() + {
         'log_scale_x': {
             'default_value': False,
             'lightning_name': 'logScaleX'
@@ -144,7 +164,7 @@ class Line(Base):
             'default_value': False,
             'lightning_name': 'logScaleY'
         }
-    }
+    }.items())
 
     @staticmethod
     def clean(series, index=None, color=None, label=None, size=None, xaxis=None, yaxis=None):
@@ -239,7 +259,7 @@ class Force(Base):
     @staticmethod
     def clean(conn, color=None, label=None, value=None, colormap=None, size=None):
         """
-        Create a force-directed network from a connectivity matrix.
+        Create a force-directed network from connectivity.
 
         .. image:: force.png
 
@@ -280,6 +300,16 @@ class Force(Base):
 
         return outdict
 
+    def selected(self):
+        """
+        Selected points from force plot
+        """
+        user_data = self.get_user_data()['settings']
+        if 'selected' in user_data.keys():
+            return user_data['selected']
+        else:
+            return []
+
 @viztype
 class Graph(Base):
 
@@ -289,7 +319,7 @@ class Graph(Base):
     @staticmethod
     def clean(x, y, conn, color=None, label=None, value=None, colormap=None, size=None, imagedata=None):
         """
-        Create a node-link graph from spatial points and their connectivity matrix.
+        Create a node-link graph from spatial points and their connectivity.
 
         .. image:: graph.png
 
@@ -347,7 +377,7 @@ class GraphBundled(Base):
     @staticmethod
     def clean(x, y, conn, color=None, label=None, value=None, colormap=None, size=None, imagedata=None):
         """
-        Create a node-link graph with bundled edges.
+        Create a node-link graph with bundled edges from spatial points and their connectivity.
 
         .. image:: graphbundled.png
 

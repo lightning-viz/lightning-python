@@ -7,6 +7,17 @@ class Base(Visualization, VisualizationLocal):
 
     _name = 'base'
 
+    _options = {
+        'width': {
+            'default_value': None,
+            'lightning_name': 'width'
+        },
+        'height': {
+            'default_value': None,
+            'lightning_name': 'height'
+        }
+    }
+
     _data_dict_inputs = {}
 
     @classmethod

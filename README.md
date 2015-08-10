@@ -1,4 +1,4 @@
-[![Travis branch](https://img.shields.io/travis/lightning-viz/lightning-python/master.svg)](https://travis-ci.org/lightning-viz/lightning-python)
+[![Build Status](https://travis-ci.org/lightning-viz/lightning-python.svg?branch=master)](https://travis-ci.org/lightning-viz/lightning-python)
 [![Gitter](https://badges.gitter.im/Join%20Chat.svg)](https://gitter.im/lightning-viz/lightning?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge)
 
 

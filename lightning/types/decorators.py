@@ -32,14 +32,17 @@ def viztype(VizType):
     # based on: http://emptysqua.re/blog/copying-a-python-functions-signature/
     # NOTE currently only handles functions with keyword arguments with defaults of None
 
-    valid_opts = {}
-    if hasattr(VizType, '_validOptions'):
-        valid_opts = VizType._validOptions
+    options = {}
+    if hasattr(VizType, '_options'):
+        options = VizType._options
 
-    formatted_opts = ', '.join(['%s=%s' % (key, value.get('default_value')) for (key, value) in valid_opts.items()])
+    formatted_options = ', '.join(['%s=%s' % (key, value.get('default_value')) for (key, value) in options.items()])
     argspec = inspect.getargspec(VizType.clean)
     formatted_args = inspect.formatargspec(*argspec)
-    fndef = 'lambda self, %s, %s: plotter(self,%s, %s)' % (formatted_args.lstrip('(').rstrip(')'), formatted_opts, formatted_args[1:].replace('=None', '').rstrip(')'), ', '.join('%s=%s' % (key, key) for key in valid_opts.keys()))
+    fndef = 'lambda self, %s, %s: plotter(self,%s, %s)' \
+            % (formatted_args.lstrip('(').rstrip(')'),
+               formatted_options, formatted_args[1:].replace('=None', '').rstrip(')'),
+               ', '.join('%s=%s' % (key, key) for key in options.keys()))
 
     fake_fn = eval(fndef, {'plotter': plotter})
     plotter = wraps(VizType.clean)(fake_fn)
