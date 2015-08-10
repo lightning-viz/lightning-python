@@ -159,7 +159,7 @@ class VisualizationLocal(object):
         """
         return self._html
 
-    def save_html(self, filename, overwrite=False):
+    def save_html(self, filename=None, overwrite=False):
         """
         Save self-contained html to a file.
 
@@ -168,12 +168,16 @@ class VisualizationLocal(object):
         filename : str
             The filename to save to
         """
+
+        if filename is None:
+            raise ValueError('Please provide a filename, e.g. viz.save_html(filename="viz.html").')
+
         import os
         base = self._html
         js = self.load_embed()
         if os.path.exists(filename):
             if overwrite is False:
-                raise ValueError("File '%s' exists and overwrite is False"
+                raise ValueError("File '%s' exists. To ovewrite call save_html with overwrite=True."
                                  % os.path.abspath(filename))
             else:
                 os.remove(filename)
