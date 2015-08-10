@@ -6,21 +6,22 @@ from .visualization import Visualization, VisualizationLocal
 class Lightning(object):
 
     def __init__(self, host="http://localhost:3000", local=False, ipython=False, auth=None):
-        self.set_host(host)
-        self.auth = auth
-
-        if auth is not None:
-            if isinstance(auth, tuple):
-                self.set_basic_auth(auth[0], auth[1])
 
         if local:
             self.enable_local()
-        else:
-            self.local_enabled = False
-        status = self.check_status()
 
-        if not status:
-            raise ValueError("Could not instantiate lightning server")
+        else:
+            self.set_host(host)
+            self.auth = auth
+
+            if auth is not None:
+                if isinstance(auth, tuple):
+                    self.set_basic_auth(auth[0], auth[1])
+
+            self.local_enabled = False
+            status = self.check_status()
+            if not status:
+                raise ValueError("Could not instantiate lightning server")
 
         if ipython:
             self.enable_ipython()

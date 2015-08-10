@@ -99,10 +99,10 @@ class Base(Visualization, VisualizationLocal):
     def _clean_options(cls, **kwargs):
 
         options = {}
-        if hasattr(cls, '_validOptions'):
+        if hasattr(cls, '_options'):
             for key, value in six.iteritems(kwargs):
-                if key in cls._validOptions:
-                    lgn_option = cls._validOptions[key].get('lightning_name')
+                if key in cls._options:
+                    lgn_option = cls._options[key].get('lightning_name')
                     options[lgn_option] = value
 
         return options
