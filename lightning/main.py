@@ -5,7 +5,7 @@ from .visualization import Visualization, VisualizationLocal
 
 class Lightning(object):
 
-    def __init__(self, host="http://localhost:3000", local=False, ipython=False, auth=None):
+    def __init__(self, host="http://localhost:3000", local=False, ipython=False, auth=None, size='medium'):
 
         if local:
             self.enable_local()
@@ -27,6 +27,8 @@ class Lightning(object):
             self.enable_ipython()
         else:
             self.ipython_enabled = False
+
+        self.set_size(size)
 
     def __repr__(self):
         if hasattr(self, 'session') and self.session is not None:
@@ -141,6 +143,17 @@ class Lightning(object):
 
         self.host = host
         return self
+
+    def set_size(self, size='medium'):
+        """
+        Set a figure size using one of four options.
+
+        Convention is 'small': 400px, 'medium': 600px, 'large': 800px,
+        and 'full' will use the entire width
+        """
+        if size not in ['small', 'medium', 'large', 'full']:
+            raise ValueError("Size must be one of 'small', 'medium', 'large', 'full'")
+        self.size = size
 
     def check_status(self):
         """
