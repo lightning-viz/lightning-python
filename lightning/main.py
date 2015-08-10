@@ -7,7 +7,10 @@ class Lightning(object):
 
     def __init__(self, host="http://localhost:3000", local=False, ipython=False, auth=None, size='medium'):
 
-        self.startup_message()
+        if ipython:
+            self.startup_message_ipython()
+        else:
+            self.startup_message()
 
         if local:
             self.enable_local()
@@ -178,7 +181,7 @@ class Lightning(object):
             print("error: %s" % e)
             return False
 
-    def startup_message(self):
+    def startup_message_ipython(self):
         import os
         import base64
         from IPython.display import display, HTML
@@ -189,6 +192,9 @@ class Lightning(object):
             "style='display: inline-block; padding-right: 10px'>" \
             "</img><span>Lightning initialized</span></div>" % im
         display(HTML(t))
+
+    def startup_message(self):
+        print("Lightning initialized")
 
     def plot(self, data=None, type=None):
         """
