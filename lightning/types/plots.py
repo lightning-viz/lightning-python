@@ -17,6 +17,12 @@ class Generic(Base):
 class Scatter(Base):
 
     _name = 'scatter'
+    _options = dict(Base._options, **{
+        'tooltips': {
+            'default_value': None,
+            'lightning_name': 'tooltips'
+        }
+    })
 
     @staticmethod
     def clean(x, y, color=None, group=None, labels=None, value=None, colormap=None, size=None, alpha=None, xaxis=None, yaxis=None):
