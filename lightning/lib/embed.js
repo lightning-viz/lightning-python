@@ -87102,6 +87102,7 @@ function init() {
         var data = $this.data('data');
         var images = $this.data('images');
         var options = $this.data('options');
+        var vid = $this.attr('id');
 
         var Viz;
         try {
@@ -87110,7 +87111,7 @@ function init() {
             Viz = require('lightning-' + type);
         }
 
-        new Viz($this[0], data, images, options);
+        new Viz('#' + vid, data, images, options);
         $this.data('initialized', true);
         $this.attr('data-initialized', true);
 
@@ -87718,6 +87719,8 @@ var Visualization = LightningVisualization.extend({
     },
 
     init: function() {
+
+        console.log(this.selector);
         MultiaxisZoom(d3);
         this.margin = {top: 0, right: 0, bottom: 20, left: 60};
         if(_.has(this.data, 'xaxis')) {

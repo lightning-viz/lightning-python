@@ -19,7 +19,7 @@ class Scatter(Base):
     _name = 'scatter'
     _options = dict(Base._options, **{
         'tooltips': {
-            'default_value': None,
+            'default_value': True,
             'lightning_name': 'tooltips'
         }
     })

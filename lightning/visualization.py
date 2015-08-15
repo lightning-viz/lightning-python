@@ -1,6 +1,8 @@
 import requests
 import json
 import webbrowser
+import random
+import string
 
 class Visualization(object):
 
@@ -137,7 +139,8 @@ class VisualizationLocal(object):
         t = Template(cls.load_template())
 
         options = escape(json.dumps(options))
-        fields = {'viz': type, 'options': options}
+        random_id = ''.join(random.choice(string.ascii_uppercase + string.digits) for _ in range(10))
+        fields = {'viz': type, 'options': options, 'viz_id': random_id}
 
         if images:
             bytes = ['data:image/png;base64,' + base64.b64encode(img) + ',' for img in images]
