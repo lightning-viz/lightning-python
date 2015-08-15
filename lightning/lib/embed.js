@@ -624,20 +624,84 @@ function base64Slice (buf, start, end) {
 }
 
 function utf8Slice (buf, start, end) {
-  var res = ''
-  var tmp = ''
   end = Math.min(buf.length, end)
+  var firstByte
+  var secondByte
+  var thirdByte
+  var fourthByte
+  var bytesPerSequence
+  var tempCodePoint
+  var codePoint
+  var res = []
+  var i = start
 
-  for (var i = start; i < end; i++) {
-    if (buf[i] <= 0x7F) {
-      res += decodeUtf8Char(tmp) + String.fromCharCode(buf[i])
-      tmp = ''
+  for (; i < end; i += bytesPerSequence) {
+    firstByte = buf[i]
+    codePoint = 0xFFFD
+
+    if (firstByte > 0xEF) {
+      bytesPerSequence = 4
+    } else if (firstByte > 0xDF) {
+      bytesPerSequence = 3
+    } else if (firstByte > 0xBF) {
+      bytesPerSequence = 2
     } else {
-      tmp += '%' + buf[i].toString(16)
+      bytesPerSequence = 1
     }
+
+    if (i + bytesPerSequence <= end) {
+      switch (bytesPerSequence) {
+        case 1:
+          if (firstByte < 0x80) {
+            codePoint = firstByte
+          }
+          break
+        case 2:
+          secondByte = buf[i + 1]
+          if ((secondByte & 0xC0) === 0x80) {
+            tempCodePoint = (firstByte & 0x1F) << 0x6 | (secondByte & 0x3F)
+            if (tempCodePoint > 0x7F) {
+              codePoint = tempCodePoint
+            }
+          }
+          break
+        case 3:
+          secondByte = buf[i + 1]
+          thirdByte = buf[i + 2]
+          if ((secondByte & 0xC0) === 0x80 && (thirdByte & 0xC0) === 0x80) {
+            tempCodePoint = (firstByte & 0xF) << 0xC | (secondByte & 0x3F) << 0x6 | (thirdByte & 0x3F)
+            if (tempCodePoint > 0x7FF && (tempCodePoint < 0xD800 || tempCodePoint > 0xDFFF)) {
+              codePoint = tempCodePoint
+            }
+          }
+          break
+        case 4:
+          secondByte = buf[i + 1]
+          thirdByte = buf[i + 2]
+          fourthByte = buf[i + 3]
+          if ((secondByte & 0xC0) === 0x80 && (thirdByte & 0xC0) === 0x80 && (fourthByte & 0xC0) === 0x80) {
+            tempCodePoint = (firstByte & 0xF) << 0x12 | (secondByte & 0x3F) << 0xC | (thirdByte & 0x3F) << 0x6 | (fourthByte & 0x3F)
+            if (tempCodePoint > 0xFFFF && tempCodePoint < 0x110000) {
+              codePoint = tempCodePoint
+            }
+          }
+      }
+    }
+
+    if (codePoint === 0xFFFD) {
+      // we generated an invalid codePoint so make sure to only advance by 1 byte
+      bytesPerSequence = 1
+    } else if (codePoint > 0xFFFF) {
+      // encode to utf16 (surrogate pair dance)
+      codePoint -= 0x10000
+      res.push(codePoint >>> 10 & 0x3FF | 0xD800)
+      codePoint = 0xDC00 | codePoint & 0x3FF
+    }
+
+    res.push(codePoint)
   }
 
-  return res + decodeUtf8Char(tmp)
+  return String.fromCharCode.apply(String, res)
 }
 
 function asciiSlice (buf, start, end) {
@@ -1343,47 +1407,48 @@ function utf8ToBytes (string, units) {
   var length = string.length
   var leadSurrogate = null
   var bytes = []
-  var i = 0
 
-  for (; i < length; i++) {
+  for (var i = 0; i < length; i++) {
     codePoint = string.charCodeAt(i)
 
     // is surrogate component
     if (codePoint > 0xD7FF && codePoint < 0xE000) {
       // last char was a lead
-      if (leadSurrogate) {
-        // 2 leads in a row
-        if (codePoint < 0xDC00) {
-          if ((units -= 3) > -1) bytes.push(0xEF, 0xBF, 0xBD)
-          leadSurrogate = codePoint
-          continue
-        } else {
-          // valid surrogate pair
-          codePoint = leadSurrogate - 0xD800 << 10 | codePoint - 0xDC00 | 0x10000
-          leadSurrogate = null
-        }
-      } else {
+      if (!leadSurrogate) {
         // no lead yet
-
         if (codePoint > 0xDBFF) {
           // unexpected trail
           if ((units -= 3) > -1) bytes.push(0xEF, 0xBF, 0xBD)
           continue
+
         } else if (i + 1 === length) {
           // unpaired lead
           if ((units -= 3) > -1) bytes.push(0xEF, 0xBF, 0xBD)
           continue
-        } else {
-          // valid lead
-          leadSurrogate = codePoint
-          continue
         }
+
+        // valid lead
+        leadSurrogate = codePoint
+
+        continue
       }
+
+      // 2 leads in a row
+      if (codePoint < 0xDC00) {
+        if ((units -= 3) > -1) bytes.push(0xEF, 0xBF, 0xBD)
+        leadSurrogate = codePoint
+        continue
+      }
+
+      // valid surrogate pair
+      codePoint = leadSurrogate - 0xD800 << 10 | codePoint - 0xDC00 | 0x10000
+
     } else if (leadSurrogate) {
       // valid bmp char, but last char was a lead
       if ((units -= 3) > -1) bytes.push(0xEF, 0xBF, 0xBD)
-      leadSurrogate = null
     }
+
+    leadSurrogate = null
 
     // encode utf8
     if (codePoint < 0x80) {
@@ -1402,7 +1467,7 @@ function utf8ToBytes (string, units) {
         codePoint >> 0x6 & 0x3F | 0x80,
         codePoint & 0x3F | 0x80
       )
-    } else if (codePoint < 0x200000) {
+    } else if (codePoint < 0x110000) {
       if ((units -= 4) < 0) break
       bytes.push(
         codePoint >> 0x12 | 0xF0,
@@ -1453,14 +1518,6 @@ function blitBuffer (src, dst, offset, length) {
     dst[i + offset] = src[i]
   }
   return i
-}
-
-function decodeUtf8Char (str) {
-  try {
-    return decodeURIComponent(str)
-  } catch (err) {
-    return String.fromCharCode(0xFFFD) // UTF 8 invalid char
-  }
 }
 
 },{"base64-js":2,"ieee754":3,"is-array":4}],2:[function(require,module,exports){
@@ -25259,7 +25316,7 @@ var Visualization = Matrix.extend({
 
 module.exports = Visualization;
 
-},{"d3":9,"lightning-client-utils":10,"lightning-matrix":220,"lodash":319}],23:[function(require,module,exports){
+},{"d3":9,"lightning-client-utils":10,"lightning-matrix":220,"lodash":296}],23:[function(require,module,exports){
 arguments[4][6][0].apply(exports,arguments)
 },{"./src":47,"dup":6}],24:[function(require,module,exports){
 arguments[4][9][0].apply(exports,arguments)
@@ -27902,7 +27959,7 @@ LightningVisualization.extend = function(protoProps, staticProps) {
 module.exports = LightningVisualization;
 
 
-},{"events":5,"inherits":43,"insert-css":44,"lodash":319,"qwery":45}],43:[function(require,module,exports){
+},{"events":5,"inherits":43,"insert-css":44,"lodash":296,"qwery":45}],43:[function(require,module,exports){
 if (typeof Object.create === 'function') {
   // implementation from standard node.js 'util' module
   module.exports = function inherits(ctor, superCtor) {
@@ -28407,7 +28464,7 @@ var Visualization = LightningVisualization.extend({
 module.exports = Visualization;
 
 }).call(this,require("buffer").Buffer)
-},{"buffer":1,"d3":24,"d3-multiaxis-zoom":40,"lightning-client-utils":25,"lightning-visualization":42,"lodash":319}],47:[function(require,module,exports){
+},{"buffer":1,"d3":24,"d3-multiaxis-zoom":40,"lightning-client-utils":25,"lightning-visualization":42,"lodash":296}],47:[function(require,module,exports){
 'use strict';
 var d3 = require('d3');
 var Graph = require('lightning-graph')
@@ -28495,11 +28552,11 @@ var Visualization = Graph.extend({
 
 module.exports = Visualization;
 
-},{"d3":24,"lightning-client-utils":25,"lightning-graph":39,"lodash":319}],48:[function(require,module,exports){
+},{"d3":24,"lightning-client-utils":25,"lightning-graph":39,"lodash":296}],48:[function(require,module,exports){
 arguments[4][6][0].apply(exports,arguments)
 },{"./src":53,"dup":6}],49:[function(require,module,exports){
 arguments[4][42][0].apply(exports,arguments)
-},{"dup":42,"events":5,"inherits":50,"insert-css":51,"lodash":319,"qwery":52}],50:[function(require,module,exports){
+},{"dup":42,"events":5,"inherits":50,"insert-css":51,"lodash":296,"qwery":52}],50:[function(require,module,exports){
 arguments[4][43][0].apply(exports,arguments)
 },{"dup":43}],51:[function(require,module,exports){
 arguments[4][44][0].apply(exports,arguments)
@@ -28588,7 +28645,7 @@ var Visualization = LightningVisualization.extend({
 module.exports = Visualization;
 
 }).call(this,require("buffer").Buffer)
-},{"buffer":1,"lightning-image":138,"lightning-visualization":49,"lodash":319}],54:[function(require,module,exports){
+},{"buffer":1,"lightning-image":138,"lightning-visualization":49,"lodash":296}],54:[function(require,module,exports){
 
 var ForceEdgeBundling = function(){
         var data_nodes = {},        // {'nodeid':{'x':,'y':},..}
@@ -29041,7 +29098,7 @@ arguments[4][40][0].apply(exports,arguments)
 arguments[4][41][0].apply(exports,arguments)
 },{"dup":41}],74:[function(require,module,exports){
 arguments[4][42][0].apply(exports,arguments)
-},{"dup":42,"events":5,"inherits":75,"insert-css":76,"lodash":319,"qwery":77}],75:[function(require,module,exports){
+},{"dup":42,"events":5,"inherits":75,"insert-css":76,"lodash":296,"qwery":77}],75:[function(require,module,exports){
 arguments[4][43][0].apply(exports,arguments)
 },{"dup":43}],76:[function(require,module,exports){
 arguments[4][44][0].apply(exports,arguments)
@@ -29049,7 +29106,7 @@ arguments[4][44][0].apply(exports,arguments)
 arguments[4][45][0].apply(exports,arguments)
 },{"dup":45}],78:[function(require,module,exports){
 arguments[4][46][0].apply(exports,arguments)
-},{"buffer":1,"d3":56,"d3-multiaxis-zoom":72,"dup":46,"lightning-client-utils":57,"lightning-visualization":74,"lodash":319}],79:[function(require,module,exports){
+},{"buffer":1,"d3":56,"d3-multiaxis-zoom":72,"dup":46,"lightning-client-utils":57,"lightning-visualization":74,"lodash":296}],79:[function(require,module,exports){
 'use strict';
 var Graph = require('lightning-graph');
 var d3 = require('d3');
@@ -29126,7 +29183,7 @@ var Visualization = Graph.extend({
 
 module.exports = Visualization;
 
-},{"../deps/force-edge-bundling":54,"d3":56,"lightning-client-utils":57,"lightning-graph":71,"lodash":319}],80:[function(require,module,exports){
+},{"../deps/force-edge-bundling":54,"d3":56,"lightning-client-utils":57,"lightning-graph":71,"lodash":296}],80:[function(require,module,exports){
 arguments[4][6][0].apply(exports,arguments)
 },{"./src":102,"dup":6}],81:[function(require,module,exports){
 arguments[4][40][0].apply(exports,arguments)
@@ -29164,7 +29221,7 @@ arguments[4][20][0].apply(exports,arguments)
 arguments[4][21][0].apply(exports,arguments)
 },{"dup":21}],98:[function(require,module,exports){
 arguments[4][42][0].apply(exports,arguments)
-},{"dup":42,"events":5,"inherits":99,"insert-css":100,"lodash":319,"qwery":101}],99:[function(require,module,exports){
+},{"dup":42,"events":5,"inherits":99,"insert-css":100,"lodash":296,"qwery":101}],99:[function(require,module,exports){
 arguments[4][43][0].apply(exports,arguments)
 },{"dup":43}],100:[function(require,module,exports){
 arguments[4][44][0].apply(exports,arguments)
@@ -29172,7 +29229,7 @@ arguments[4][44][0].apply(exports,arguments)
 arguments[4][45][0].apply(exports,arguments)
 },{"dup":45}],102:[function(require,module,exports){
 arguments[4][46][0].apply(exports,arguments)
-},{"buffer":1,"d3":83,"d3-multiaxis-zoom":81,"dup":46,"lightning-client-utils":84,"lightning-visualization":98,"lodash":319}],103:[function(require,module,exports){
+},{"buffer":1,"d3":83,"d3-multiaxis-zoom":81,"dup":46,"lightning-client-utils":84,"lightning-visualization":98,"lodash":296}],103:[function(require,module,exports){
 arguments[4][6][0].apply(exports,arguments)
 },{"./src":137,"dup":6}],104:[function(require,module,exports){
 /**
@@ -58226,9 +58283,9 @@ var Visualization = LightningVisualization.extend({
 module.exports = Visualization;
 
 }).call(this,require("buffer").Buffer)
-},{"buffer":1,"jquery":105,"leaflet":116,"lightning-client-utils":117,"lightning-visualization":133,"lodash":319}],133:[function(require,module,exports){
+},{"buffer":1,"jquery":105,"leaflet":116,"lightning-client-utils":117,"lightning-visualization":133,"lodash":296}],133:[function(require,module,exports){
 arguments[4][42][0].apply(exports,arguments)
-},{"dup":42,"events":5,"inherits":134,"insert-css":135,"lodash":319,"qwery":136}],134:[function(require,module,exports){
+},{"dup":42,"events":5,"inherits":134,"insert-css":135,"lodash":296,"qwery":136}],134:[function(require,module,exports){
 arguments[4][43][0].apply(exports,arguments)
 },{"dup":43}],135:[function(require,module,exports){
 arguments[4][44][0].apply(exports,arguments)
@@ -58546,7 +58603,7 @@ var Visualization = ImageViz.extend({
 module.exports = Visualization;
 
 }).call(this,require("buffer").Buffer)
-},{"buffer":1,"geojson-validation":104,"leaflet":116,"leaflet.freedraw-browserify":112,"lightning-client-utils":117,"lightning-image":131,"lodash":319}],138:[function(require,module,exports){
+},{"buffer":1,"geojson-validation":104,"leaflet":116,"leaflet.freedraw-browserify":112,"lightning-client-utils":117,"lightning-image":131,"lodash":296}],138:[function(require,module,exports){
 arguments[4][6][0].apply(exports,arguments)
 },{"./src":159,"dup":6}],139:[function(require,module,exports){
 arguments[4][105][0].apply(exports,arguments)
@@ -58582,7 +58639,7 @@ arguments[4][20][0].apply(exports,arguments)
 arguments[4][21][0].apply(exports,arguments)
 },{"dup":21}],155:[function(require,module,exports){
 arguments[4][42][0].apply(exports,arguments)
-},{"dup":42,"events":5,"inherits":156,"insert-css":157,"lodash":319,"qwery":158}],156:[function(require,module,exports){
+},{"dup":42,"events":5,"inherits":156,"insert-css":157,"lodash":296,"qwery":158}],156:[function(require,module,exports){
 arguments[4][43][0].apply(exports,arguments)
 },{"dup":43}],157:[function(require,module,exports){
 arguments[4][44][0].apply(exports,arguments)
@@ -58590,7 +58647,7 @@ arguments[4][44][0].apply(exports,arguments)
 arguments[4][45][0].apply(exports,arguments)
 },{"dup":45}],159:[function(require,module,exports){
 arguments[4][132][0].apply(exports,arguments)
-},{"buffer":1,"dup":132,"jquery":139,"leaflet":140,"lightning-client-utils":141,"lightning-visualization":155,"lodash":319}],160:[function(require,module,exports){
+},{"buffer":1,"dup":132,"jquery":139,"leaflet":140,"lightning-client-utils":141,"lightning-visualization":155,"lodash":296}],160:[function(require,module,exports){
 arguments[4][6][0].apply(exports,arguments)
 },{"./src":184,"dup":6}],161:[function(require,module,exports){
 arguments[4][6][0].apply(exports,arguments)
@@ -58630,7 +58687,7 @@ arguments[4][20][0].apply(exports,arguments)
 arguments[4][21][0].apply(exports,arguments)
 },{"dup":21}],179:[function(require,module,exports){
 arguments[4][42][0].apply(exports,arguments)
-},{"dup":42,"events":5,"inherits":180,"insert-css":181,"lodash":319,"qwery":182}],180:[function(require,module,exports){
+},{"dup":42,"events":5,"inherits":180,"insert-css":181,"lodash":296,"qwery":182}],180:[function(require,module,exports){
 arguments[4][43][0].apply(exports,arguments)
 },{"dup":43}],181:[function(require,module,exports){
 arguments[4][44][0].apply(exports,arguments)
@@ -58938,7 +58995,7 @@ var Visualization = LightningVisualization.extend({
 module.exports = Visualization;
 
 }).call(this,require("buffer").Buffer)
-},{"buffer":1,"d3":164,"d3-multiaxis-zoom":162,"lightning-client-utils":165,"lightning-visualization":179,"lodash":319}],184:[function(require,module,exports){
+},{"buffer":1,"d3":164,"d3-multiaxis-zoom":162,"lightning-client-utils":165,"lightning-visualization":179,"lodash":296}],184:[function(require,module,exports){
 'use strict';
 var Line = require('lightning-line');
 var _ = require('lodash');
@@ -58985,7 +59042,7 @@ var Visualization = Line.extend({
 
 
 module.exports = Visualization;
-},{"lightning-line":161,"lodash":319}],185:[function(require,module,exports){
+},{"lightning-line":161,"lodash":296}],185:[function(require,module,exports){
 arguments[4][6][0].apply(exports,arguments)
 },{"./src":207,"dup":6}],186:[function(require,module,exports){
 arguments[4][40][0].apply(exports,arguments)
@@ -59023,15 +59080,326 @@ arguments[4][20][0].apply(exports,arguments)
 arguments[4][21][0].apply(exports,arguments)
 },{"dup":21}],203:[function(require,module,exports){
 arguments[4][42][0].apply(exports,arguments)
-},{"dup":42,"events":5,"inherits":204,"insert-css":205,"lodash":319,"qwery":206}],204:[function(require,module,exports){
+},{"dup":42,"events":5,"inherits":204,"insert-css":205,"lodash":296,"qwery":206}],204:[function(require,module,exports){
 arguments[4][43][0].apply(exports,arguments)
 },{"dup":43}],205:[function(require,module,exports){
 arguments[4][44][0].apply(exports,arguments)
 },{"dup":44}],206:[function(require,module,exports){
 arguments[4][45][0].apply(exports,arguments)
 },{"dup":45}],207:[function(require,module,exports){
-arguments[4][183][0].apply(exports,arguments)
-},{"buffer":1,"d3":188,"d3-multiaxis-zoom":186,"dup":183,"lightning-client-utils":189,"lightning-visualization":203,"lodash":319}],208:[function(require,module,exports){
+(function (Buffer){
+'use strict';
+var d3 = require('d3');
+var MultiaxisZoom = require('d3-multiaxis-zoom');
+var _ = require('lodash');
+var utils = require('lightning-client-utils');
+var LightningVisualization = require('lightning-visualization');
+
+var css = Buffer("QGltcG9ydCB1cmwoaHR0cDovL2ZvbnRzLmdvb2dsZWFwaXMuY29tL2Nzcz9mYW1pbHk9T3BlbitTYW5zKTsKCi5saW5lLXBsb3QgewogICAgcG9zaXRpb246IHJlbGF0aXZlOwp9CgoubGluZS1wbG90LmNhbnZhcyB7CiAgICBwb3NpdGlvbjogYWJzb2x1dGU7CiAgICBwb2ludGVyLWV2ZW50czogYWxsOwogICAgei1pbmRleDogMTsKfQoKLmxpbmUtcGxvdC5zdmcgewogICAgcG9zaXRpb246IGFic29sdXRlOwogICAgei1pbmRleDogMDsKICAgIHBvaW50ZXItZXZlbnRzOiBub25lOwogICAgLXdlYmtpdC10cmFuc2Zvcm06IHRyYW5zbGF0ZTNkKDAsMCwwKTsKfQoKLmxpbmUtcGxvdC5yZWN0IHsKICAgIGZpbGw6ICNmZmZmZmY7CiAgICB6LWluZGV4OiAxMDA7Cn0KCi5saW5lLXBsb3QgLnBsb3QgewogICAgZmlsbDogI2ZmZmZmZjsKfQoKLmxpbmUtcGxvdCAuZ3JpZCAudGljayB7CiAgICBzdHJva2U6ICNCRUM5Q0U7CiAgICBvcGFjaXR5OiAwLjY7Cn0KCi5saW5lLXBsb3QgLmdyaWQgcGF0aCB7CiAgICBzdHJva2Utd2lkdGg6IDA7Cn0KCi5saW5lLXBsb3QgLmF4aXMgcGF0aCwgLmF4aXMgbGluZSB7CiAgICBmaWxsOiBub25lOwogICAgc3Ryb2tlOiBub25lOwogICAgc2hhcGUtcmVuZGVyaW5nOiBjcmlzcEVkZ2VzOwp9CgoubGluZS1wbG90IC5heGlzIHBhdGggewogICAgZGlzcGxheTogbm9uZTsKfQoKLmxpbmUtcGxvdCAubGluZSB7CiAgICBjdXJzb3I6IHBvaW50ZXI7CiAgICBmaWxsOiBub25lOwp9CgoubGluZS1wbG90IHRleHQgewogICAgZmlsbDogI0E3QTlBQzsKICAgIGZvbnQtZmFtaWx5OiBtb25vc3BhY2U7CiAgICBmb250LXNpemU6IDE0cHg7CiAgICBmb250LXdlaWdodDogbm9ybWFsOwp9CgoubGluZS1wbG90IC5sYWJlbCB7CiAgICBmb250LWZhbWlseTogJ09wZW4gU2FucycsIHNhbnMtc2VyaWY7CiAgICBmb250LXNpemU6IDE2cHg7Cn0K","base64");
+
+var Visualization = LightningVisualization.extend({
+
+    init: function() {
+        MultiaxisZoom(d3);
+        this.margin = {top: 0, right: 0, bottom: 20, left: 60};
+        if(_.has(this.data, 'xaxis')) {
+            this.margin.bottom = 57;
+        }
+        if(_.has(this.data, 'yaxis')) {
+            this.margin.left = 85;
+        }
+        this.render();
+    },
+
+    css: css,
+
+    render: function() {
+
+        console.log(this.options)
+
+        var height = this.height;
+        var width = this.width;
+        var margin = this.margin;
+        var selector = this.selector;
+        var self = this;
+
+        var nestedExtent = function(data, map) {
+            var max = d3.max(data, function(arr) {
+                return d3.max(_.map(arr, map));
+            });
+            var min = d3.min(data, function(arr) {
+                return d3.min(_.map(arr, map));
+            });
+
+            return [min, max];
+        };
+
+        function setAxis() {
+        
+            var yDomain = nestedExtent(self.data.series.map(function(d) {return d.d}), function(d) {
+                return d.y;
+            });
+            var xDomain = nestedExtent(self.data.series.map(function(d) {return d.d}), function(d) {
+                return d.x;
+            });
+
+            var ySpread = Math.abs(yDomain[1] - yDomain[0]) || 1;
+            var xSpread = Math.abs(xDomain[1] - xDomain[0]) || 1;
+
+            function customTickFormat(d) {
+                return parseFloat(d3.format(".3f")(d))
+            }
+
+            self.x = d3.scale.linear()
+                .domain([xDomain[0] - 0.05 * xSpread, xDomain[1] + 0.05 * xSpread])
+                .range([0, width - margin.left - margin.right]);
+
+            self.y = d3.scale.linear()
+                .domain([yDomain[0] - 0.1 * ySpread, yDomain[1] + 0.1 * ySpread])
+                .range([height - margin.top - margin.bottom, 0]);
+
+            self.xAxis = d3.svg.axis()
+                .scale(self.x)
+                .orient('bottom')
+                .ticks(5)
+                .tickFormat(customTickFormat);
+
+            self.yAxis = d3.svg.axis()
+                .scale(self.y)
+                .orient('left')
+                .ticks(5)
+                .tickFormat(customTickFormat);
+
+            self.zoom = d3.behavior.zoom()
+                .x(self.x)
+                .y(self.y)
+                .on('zoom', zoomed);
+
+        }
+
+        setAxis();
+
+        this.line = d3.svg.line()
+            .x(function (d) {
+                return self.x(d.x);
+            })
+            .y(function (d) {
+                return self.y(d.y);
+            });
+
+        var container = d3.select(selector)
+            .append('div')
+            .style('width', width + "px")
+            .style('height', height + "px");
+
+        var canvas = container
+            .append('canvas')
+            .attr('class', 'line-plot canvas')
+            .attr('width', width - margin.left - margin.right)
+            .attr('height', height - margin.top - margin.bottom)
+            .style('margin-left', margin.left + 'px')
+            .style('margin-right', margin.right + 'px')
+            .style('margin-top', margin.top + 'px')
+            .style('margin-bottom', margin.bottom + 'px')
+            .call(self.zoom);
+
+        var ctx = canvas
+            .node().getContext("2d");
+
+        var svg = container
+            .append('svg:svg')
+            .attr('class', 'line-plot svg')
+            .attr('width', width)
+            .attr('height', height)
+            .append('svg:g')
+            .attr('transform', 'translate(' + margin.left + ',' + margin.top + ')')
+            .call(self.zoom);
+
+        svg.append('rect')
+            .attr('width', width - margin.left - margin.right)
+            .attr('height', height - margin.top - margin.bottom)
+            .attr('class', 'line-plot rect');
+
+        var makeXAxis = function () {
+            return d3.svg.axis()
+                .scale(self.x)
+                .orient('bottom')
+                .ticks(5);
+        };
+
+        var makeYAxis = function () {
+            return d3.svg.axis()
+                .scale(self.y)
+                .orient('left')
+                .ticks(5);
+        };
+
+        svg.append('svg:g')
+            .attr('class', 'x axis')
+            .attr('transform', 'translate(0, ' + (height - margin.top - margin.bottom) + ')')
+            .call(this.xAxis);
+
+        svg.append('g')
+            .attr('class', 'y axis')
+            .call(this.yAxis);
+
+        svg.append('g')
+            .attr('class', 'x grid')
+            .attr('transform', 'translate(0,' + (height - margin.top - margin.bottom) + ')')
+            .call(makeXAxis()
+                    .tickSize(-(height - margin.top - margin.bottom), 0, 0)
+                    .tickFormat(''));
+
+        svg.append('g')
+            .attr('class', 'y grid')
+            .call(makeYAxis()
+                    .tickSize(-(width - margin.left - margin.right), 0, 0)
+                    .tickFormat(''));
+
+        var txt;
+        if(_.has(this.data, 'xaxis')) {
+            txt = this.data.xaxis;
+            if(_.isArray(txt)) {
+                txt = txt[0];
+            }
+            svg.append("text")
+                .attr("class", "x label")
+                .attr("text-anchor", "middle")
+                .attr("x", (width - margin.left - margin.right) / 2)
+                .attr("y", height - margin.top - 5)
+                .text(txt);
+        }
+        if(_.has(this.data, 'yaxis')) {
+            txt = this.data.yaxis;
+            if(_.isArray(txt)) {
+                txt = txt[0];
+            }
+
+            svg.append("text")
+                .attr("class", "y label")
+                .attr("text-anchor", "middle")
+                .attr("transform", "rotate(-90)")
+                .attr("x", - (height - margin.top - margin.bottom) / 2)
+                .attr("y", -margin.left + 20)
+                .text(txt);
+        }
+
+        function updateAxis() {
+
+            svg.select('.x.axis').call(self.xAxis);
+            svg.select('.y.axis').call(self.yAxis);
+            svg.select('.x.grid')
+                .call(makeXAxis()
+                    .tickSize(-(height - margin.top - margin.bottom), 0, 0)
+                    .tickFormat(''));
+            svg.select('.y.grid')
+                .call(makeYAxis()
+                        .tickSize(-(width - margin.left - margin.right), 0, 0)
+                        .tickFormat(''));
+        }
+
+        function zoomed() {
+            redraw();
+            updateAxis();
+        }
+
+        function redraw() {
+            ctx.clearRect(0, 0, width - margin.left - margin.right, height - margin.top - margin.bottom);
+            draw();
+        }
+
+        function draw() {
+
+            ctx.globalAlpha = 0.9;
+
+            _.forEach(self.data.series, function(s) {
+                var t = s.d.length, i = 0;
+                ctx.strokeStyle = s.c;
+                ctx.lineWidth = s.s;
+                ctx.lineJoin = 'round';
+                ctx.beginPath();
+                ctx.moveTo(self.x(s.d[0].x), self.y(s.d[0].y));
+                while(++i < t) {
+                    ctx.lineTo(self.x(s.d[i].x), self.y(s.d[i].y));
+                }
+                ctx.stroke()
+            })
+
+        }
+
+        draw();
+
+        this.svg = svg;
+        this.ctx = ctx;
+        this.canvas = canvas;
+        this.zoomed = zoomed;
+        this.setAxis = setAxis;
+        this.updateAxis = updateAxis;
+        this.redraw = redraw;
+
+    },
+
+    formatData: function(data) {
+
+        // parse the array data
+        if(_.isArray(data.series[0])) {
+            // handle case of mutliple series
+            data.series = _.map(data.series, function(d) {
+                return _.map(d, function(datum, i) {
+                    return {
+                        x: data.index ? data.index[i] : i,
+                        y: datum
+                    };
+                });
+            });
+        } else {
+            // handle a single series
+            data.series = [_.map(data.series, function(d, i) {
+                return {
+                    x: data.index ? data.index[i] : i,
+                    y: d
+                };
+            })];
+        }
+
+        // parse colors and sizes, and automatically fill colors
+        // with our random colors if none provided
+        var retColor = utils.getColorFromData(data);
+        if (retColor.length == 0) {
+            retColor = utils.getColors(data.series.length)
+        }
+        var retSize = data.size || [];
+
+        var s;
+
+        // embed properties in data array
+        data.series = data.series.map(function(line, i) {
+            var d = {'d': line, 'i': i};
+            s = retSize.length > 1 ? retSize[i] : retSize[0];
+            d.c = retColor.length > 1 ? retColor[i] : retColor[0];
+            d.s = s ? s : Math.max(Math.exp(2 - 0.003 * line.length), 1);
+            return d
+        });
+
+        return data;
+    },
+
+    updateData: function(formattedData) {
+        this.data = formattedData;
+        this.redraw();
+    },
+
+    appendData: function(formattedData) {
+        this.data.series = this.data.series.concat(formattedData.series);
+        this.redraw();
+    }
+
+});
+
+module.exports = Visualization;
+
+}).call(this,require("buffer").Buffer)
+},{"buffer":1,"d3":188,"d3-multiaxis-zoom":186,"lightning-client-utils":189,"lightning-visualization":203,"lodash":296}],208:[function(require,module,exports){
 arguments[4][6][0].apply(exports,arguments)
 },{"./src":219,"dup":6}],209:[function(require,module,exports){
 arguments[4][7][0].apply(exports,arguments)
@@ -71750,7 +72118,7 @@ arguments[4][9][0].apply(exports,arguments)
 arguments[4][105][0].apply(exports,arguments)
 },{"dup":105}],215:[function(require,module,exports){
 arguments[4][42][0].apply(exports,arguments)
-},{"dup":42,"events":5,"inherits":216,"insert-css":217,"lodash":319,"qwery":218}],216:[function(require,module,exports){
+},{"dup":42,"events":5,"inherits":216,"insert-css":217,"lodash":296,"qwery":218}],216:[function(require,module,exports){
 arguments[4][43][0].apply(exports,arguments)
 },{"dup":43}],217:[function(require,module,exports){
 arguments[4][44][0].apply(exports,arguments)
@@ -71862,7 +72230,7 @@ var Visualization = LightningVisualization.extend({
 
 module.exports = Visualization;
 
-},{"colorbrewer":210,"datamaps-all-browserify":211,"jquery":214,"lightning-visualization":215,"lodash":319}],220:[function(require,module,exports){
+},{"colorbrewer":210,"datamaps-all-browserify":211,"jquery":214,"lightning-visualization":215,"lodash":296}],220:[function(require,module,exports){
 arguments[4][6][0].apply(exports,arguments)
 },{"./src":240,"dup":6}],221:[function(require,module,exports){
 arguments[4][7][0].apply(exports,arguments)
@@ -71896,7 +72264,7 @@ arguments[4][20][0].apply(exports,arguments)
 arguments[4][21][0].apply(exports,arguments)
 },{"dup":21}],236:[function(require,module,exports){
 arguments[4][42][0].apply(exports,arguments)
-},{"dup":42,"events":5,"inherits":237,"insert-css":238,"lodash":319,"qwery":239}],237:[function(require,module,exports){
+},{"dup":42,"events":5,"inherits":237,"insert-css":238,"lodash":296,"qwery":239}],237:[function(require,module,exports){
 arguments[4][43][0].apply(exports,arguments)
 },{"dup":43}],238:[function(require,module,exports){
 arguments[4][44][0].apply(exports,arguments)
@@ -72281,7 +72649,7 @@ var Visualization = LightningVisualization.extend({
 module.exports = Visualization;
 
 }).call(this,require("buffer").Buffer)
-},{"buffer":1,"colorbrewer":222,"d3":223,"lightning-client-utils":224,"lightning-visualization":236,"lodash":319}],241:[function(require,module,exports){
+},{"buffer":1,"colorbrewer":222,"d3":223,"lightning-client-utils":224,"lightning-visualization":236,"lodash":296}],241:[function(require,module,exports){
 arguments[4][6][0].apply(exports,arguments)
 },{"./src":262,"dup":6}],242:[function(require,module,exports){
 arguments[4][16][0].apply(exports,arguments)
@@ -72313,7 +72681,7 @@ arguments[4][20][0].apply(exports,arguments)
 arguments[4][21][0].apply(exports,arguments)
 },{"dup":21}],256:[function(require,module,exports){
 arguments[4][42][0].apply(exports,arguments)
-},{"dup":42,"events":5,"inherits":257,"insert-css":258,"lodash":319,"qwery":259}],257:[function(require,module,exports){
+},{"dup":42,"events":5,"inherits":257,"insert-css":258,"lodash":296,"qwery":259}],257:[function(require,module,exports){
 arguments[4][43][0].apply(exports,arguments)
 },{"dup":43}],258:[function(require,module,exports){
 arguments[4][44][0].apply(exports,arguments)
@@ -73707,7 +74075,7 @@ var Scatter3 = LightningVisualization.extend({
 
 module.exports = Scatter3;
 
-},{"d3-color":242,"lightning-client-utils":243,"lightning-visualization":256,"lodash":319,"three-fly-controls":260,"three.js":261}],263:[function(require,module,exports){
+},{"d3-color":242,"lightning-client-utils":243,"lightning-visualization":256,"lodash":296,"three-fly-controls":260,"three.js":261}],263:[function(require,module,exports){
 arguments[4][6][0].apply(exports,arguments)
 },{"./src":287,"dup":6}],264:[function(require,module,exports){
 arguments[4][6][0].apply(exports,arguments)
@@ -73747,7 +74115,7 @@ arguments[4][20][0].apply(exports,arguments)
 arguments[4][21][0].apply(exports,arguments)
 },{"dup":21}],282:[function(require,module,exports){
 arguments[4][42][0].apply(exports,arguments)
-},{"dup":42,"events":5,"inherits":283,"insert-css":284,"lodash":319,"qwery":285}],283:[function(require,module,exports){
+},{"dup":42,"events":5,"inherits":283,"insert-css":284,"lodash":296,"qwery":285}],283:[function(require,module,exports){
 arguments[4][43][0].apply(exports,arguments)
 },{"dup":43}],284:[function(require,module,exports){
 arguments[4][44][0].apply(exports,arguments)
@@ -74178,7 +74546,7 @@ var Visualization = LightningVisualization.extend({
 module.exports = Visualization;
 
 }).call(this,require("buffer").Buffer)
-},{"buffer":1,"d3":267,"d3-multiaxis-zoom":265,"lightning-client-utils":268,"lightning-visualization":282,"lodash":319}],287:[function(require,module,exports){
+},{"buffer":1,"d3":267,"d3-multiaxis-zoom":265,"lightning-client-utils":268,"lightning-visualization":282,"lodash":296}],287:[function(require,module,exports){
 'use strict';
 var Scatter = require('lightning-scatter');
 var _ = require('lodash');
@@ -74213,485 +74581,21 @@ var Visualization = Scatter.extend({
 
 module.exports = Visualization;
 
-},{"lightning-scatter":264,"lodash":319}],288:[function(require,module,exports){
+},{"lightning-scatter":264,"lodash":296}],288:[function(require,module,exports){
 arguments[4][6][0].apply(exports,arguments)
-},{"./src":310,"dup":6}],289:[function(require,module,exports){
-arguments[4][40][0].apply(exports,arguments)
-},{"./src":290,"dup":40}],290:[function(require,module,exports){
-arguments[4][41][0].apply(exports,arguments)
-},{"dup":41}],291:[function(require,module,exports){
-arguments[4][9][0].apply(exports,arguments)
-},{"dup":9}],292:[function(require,module,exports){
-arguments[4][10][0].apply(exports,arguments)
-},{"color":293,"colorbrewer":299,"d3-color":300,"d3-scale":301,"dup":10,"lodash":302,"superagent":303}],293:[function(require,module,exports){
-arguments[4][11][0].apply(exports,arguments)
-},{"color-convert":295,"color-string":296,"dup":11}],294:[function(require,module,exports){
-arguments[4][12][0].apply(exports,arguments)
-},{"dup":12}],295:[function(require,module,exports){
-arguments[4][13][0].apply(exports,arguments)
-},{"./conversions":294,"dup":13}],296:[function(require,module,exports){
-arguments[4][14][0].apply(exports,arguments)
-},{"color-name":297,"dup":14}],297:[function(require,module,exports){
-arguments[4][15][0].apply(exports,arguments)
-},{"dup":15}],298:[function(require,module,exports){
-arguments[4][7][0].apply(exports,arguments)
-},{"dup":7}],299:[function(require,module,exports){
-arguments[4][8][0].apply(exports,arguments)
-},{"./colorbrewer.js":298,"dup":8}],300:[function(require,module,exports){
-arguments[4][16][0].apply(exports,arguments)
-},{"dup":16}],301:[function(require,module,exports){
-arguments[4][17][0].apply(exports,arguments)
-},{"dup":17}],302:[function(require,module,exports){
-arguments[4][18][0].apply(exports,arguments)
-},{"dup":18}],303:[function(require,module,exports){
-arguments[4][19][0].apply(exports,arguments)
-},{"dup":19,"emitter":304,"reduce":305}],304:[function(require,module,exports){
-arguments[4][20][0].apply(exports,arguments)
-},{"dup":20}],305:[function(require,module,exports){
-arguments[4][21][0].apply(exports,arguments)
-},{"dup":21}],306:[function(require,module,exports){
+},{"./src":295,"dup":6}],289:[function(require,module,exports){
 arguments[4][42][0].apply(exports,arguments)
-},{"dup":42,"events":5,"inherits":307,"insert-css":308,"lodash":319,"qwery":309}],307:[function(require,module,exports){
+},{"dup":42,"events":5,"inherits":290,"insert-css":291,"lodash":296,"qwery":292}],290:[function(require,module,exports){
 arguments[4][43][0].apply(exports,arguments)
-},{"dup":43}],308:[function(require,module,exports){
+},{"dup":43}],291:[function(require,module,exports){
 arguments[4][44][0].apply(exports,arguments)
-},{"dup":44}],309:[function(require,module,exports){
+},{"dup":44}],292:[function(require,module,exports){
 arguments[4][45][0].apply(exports,arguments)
-},{"dup":45}],310:[function(require,module,exports){
-(function (Buffer){
-'use strict';
-var d3 = require('d3');
-var utils = require('lightning-client-utils');
-var MultiaxisZoom = require('d3-multiaxis-zoom');
-var _ = require('lodash');
-var LightningVisualization = require('lightning-visualization');
-
-var css = Buffer("LnNjYXR0ZXItcGxvdCB7CiAgICBwb3NpdGlvbjogcmVsYXRpdmU7Cn0KCi5zY2F0dGVyLXBsb3QuY2FudmFzIHsKICAgIHBvc2l0aW9uOiBhYnNvbHV0ZTsKICAgIHBvaW50ZXItZXZlbnRzOiBhbGw7CiAgICB6LWluZGV4OiAxOwp9Cgouc2NhdHRlci1wbG90LnN2ZyB7CiAgICBwb3NpdGlvbjogYWJzb2x1dGU7CiAgICB6LWluZGV4OiAwOwogICAgcG9pbnRlci1ldmVudHM6IG5vbmU7CiAgICAtd2Via2l0LXRyYW5zZm9ybTogdHJhbnNsYXRlM2QoMCwwLDApOwp9Cgouc2NhdHRlci1wbG90LnJlY3QgewogICAgZmlsbDogI2ZmZmZmZjsKICAgIHotaW5kZXg6IDEwMDsKfQoKLnNjYXR0ZXItcGxvdC5icnVzaC1jb250YWluZXIgewogICAgei1pbmRleCA6IDE7CiAgICBwb2ludGVyLWV2ZW50czogbm9uZTsKfQoKLmJydXNoIHsKICAgIHBvaW50ZXItZXZlbnRzOiBub25lOwp9CgouYnJ1c2ggLmV4dGVudCB7CiAgICBmaWxsLW9wYWNpdHk6IC4wODU7CiAgICBzaGFwZS1yZW5kZXJpbmc6IGNyaXNwRWRnZXM7Cn0KCi5zY2F0dGVyLXBsb3QgLnBsb3QgewogICAgZmlsbDogI2ZmZmZmZjsKfQoKLnNjYXR0ZXItcGxvdCAuZ3JpZCAudGljayB7CiAgICBzdHJva2U6ICNCRUM5Q0U7CiAgICBvcGFjaXR5OiAwLjY7Cn0KCi5zY2F0dGVyLXBsb3QgLmdyaWQgLnBhdGggewogICAgc3Ryb2tlLXdpZHRoOiAwOwp9Cgouc2NhdHRlci1wbG90IC5heGlzIHBhdGgsIC5heGlzIGxpbmUgewogICAgZmlsbDogbm9uZTsKICAgIHN0cm9rZTogbm9uZTsKICAgIHNoYXBlLXJlbmRlcmluZzogY3Jpc3BFZGdlczsKfQoKLnNjYXR0ZXItcGxvdCAuYXhpcyBwYXRoIHsKICAgIGRpc3BsYXk6IG5vbmU7Cn0KCi5zY2F0dGVyLXBsb3QgLmxpbmUgewogICAgZmlsbDogbm9uZTsKICAgIHN0cm9rZTogIzkxNzVmMDsKICAgIHN0cm9rZS13aWR0aDogMnB4Owp9Cgouc2NhdHRlci1wbG90IHRleHQgewogICAgZmlsbDogI0E3QTlBQzsKICAgIGZvbnQtZmFtaWx5OiBtb25vc3BhY2U7CiAgICBmb250LXNpemU6IDE0cHg7CiAgICBmb250LXdlaWdodDogbm9ybWFsOwp9","base64");
-
-var Visualization = LightningVisualization.extend({
-
-    getDefaultStyles: function() {
-        return {
-            color: '#deebfa',
-            stroke: '#68a1e5',
-            size: 8,
-            alpha: 0.9
-        }
-    },
-
-    getDefaultOptions: function() {
-        return {
-            brush: true,
-            select: true
-        }
-    },
-
-    init: function() {
-        MultiaxisZoom(d3);
-        this.margin = {top: 0, right: 0, bottom: 20, left: 45};
-        if(_.has(this.data, 'xaxis')) {
-            this.margin.bottom = 57;
-        }
-        if(_.has(this.data, 'yaxis')) {
-            this.margin.left = 70;
-        }
-        this.render();
-    },
-
-    css: css,
-
-    render: function() {
-
-        var data = this.data;
-        var height = this.height;
-        var width = this.width;
-        var options = this.options;
-        var selector = this.selector;
-        var margin = this.margin;
-        var self = this;
-
-        this.$el = $(selector).first();
-
-        var points = data.points;
-
-        var xDomain = d3.extent(points, function(d) {
-                return d.x;
-            });
-        var yDomain = d3.extent(points, function(d) {
-                return d.y;
-            });
-
-        var xRange = xDomain[1] - xDomain[0];
-        var yRange = yDomain[1] - yDomain[0];
-
-        this.x = d3.scale.linear()
-            .domain([xDomain[0] - xRange * 0.1, xDomain[1] + xRange * 0.1])
-            .range([0, width - margin.left - margin.right]);
-
-        this.y = d3.scale.linear()
-            .domain([yDomain[0] - yRange * 0.1, yDomain[1] + yRange * 0.1])
-            .range([height - margin.top - margin.bottom, 0]);
-
-        this.zoom = d3.behavior.zoom()
-            .x(this.x)
-            .y(this.y)
-            .on('zoom', zoomed);
-
-        var highlighted = [];
-        var selected = [];
-
-        var container = d3.select(selector)
-            .append('div')
-            .style('width', width + "px")
-            .style('height', height + "px");
-
-        var canvas = container
-            .append('canvas')
-            .attr('class', 'scatter-plot canvas')
-            .attr('width', width - margin.left - margin.right)
-            .attr('height', height - margin.top - margin.bottom)
-            .style('margin-left', margin.left + 'px')
-            .style('margin-right', margin.right + 'px')
-            .style('margin-top', margin.top + 'px')
-            .style('margin-bottom', margin.bottom + 'px')
-            .call(this.zoom)
-            .on("dblclick.zoom", null);
-
-        var ctx = canvas
-            .node()
-            .getContext("2d");
-
-        var svg = container
-            .append('svg:svg')
-            .attr('class', 'scatter-plot svg')
-            .attr('width', width)
-            .attr('height', height)
-            .append('svg:g')
-            .attr('transform', 'translate(' + margin.left + ',' + margin.top + ')')
-            .call(this.zoom);
-
-        svg.append('rect')
-            .attr('width', width - margin.left - margin.right)
-            .attr('height', height - margin.top - margin.bottom)
-            .attr('class', 'scatter-plot rect');
-
-        // setup brushing
-        if (options.brush) {
-
-            var shiftKey;
-
-            var brush = d3.svg.brush()
-                .x(this.x)
-                .y(this.y)
-                .on("brushstart", function() {
-                    // remove any highlighting
-                    highlighted = [];
-                    // select a point if we click without extent
-                    var pos = d3.mouse(this);
-                    var found = utils.nearestPoint(self.data.points, pos, self.x, self.y);
-                    if (found) {
-                        if (_.indexOf(selected, found.i) == -1) {
-                            selected.push(found.i)
-                        } else {
-                            _.remove(selected, function(d) {return d == found.i})
-                        }
-                        redraw();
-                    }
-                })
-                .on("brush", function() {
-                    // select points within extent
-                    var extent = d3.event.target.extent();
-                    if (Math.abs(extent[0][0] - extent[1][0]) > 0 & Math.abs(extent[0][1] - extent[1][1]) > 0) {
-                        selected = [];
-                        _.forEach(points, function(p) {
-                            if (_.indexOf(selected, p.i) == -1) {
-                                var cond1 = (p.x > extent[0][0] & p.x < extent[1][0]);
-                                var cond2 = (p.y > extent[0][1] & p.y < extent[1][1]);
-                                if (cond1 && cond2) {
-                                    selected.push(p.i)
-                                }
-                            }
-                        })
-                    }
-                    redraw();
-                })
-                .on("brushend", function() {
-                    getUserData();
-                    d3.event.target.clear();
-                    d3.select(this).call(d3.event.target);
-                })
-
-            container
-                .append('svg:svg')
-                .attr('class', 'scatter-plot brush-container')
-                .attr('width', width + margin.left + margin.right)
-                .attr('height', height + margin.top + margin.bottom)
-                .append("g")
-                .attr('transform', 'translate(' + margin.left + ',' + margin.top + ')')
-                .attr('class', 'brush')
-                .call(brush);
-
-            d3.selectAll('.brush .background')
-                .style('cursor', 'default');
-
-            d3.selectAll('.brush')
-                .style('pointer-events', 'none');
-
-            d3.select(selector).on("keydown", function() {
-                shiftKey = d3.event.shiftKey;
-                if (shiftKey) {
-                    d3.selectAll('.brush').style('pointer-events', 'all');
-                    d3.selectAll('.brush .background').style('cursor', 'crosshair')
-                }
-            });
-
-            d3.select(selector).on("keyup", function() {
-                if (shiftKey) {
-                    d3.selectAll('.brush').style('pointer-events', 'none');
-                    d3.selectAll('.brush .background').style('cursor', 'default')
-                }
-                shiftKey = false
-            });
-
-        }
-
-        function mouseHandler() {
-            if (d3.event.defaultPrevented) return;
-            var pos = d3.mouse(this);
-            var found = utils.nearestPoint(points, pos, self.x, self.y);
-            if (found) {
-                highlighted = [];
-                highlighted.push(found.i);
-                self.emit('hover', found);
-            } else {
-                highlighted = []
-            }
-            selected = [];
-            redraw();
-        }
-
-        // setup mouse selections
-        if (options.select) {
-            canvas.on("click", mouseHandler)
-        }
-
-        var makeXAxis = function () {
-            return d3.svg.axis()
-                .scale(self.x)
-                .orient('bottom')
-                .ticks(5);
-        };
-
-        var makeYAxis = function () {
-            return d3.svg.axis()
-                .scale(self.y)
-                .orient('left')
-                .ticks(5);
-        };
-
-        this.xAxis = d3.svg.axis()
-            .scale(self.x)
-            .orient('bottom')
-            .ticks(5);
-
-        svg.append('g')
-            .attr('class', 'x axis')
-            .attr('transform', 'translate(0, ' + (height - margin.top - margin.bottom) + ')')
-            .call(self.xAxis);
-
-        this.yAxis = d3.svg.axis()
-            .scale(self.y)
-            .orient('left')
-            .ticks(5);
-
-        svg.append('g')
-            .attr('class', 'y axis')
-            .call(self.yAxis);
-
-        svg.append('g')
-            .attr('class', 'x grid')
-            .attr('transform', 'translate(0,' + (height - margin.top - margin.bottom) + ')')
-            .call(makeXAxis()
-                    .tickSize(-(height - margin.top - margin.bottom), 0, 0)
-                    .tickFormat(''));
-
-        svg.append('g')
-            .attr('class', 'y grid')
-            .call(makeYAxis()
-                    .tickSize(-(width - margin.left - margin.right), 0, 0)
-                    .tickFormat(''));
-
-        // automatically set line width based on number of points
-        var strokeWidth = points.length > 500 ? 1 : 1.1;
-
-        function redraw() {
-            ctx.clearRect(0, 0, width + margin.left + margin.right, height + margin.top + margin.bottom);
-            draw()
-        }
-
-        function draw() {
-
-            var cx, cy;
-
-            _.forEach(self.data.points, function(p) {
-                var alpha, fill;
-                if (selected.length > 0) {
-                    if (_.indexOf(selected, p.i) >= 0) {
-                        alpha = 0.9
-                    } else {
-                        alpha = 0.1
-                    }
-                } else {
-                    alpha = p.a
-                }
-                if (_.indexOf(highlighted, p.i) >= 0) {
-                    fill = d3.rgb(d3.hsl(p.c).darker(0.75))
-                } else {
-                    fill = p.c
-                }
-                cx = self.x(p.x);
-                cy = self.y(p.y);
-                ctx.beginPath();
-                ctx.arc(cx, cy, p.s, 0, 2 * Math.PI, false);
-                ctx.fillStyle = utils.buildRGBA(fill, alpha);
-                ctx.strokeWidth = strokeWidth;
-                ctx.strokeStyle = utils.buildRGBA(p.k, alpha);
-                ctx.fill();
-                ctx.stroke()
-            })
-              
-        }
-
-        function updateAxis() {
-
-            svg.select('.x.axis').call(self.xAxis);
-            svg.select('.y.axis').call(self.yAxis);
-            svg.select('.x.grid')
-                .call(makeXAxis()
-                    .tickSize(-(height - margin.top - margin.bottom), 0, 0)
-                    .tickFormat(''));
-            svg.select('.y.grid')
-                .call(makeYAxis()
-                    .tickSize(-(width - margin.left - margin.right), 0, 0)
-                    .tickFormat(''));
-
-        }
-
-        function zoomed() {
-            ctx.clearRect(0, 0, width - margin.left - margin.right, height - margin.top - margin.bottom);
-            updateAxis();
-            draw();
-        }
-
-        var txt;
-        if(_.has(this.data, 'xaxis')) {
-            txt = this.data.xaxis;
-            if(_.isArray(txt)) {
-                txt = txt[0];
-            }
-            svg.append("text")
-                .attr("class", "x label")
-                .attr("text-anchor", "middle")
-                .attr("x", (width - margin.left - margin.right) / 2)
-                .attr("y", height - margin.top)
-                .text(txt);
-        }
-        if(_.has(this.data, 'yaxis')) {
-            txt = this.data.yaxis;
-            if(_.isArray(txt)) {
-                txt = txt[0];
-            }
-
-            svg.append("text")
-                .attr("class", "y label")
-                .attr("text-anchor", "middle")
-                .attr("transform", "rotate(-90)")
-                .attr("x", - (height - margin.top - margin.bottom) / 2)
-                .attr("y", -margin.left + 20)
-                .text(txt);
-        }
-
-        d3.select(selector).attr("tabindex", -1);
-
-        function getUserData() {
-
-            utils.sendCommMessage(self, 'selection', selected);
-            var x = _.map(selected, function(d) {return points[d].x});
-            var y = _.map(selected, function(d) {return points[d].y});
-            utils.updateSettings(self, {
-                selected: selected,
-                x: x,
-                y: y
-            }, function(err) {
-                if(err) {
-                    console.log('err saving user data');
-                }
-            });
-        }
-
-        draw();
-        
-        this.redraw = redraw;
-
-    },
-
-    formatData: function(data) {
-
-        var retColor = utils.getColorFromData(data);
-        var retSize = data.size || [];
-        var retAlpha = data.alpha || [];
-        var styles = this.styles;
-
-        var c, s, a;
-
-        data.points = data.points.map(function(d, i) {
-            d.x = d[0];
-            d.y = d[1];
-            d.i = i;
-            c = retColor.length > 1 ? retColor[i] : retColor[0];
-            s = retSize.length > 1 ? retSize[i] : retSize[0];
-            a = retAlpha.length > 1 ? retAlpha[i] : retAlpha[0];
-            d.c = c ? c : styles.color;
-            d.s = s ? s : styles.size;
-            d.k = c ? c.darker(0.75) : styles.stroke;
-            d.a = a ? a : styles.alpha;
-            return d
-        });
-
-        return data
-    },
-
-    updateData: function(formattedData) {
-        this.data = formattedData;
-        this.redraw();
-    },
-
-    appendData: function(formattedData) {        
-        this.data.points = this.data.points.concat(formattedData.points);
-        this.redraw();
-    }
-
-});
-
-
-module.exports = Visualization;
-
-}).call(this,require("buffer").Buffer)
-},{"buffer":1,"d3":291,"d3-multiaxis-zoom":289,"lightning-client-utils":292,"lightning-visualization":306,"lodash":319}],311:[function(require,module,exports){
-arguments[4][6][0].apply(exports,arguments)
-},{"./src":318,"dup":6}],312:[function(require,module,exports){
-arguments[4][42][0].apply(exports,arguments)
-},{"dup":42,"events":5,"inherits":313,"insert-css":314,"lodash":319,"qwery":315}],313:[function(require,module,exports){
-arguments[4][43][0].apply(exports,arguments)
-},{"dup":43}],314:[function(require,module,exports){
-arguments[4][44][0].apply(exports,arguments)
-},{"dup":44}],315:[function(require,module,exports){
-arguments[4][45][0].apply(exports,arguments)
-},{"dup":45}],316:[function(require,module,exports){
+},{"dup":45}],293:[function(require,module,exports){
 arguments[4][260][0].apply(exports,arguments)
-},{"dup":260}],317:[function(require,module,exports){
+},{"dup":260}],294:[function(require,module,exports){
 arguments[4][261][0].apply(exports,arguments)
-},{"dup":261}],318:[function(require,module,exports){
+},{"dup":261}],295:[function(require,module,exports){
 'use strict';
 
 var LightningVisualization = require('lightning-visualization');
@@ -74800,7 +74704,7 @@ var Visualization = LightningVisualization.extend({
 
 module.exports = Visualization;
 
-},{"lightning-visualization":312,"lodash":319,"three-fly-controls":316,"three.js":317}],319:[function(require,module,exports){
+},{"lightning-visualization":289,"lodash":296,"three-fly-controls":293,"three.js":294}],296:[function(require,module,exports){
 (function (global){
 /**
  * @license
@@ -87155,12 +87059,13 @@ module.exports = Visualization;
 }.call(this));
 
 }).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{}],320:[function(require,module,exports){
+},{}],297:[function(require,module,exports){
 
 var jQueryURL = '//ajax.googleapis.com/ajax/libs/jquery/1.11.0/jquery.min.js';
 
 // require all the default viz's
 require('lightning-adjacency');
+// require('lightning-circle');
 require('lightning-force');
 require('lightning-gallery');
 require('lightning-graph');
@@ -87222,5 +87127,1050 @@ if(!window.$) {
 window.lightning = window.lightning || {};
 window.lightning.initVisualizations = init;
 
-},{"lightning-adjacency":6,"lightning-force":23,"lightning-gallery":48,"lightning-graph":80,"lightning-graph-bundled":55,"lightning-image":138,"lightning-image-poly":103,"lightning-line":185,"lightning-line-streaming":160,"lightning-map":208,"lightning-matrix":220,"lightning-scatter":288,"lightning-scatter-3":241,"lightning-scatter-streaming":263,"lightning-volume":311}]},{},[320]);
+},{"lightning-adjacency":6,"lightning-force":23,"lightning-gallery":48,"lightning-graph":80,"lightning-graph-bundled":55,"lightning-image":138,"lightning-image-poly":103,"lightning-line":185,"lightning-line-streaming":160,"lightning-map":208,"lightning-matrix":220,"lightning-scatter":298,"lightning-scatter-3":241,"lightning-scatter-streaming":263,"lightning-volume":288}],298:[function(require,module,exports){
+arguments[4][6][0].apply(exports,arguments)
+},{"./src":321,"dup":6}],299:[function(require,module,exports){
+arguments[4][40][0].apply(exports,arguments)
+},{"./src":300,"dup":40}],300:[function(require,module,exports){
+arguments[4][41][0].apply(exports,arguments)
+},{"dup":41}],301:[function(require,module,exports){
+arguments[4][9][0].apply(exports,arguments)
+},{"dup":9}],302:[function(require,module,exports){
+'use strict';
+var _ = require('lodash');
+var request = require('superagent');
+var d3Color = require('d3-color');
+var d3Scale = require('d3-scale');
+
+var colorbrewer = require('colorbrewer')
+var Color = require('color');
+var r;
+
+var utils = {
+
+    preloadImages: function(urls) {
+        _.each(urls, function(url) {
+            utils.preloadImage(url);
+        });
+    },
+
+    preloadImage: function(url) {
+        var img=new Image();
+        img.src=url;
+    },
+
+    randomColor: function() {
+        return '#'+Math.floor(Math.random()*16777215).toString(16);
+    },
+
+    linspace: function(a, b, n) {
+      var every = (b-a)/(n-1);
+      var ranged = _.range(a, b, every);
+      return ranged.length == n ? ranged : ranged.concat(b);
+    },
+
+    getThumbnail: function(image) {
+        return image + '_small';
+    },
+
+    cleanImageURL: function(url) {
+        if(url.indexOf('http') > -1) {
+            return url;
+        }
+
+        return (window.lightning && window.lightning.host) ? window.lightning.host + url : url;
+    },
+
+    mapRange: function(value, istart, istop, ostart, ostop) {
+        return ostart + (ostop - ostart) * ((value - istart) / (istop - istart));
+    },
+
+    getColors: function(n) {
+        var colors = ['#A38EF3', '#7ABFEA', '#5BC69F', '#E96B88', '#F0E86B', '#C2B08C', '#F9B070', '#F19A9A', '#AADA90', '#DBB1F2'];
+
+        var retColors = [];
+        for(var i = 0; i<n; i++) {
+            retColors.push(colors[ i % colors.length]);
+        }
+
+        return retColors;
+    },
+
+    getColorFromData: function(data) {
+
+        // retrieve an array of colors from 'label' or 'color' fields of object data
+        // returns an list of lists in the form [[r,g,b],[r,g,b]...]
+        var retColor, color;
+
+        if(data.hasOwnProperty('group')) {
+
+            // get bounds and number of labels
+            var group = data.group;
+            var mn = Math.min.apply(null, group);
+            var mx = Math.max.apply(null, group);
+            var n = mx - mn + 1;
+            var colors = this.getColors(n);
+
+            // get an array of d3 colors
+            retColor = group.map(function(d) { return d3Color.rgb(colors[d - mn]); });
+
+        } else if (data.hasOwnProperty('color')) {
+
+            // get an array of d3 colors directly from r,g,b values
+            color = data.color;
+            retColor = color.map(function(d) {return d3Color.rgb(d[0], d[1], d[2]); });
+
+        } else if (data.hasOwnProperty('value')) {
+
+            var value = data.value;
+
+            // get d3 colors from a linear scale
+            var colormap = data.colormap ? data.colormap : 'Purples';
+
+            var ncolor = 9;
+            if (colormap == 'Lightning') {
+                color = ['#A38EF3', '#DBB1F2', '#7ABFEA', '#5BC69F', '#AADA90', '#F0E86B', '#F9B070', '#F19A9A', '#E96B88'];
+            } else {
+                color = colorbrewer[colormap][ncolor];
+            }
+            
+            // get min and max of value data
+            var vmin = Math.min.apply(null, value);
+            var vmax = Math.max.apply(null, value);
+
+            // set up scales
+            var domain = this.linspace(vmin, vmax, ncolor);
+            var scale = d3Scale.linear().domain(domain).range(color);
+
+            retColor = value.map(function(d) { return d3Color.rgb(scale(d)); });
+
+        } else {
+            // otherwise return empty
+            retColor = [];
+        }
+
+        return retColor;
+    },
+
+    buildRGBA: function(base, opacity) {
+        var color = Color(base);
+        color.alpha(opacity);
+        return color.rgbString();
+    }, 
+
+    trackTransforms: function(ctx){
+
+        var svg = document.createElementNS("http://www.w3.org/2000/svg",'svg');
+        var xform = svg.createSVGMatrix();
+
+        ctx.getTransform = function(){ return xform; };
+        
+        var savedTransforms = [];
+        var save = ctx.save;
+        ctx.save = function(){
+            savedTransforms.push(xform.translate(0,0));
+            return save.call(ctx);
+        };
+        var restore = ctx.restore;
+        ctx.restore = function(){
+            xform = savedTransforms.pop();
+            return restore.call(ctx);
+        };
+
+        var scale = ctx.scale;
+        ctx.scale = function(sx,sy){            
+            var oldXForm = xform;
+            xform = xform.scaleNonUniform(sx,sy);
+            if(xform.d < 1) {
+                xform = oldXForm;
+                return;
+            }
+
+            return scale.call(ctx,sx,sy);
+        };
+        
+        var rotate = ctx.rotate;
+        ctx.rotate = function(radians){
+            xform = xform.rotate(radians*180/Math.PI);
+            return rotate.call(ctx,radians);
+        };
+        
+        var translate = ctx.translate;
+        ctx.translate = function(dx,dy){
+            xform = xform.translate(dx,dy);
+            return translate.call(ctx,dx,dy);
+        };
+        
+        var transform = ctx.transform;
+        ctx.transform = function(a,b,c,d,e,f){
+            var m2 = svg.createSVGMatrix();
+            m2.a=a; m2.b=b; m2.c=c; m2.d=d; m2.e=e; m2.f=f;
+            xform = xform.multiply(m2);
+            return transform.call(ctx,a,b,c,d,e,f);
+        };
+
+        var setTransform = ctx.setTransform;
+        ctx.setTransform = function(a,b,c,d,e,f){
+            xform.a = a;
+            xform.b = b;
+            xform.c = c;
+            xform.d = d;
+            xform.e = e;
+            xform.f = f;
+            return setTransform.call(ctx,a,b,c,d,e,f);
+        };
+        var pt  = svg.createSVGPoint();
+        ctx.transformedPoint = function(x,y) {
+            pt.x=x; pt.y=y;
+            return pt.matrixTransform(xform.inverse());
+        };
+    },
+
+    addCanvasZoomPanListeners: function(canvas, context, redraw) {
+            
+        var lastX= canvas.width / 2;
+        var lastY = canvas.height / 2;
+        var dragStart, dragged;
+
+        canvas.addEventListener('mousedown',function(evt){
+            lastX = evt.offsetX || (evt.pageX - canvas.offsetLeft);
+            lastY = evt.offsetY || (evt.pageY - canvas.offsetTop);
+            dragStart = context.transformedPoint(lastX,lastY);
+            dragged = false;
+        }, false);
+
+        canvas.addEventListener('mousemove',function(evt){
+            lastX = evt.offsetX || (evt.pageX - canvas.offsetLeft);
+            lastY = evt.offsetY || (evt.pageY - canvas.offsetTop);
+            dragged = true;
+            if (dragStart){
+                var pt = context.transformedPoint(lastX,lastY);
+                context.translate(pt.x-dragStart.x,pt.y-dragStart.y);
+                redraw();
+            }
+        },false);
+        canvas.addEventListener('mouseup',function(evt){
+            dragStart = null;
+            if (!dragged) zoom(evt.shiftKey ? -1 : 1 );
+        },false);
+
+        var scaleFactor = 1.025;
+        var zoom = function(clicks){
+            var pt = context.transformedPoint(lastX,lastY);
+            context.translate(pt.x, pt.y);
+            var factor = Math.pow(scaleFactor,clicks);
+            context.scale(factor,factor);
+            context.translate(-pt.x, -pt.y);
+            redraw();
+        };
+
+        var handleScroll = function(evt){
+            var delta = evt.wheelDelta ? evt.wheelDelta/40 : evt.detail ? -evt.detail : 0;
+            if (delta) zoom(delta);
+            return evt.preventDefault() && false;
+        };
+        canvas.addEventListener('DOMMouseScroll',handleScroll,false);
+        canvas.addEventListener('mousewheel',handleScroll,false);
+
+    },
+
+
+    isEditorOrPreview: function() {
+        var url = document.URL;
+        return /https?:\/\/[^\/]+\/visualization-types\/*/.test(url);
+    },
+
+    getId: function(viz) {
+        var $el = viz.$el;
+        if(!viz.$el) {
+            $el = $(viz.selection);
+        }
+        return $el.closest('[data-model=visualization]').data('model-id');
+    },
+
+    getUrl: function(viz) {
+
+        var vid = this.getId(viz);
+        var host = '/';
+
+        if(window.lightning && window.lightning.host) {
+            host = window.lightning.host;
+        }
+
+        return host + 'visualizations/' + vid;
+    },
+
+
+    fetchData: function(viz, keys, cb) {
+
+        if(!viz.$el) {
+            console.warn('Must set .$el property on your visualization');
+        }
+
+        if(this.isEditorOrPreview()) {
+
+            setTimeout(function() {
+                var data = $('#data-editor').next('.CodeMirror').find('.CodeMirror-code span')[0].innerHTML;
+                var fetchedData = JSON.parse(data);
+
+                _.each(keys, function(key) {
+                    fetchedData = fetchedData[key];
+                });
+
+                cb(null, fetchedData);
+
+            }, 0);
+
+
+        } else {
+
+            var url = this.getUrl(viz);
+
+            if(r) {
+                r.abort();
+            }
+
+            r = request.get(url + '/data/' + keys.join('/') + '/', function(err, res) {
+
+                if(err) {
+                    return cb(err);
+                }
+
+                cb(null, (res.body || {}).data);
+            });
+        }
+    },
+
+    getSettings: function(viz, cb) {
+
+        if(this.isEditorOrPreview()) {
+            setTimeout(function() {
+                cb(null, {});
+            }, 0);
+
+            return;
+        }
+
+        var url = this.getUrl(viz);
+
+        r = request.get(url + '/settings/', function(err, res) {
+
+            if(err) {
+                return cb(err);
+            }
+
+            cb(null, (res.body || {}).settings);
+        });
+    },
+
+    getUniqueId: function() {
+        var s4 = function() {
+            return Math.floor((1 + Math.random()) * 0x10000)
+                       .toString(16)
+                       .substring(1);
+        };
+
+        return s4() + s4() + '-' + s4() + '-' + s4() + '-' +
+           s4() + '-' + s4() + s4() + s4();
+    },
+
+    updateSettings: function(viz, settings, cb) {
+
+        if(this.isEditorOrPreview()) {
+            setTimeout(function() {
+                cb(null, settings);
+            }, 0);
+
+            return;
+        }
+
+        var url = this.getUrl(viz);
+
+        r = request.post(url + '/settings/', settings, function(err, res) {
+
+            if(err) {
+                return cb(err)
+            }
+
+            cb(null, (res.body || {}).settings);
+        });
+    },
+
+    getCommForViz: function(viz) {
+        var m = (window.lightning || {}).comm_map;
+        if(m) {
+            return m[this.getId(viz)];
+        }
+    },
+
+    sendCommMessage: function(viz, type, data) {
+        var comm = this.getCommForViz(viz);
+        if(comm) {
+            comm.send(JSON.stringify({
+                type: type,
+                data: data
+            }));
+        }
+    },
+
+    nearestPoint: function(points, target, xscale, yscale) {
+        // find point in points nearest to target
+        // using scales x and y
+        // point must have attrs x, y, and s
+        var i = 0, count = 0;
+        var found, dist, n, p;
+        while (count == 0 & i < points.length) {
+            p = points[i]
+            dist = Math.sqrt(Math.pow(xscale(p.x) - target[0], 2) + Math.pow(yscale(p.y) - target[1], 2))
+            if (dist <= p.s) {
+                found = p
+                count = 1
+            }
+            i++;
+        }
+        return found
+    }
+
+};
+
+
+module.exports = utils;
+},{"color":303,"colorbrewer":309,"d3-color":310,"d3-scale":311,"lodash":312,"superagent":313}],303:[function(require,module,exports){
+arguments[4][11][0].apply(exports,arguments)
+},{"color-convert":305,"color-string":306,"dup":11}],304:[function(require,module,exports){
+arguments[4][12][0].apply(exports,arguments)
+},{"dup":12}],305:[function(require,module,exports){
+arguments[4][13][0].apply(exports,arguments)
+},{"./conversions":304,"dup":13}],306:[function(require,module,exports){
+arguments[4][14][0].apply(exports,arguments)
+},{"color-name":307,"dup":14}],307:[function(require,module,exports){
+arguments[4][15][0].apply(exports,arguments)
+},{"dup":15}],308:[function(require,module,exports){
+arguments[4][7][0].apply(exports,arguments)
+},{"dup":7}],309:[function(require,module,exports){
+arguments[4][8][0].apply(exports,arguments)
+},{"./colorbrewer.js":308,"dup":8}],310:[function(require,module,exports){
+arguments[4][16][0].apply(exports,arguments)
+},{"dup":16}],311:[function(require,module,exports){
+arguments[4][17][0].apply(exports,arguments)
+},{"dup":17}],312:[function(require,module,exports){
+arguments[4][18][0].apply(exports,arguments)
+},{"dup":18}],313:[function(require,module,exports){
+arguments[4][19][0].apply(exports,arguments)
+},{"dup":19,"emitter":314,"reduce":315}],314:[function(require,module,exports){
+arguments[4][20][0].apply(exports,arguments)
+},{"dup":20}],315:[function(require,module,exports){
+arguments[4][21][0].apply(exports,arguments)
+},{"dup":21}],316:[function(require,module,exports){
+var _ = require('lodash');
+var insertCSS = require('insert-css');
+var inherits = require('inherits');
+var qwery = require('qwery');
+
+var LightningVisualization = function(selector, data, images, options) {
+
+    this.options = _.defaults(options || {}, this.getDefaultOptions());
+    this.styles = this.getDefaultStyles();
+    this.qwery = qwery;
+    this.el = qwery(selector)[0];
+    this.width = (this.options.width || this.el.offsetWidth);
+    this.height = (this.options.height || (this.getHeight ? this.getHeight() : this.width * 0.6));
+    
+    this.data = this.formatData(data);
+    this.images = images || [];
+
+    this.selector = selector;
+    this.init();
+};
+
+inherits(LightningVisualization, require('events').EventEmitter);
+
+LightningVisualization.prototype.getDefaultOptions = function() {
+    return {};
+}
+
+LightningVisualization.prototype.getDefaultStyles = function() {
+    return {};
+}
+
+LightningVisualization.prototype.init = function() {
+    console.warn('init not implemented');
+}
+
+/*
+ * Take the provided data and return it in whatever data format is needed
+ */
+LightningVisualization.prototype.formatData = function(data) {
+    console.warn('formatData not implemented');
+    return data;
+}
+
+/*
+ * Optional function, use this if you want to users to send updated data to this plot
+ */
+LightningVisualization.prototype.updateData = function(data) {
+    console.warn('updateData not implemented');
+}
+
+/*
+ * Optional function, use this if you want to enable streaming updates to this plot
+ */
+LightningVisualization.prototype.appendData = function(data) {
+    console.warn('appendData not implemented');
+}
+
+
+// Modified from backbone.js
+LightningVisualization.extend = function(protoProps, staticProps) {
+    var parent = this;
+    var child;
+
+    // Wrap these functions so that the user can assume
+    // the data has already been formatted by the time
+    // it gets here.
+    var wrapFuncs = ['appendData', 'updateData'];
+    _.each(wrapFuncs, function(d) {
+        if(protoProps[d]) {
+            var fn = protoProps[d];
+            protoProps[d] = function(data) {
+                var d = this.formatData(data);
+                return fn.call(this, d);
+            };
+        }
+    });
+
+    // The constructor function for the new subclass is either defined by you
+    // (the "constructor" property in your `extend` definition), or defaulted
+    // by us to simply call the parent constructor.
+    if (protoProps && _.has(protoProps, 'constructor')) {
+        child = protoProps.constructor;
+    } else {
+        child = function(){
+            if(this.css && !child._stylesInitialized) {
+                insertCSS(this.css);
+                child._stylesInitialized = true;
+            }
+            return parent.apply(this, arguments);
+        };
+        child._initializedStyles = false;
+    }
+
+    // Add static properties to the constructor function, if supplied.
+    _.extend(child, parent, staticProps);
+
+    // Set the prototype chain to inherit from `parent`, without calling
+    // `parent` constructor function.
+    var Surrogate = function(){ this.constructor = child; };
+    Surrogate.prototype = parent.prototype;
+    child.prototype = new Surrogate;
+
+    // Add prototype properties (instance properties) to the subclass,
+    // if supplied.
+    if (protoProps) _.extend(child.prototype, protoProps);
+
+    // Set a convenience property in case the parent's prototype is needed
+    // later.
+    child.__super__ = parent.prototype;
+
+    return child;
+};
+
+
+module.exports = LightningVisualization;
+
+
+},{"events":5,"inherits":317,"insert-css":318,"lodash":320,"qwery":319}],317:[function(require,module,exports){
+arguments[4][43][0].apply(exports,arguments)
+},{"dup":43}],318:[function(require,module,exports){
+arguments[4][44][0].apply(exports,arguments)
+},{"dup":44}],319:[function(require,module,exports){
+arguments[4][45][0].apply(exports,arguments)
+},{"dup":45}],320:[function(require,module,exports){
+arguments[4][296][0].apply(exports,arguments)
+},{"dup":296}],321:[function(require,module,exports){
+(function (Buffer){
+'use strict';
+var d3 = require('d3');
+var utils = require('lightning-client-utils');
+var MultiaxisZoom = require('d3-multiaxis-zoom');
+var _ = require('lodash');
+var LightningVisualization = require('lightning-visualization');
+
+var css = Buffer("QGltcG9ydCB1cmwoaHR0cDovL2ZvbnRzLmdvb2dsZWFwaXMuY29tL2Nzcz9mYW1pbHk9T3BlbitTYW5zKTsKCi5zY2F0dGVyLXBsb3QgewogICAgcG9zaXRpb246IHJlbGF0aXZlOwp9Cgouc2NhdHRlci1wbG90LmNhbnZhcyB7CiAgICBwb3NpdGlvbjogYWJzb2x1dGU7CiAgICBwb2ludGVyLWV2ZW50czogYWxsOwogICAgei1pbmRleDogMTsKfQoKLnNjYXR0ZXItcGxvdC5zdmcgewogICAgcG9zaXRpb246IGFic29sdXRlOwogICAgei1pbmRleDogMDsKICAgIHBvaW50ZXItZXZlbnRzOiBub25lOwogICAgLXdlYmtpdC10cmFuc2Zvcm06IHRyYW5zbGF0ZTNkKDAsMCwwKTsKfQoKLnNjYXR0ZXItcGxvdC5yZWN0IHsKICAgIGZpbGw6ICNmZmZmZmY7CiAgICB6LWluZGV4OiAxMDA7Cn0KCi5zY2F0dGVyLXBsb3QuYnJ1c2gtY29udGFpbmVyIHsKICAgIHotaW5kZXggOiAxOwogICAgcG9pbnRlci1ldmVudHM6IG5vbmU7Cn0KCi5icnVzaCB7CiAgICBwb2ludGVyLWV2ZW50czogbm9uZTsKfQoKLmJydXNoIC5leHRlbnQgewogICAgZmlsbC1vcGFjaXR5OiAuMDg1OwogICAgc2hhcGUtcmVuZGVyaW5nOiBjcmlzcEVkZ2VzOwp9Cgouc2NhdHRlci1wbG90IC5wbG90IHsKICAgIGZpbGw6ICNmZmZmZmY7Cn0KCi5zY2F0dGVyLXBsb3QgLmdyaWQgLnRpY2sgewogICAgc3Ryb2tlOiAjQkVDOUNFOwogICAgb3BhY2l0eTogMC42Owp9Cgouc2NhdHRlci1wbG90IC5ncmlkIC5wYXRoIHsKICAgIHN0cm9rZS13aWR0aDogMDsKfQoKLnNjYXR0ZXItcGxvdCAuYXhpcyBwYXRoLCAuYXhpcyBsaW5lIHsKICAgIGZpbGw6IG5vbmU7CiAgICBzdHJva2U6IG5vbmU7CiAgICBzaGFwZS1yZW5kZXJpbmc6IGNyaXNwRWRnZXM7Cn0KCi5zY2F0dGVyLXBsb3QgLmF4aXMgcGF0aCB7CiAgICBkaXNwbGF5OiBub25lOwp9Cgouc2NhdHRlci1wbG90IC5saW5lIHsKICAgIGZpbGw6IG5vbmU7CiAgICBzdHJva2U6ICM5MTc1ZjA7CiAgICBzdHJva2Utd2lkdGg6IDJweDsKfQoKLnNjYXR0ZXItcGxvdCB0ZXh0IHsKICAgIGZpbGw6ICNBN0E5QUM7CiAgICBmb250LWZhbWlseTogbW9ub3NwYWNlOwogICAgZm9udC1zaXplOiAxNHB4OwogICAgZm9udC13ZWlnaHQ6IG5vcm1hbDsKfQoKLnNjYXR0ZXItcGxvdCAubGFiZWwgewogICAgZm9udC1mYW1pbHk6ICdPcGVuIFNhbnMnLCBzYW5zLXNlcmlmOwogICAgZm9udC1zaXplOiAxNnB4Owp9CgoubGlnaHRuaW5nLXRvb2x0aXAgewogICAgcG9zaXRpb246IGFic29sdXRlOwogICAgYmFja2dyb3VuZC1jb2xvcjogcmdiYSgwLCAwLCAwLCAwLjcpOwogICAgdGV4dC1hbGlnbjogY2VudGVyOwogICAgY29sb3I6IHdoaXRlOwogICAgcGFkZGluZy10b3A6IDVweDsKICAgIHBhZGRpbmctYm90dG9tOiA1cHg7CiAgICBmb250LXNpemU6IDEycHg7CiAgICBib3JkZXItcmFkaXVzOiA0cHg7CiAgICB3aWR0aDogMTAwcHg7CiAgICB6LWluZGV4OiA5OTk7Cn0=","base64");
+
+var Visualization = LightningVisualization.extend({
+
+    getDefaultStyles: function() {
+        return {
+            color: '#deebfa',
+            stroke: '#68a1e5',
+            size: 8,
+            alpha: 0.9
+        }
+    },
+
+    getDefaultOptions: function() {
+        return {
+            brush: true,
+            select: true,
+            tooltips: true
+        }
+    },
+
+    init: function() {
+        MultiaxisZoom(d3);
+        this.margin = {top: 0, right: 0, bottom: 20, left: 60};
+        if(_.has(this.data, 'xaxis')) {
+            this.margin.bottom = 57;
+        }
+        if(_.has(this.data, 'yaxis')) {
+            this.margin.left = 85;
+        }
+        this.render();
+    },
+
+    css: css,
+
+    render: function() {
+
+        var data = this.data;
+        var height = this.height;
+        var width = this.width;
+        var options = this.options;
+        var selector = this.selector;
+        var margin = this.margin;
+        var self = this;
+
+        var points = data.points;
+
+        var xDomain = d3.extent(points, function(d) {
+                return d.x;
+            });
+        var yDomain = d3.extent(points, function(d) {
+                return d.y;
+            });
+
+        var xRange = xDomain[1] - xDomain[0];
+        var yRange = yDomain[1] - yDomain[0];
+
+        this.x = d3.scale.linear()
+            .domain([xDomain[0] - xRange * 0.1, xDomain[1] + xRange * 0.1])
+            .range([0, width - margin.left - margin.right]);
+
+        this.y = d3.scale.linear()
+            .domain([yDomain[0] - yRange * 0.1, yDomain[1] + yRange * 0.1])
+            .range([height - margin.top - margin.bottom, 0]);
+
+        this.zoom = d3.behavior.zoom()
+            .x(this.x)
+            .y(this.y)
+            .on('zoom', zoomed);
+
+        var highlighted = [];
+        var selected = [];
+
+        var container = d3.select(selector)
+            .append('div')
+            .style('width', width + 'px')
+            .style('position', 'relative')
+            .style('overflow', 'hidden')
+            .style('height', height + 'px');
+
+        var canvas = container
+            .append('canvas')
+            .attr('class', 'scatter-plot canvas')
+            .attr('width', width - margin.left - margin.right)
+            .attr('height', height - margin.top - margin.bottom)
+            .style('margin-left', margin.left + 'px')
+            .style('margin-right', margin.right + 'px')
+            .style('margin-top', margin.top + 'px')
+            .style('margin-bottom', margin.bottom + 'px')
+            .call(this.zoom)
+            .on('dblclick.zoom', null);
+
+        var ctx = canvas
+            .node()
+            .getContext('2d');
+
+        var svg = container
+            .append('svg:svg')
+            .attr('class', 'scatter-plot svg')
+            .attr('width', width)
+            .attr('height', height)
+            .append('svg:g')
+            .attr('transform', 'translate(' + margin.left + ',' + margin.top + ')')
+            .call(this.zoom);
+
+        svg.append('rect')
+            .attr('width', width - margin.left - margin.right)
+            .attr('height', height - margin.top - margin.bottom)
+            .attr('class', 'scatter-plot rect');
+
+        // setup brushing
+        if (options.brush) {
+
+            var shiftKey;
+
+            var brush = d3.svg.brush()
+                .x(this.x)
+                .y(this.y)
+                .on('brushstart', function() {
+                    // remove any highlighting
+                    highlighted = [];
+                    // select a point if we click without extent
+                    var pos = d3.mouse(this);
+                    var found = utils.nearestPoint(self.data.points, pos, self.x, self.y);
+                    if (found) {
+                        if (_.indexOf(selected, found.i) == -1) {
+                            selected.push(found.i);
+                        } else {
+                            _.remove(selected, function(d) { return d == found.i; });
+                        }
+                        redraw();
+                    }
+                })
+                .on('brush', function() {
+                    // select points within extent
+                    var extent = d3.event.target.extent();
+                    if (Math.abs(extent[0][0] - extent[1][0]) > 0 & Math.abs(extent[0][1] - extent[1][1]) > 0) {
+                        selected = [];
+                        _.forEach(points, function(p) {
+                            if (_.indexOf(selected, p.i) == -1) {
+                                var cond1 = (p.x > extent[0][0] & p.x < extent[1][0]);
+                                var cond2 = (p.y > extent[0][1] & p.y < extent[1][1]);
+                                if (cond1 && cond2) {
+                                    selected.push(p.i);
+                                }
+                            }
+                        });
+                    }
+                    redraw();
+                })
+                .on('brushend', function() {
+                    getUserData();
+                    d3.event.target.clear();
+                    d3.select(this).call(d3.event.target);
+                });
+
+            container
+                .append('svg:svg')
+                .attr('class', 'scatter-plot brush-container')
+                .attr('width', width + margin.left + margin.right)
+                .attr('height', height + margin.top + margin.bottom)
+                .append('g')
+                .attr('transform', 'translate(' + margin.left + ',' + margin.top + ')')
+                .attr('class', 'brush')
+                .call(brush);
+
+            d3.selectAll('.brush .background')
+                .style('cursor', 'default');
+
+            d3.selectAll('.brush')
+                .style('pointer-events', 'none');
+
+            d3.select(selector).on('keydown', function() {
+                shiftKey = d3.event.shiftKey;
+                if (shiftKey) {
+                    d3.selectAll('.brush').style('pointer-events', 'all');
+                    d3.selectAll('.brush .background').style('cursor', 'crosshair');
+                }
+            });
+
+            d3.select(selector).on('keyup', function() {
+                if (shiftKey) {
+                    d3.selectAll('.brush').style('pointer-events', 'none');
+                    d3.selectAll('.brush .background').style('cursor', 'default');
+                }
+                shiftKey = false;
+            });
+
+        }
+
+        function mouseHandler() {
+            if (d3.event.defaultPrevented) return;
+            var pos = d3.mouse(this);
+            var found = utils.nearestPoint(points, pos, self.x, self.y);
+            if (found) {
+                highlighted = [];
+                highlighted.push(found.i);
+                self.emit('hover', found);
+            } else {
+                highlighted = [];
+                self.removeTooltip();
+            }
+            selected = [];
+            redraw();
+        }
+
+        // setup mouse selections
+        if (options.select) {
+            canvas.on('click', mouseHandler);
+        }
+
+        var makeXAxis = function () {
+            return d3.svg.axis()
+                .scale(self.x)
+                .orient('bottom')
+                .ticks(5);
+        };
+
+        var makeYAxis = function () {
+            return d3.svg.axis()
+                .scale(self.y)
+                .orient('left')
+                .ticks(5);
+        };
+
+        function customTickFormat(d) {
+            return parseFloat(d3.format('.3f')(d));
+        }
+
+        this.xAxis = d3.svg.axis()
+            .scale(self.x)
+            .orient('bottom')
+            .ticks(5)
+            .tickFormat(customTickFormat);
+
+        svg.append('g')
+            .attr('class', 'x axis')
+            .attr('transform', 'translate(0, ' + (height - margin.top - margin.bottom) + ')')
+            .call(self.xAxis);
+
+        this.yAxis = d3.svg.axis()
+            .scale(self.y)
+            .orient('left')
+            .ticks(5)
+            .tickFormat(customTickFormat);
+
+        svg.append('g')
+            .attr('class', 'y axis')
+            .call(self.yAxis);
+
+        svg.append('g')
+            .attr('class', 'x grid')
+            .attr('transform', 'translate(0,' + (height - margin.top - margin.bottom) + ')')
+            .call(makeXAxis()
+                    .tickSize(-(height - margin.top - margin.bottom), 0, 0)
+                    .tickFormat(''));
+
+        svg.append('g')
+            .attr('class', 'y grid')
+            .call(makeYAxis()
+                    .tickSize(-(width - margin.left - margin.right), 0, 0)
+                    .tickFormat(''));
+
+        // automatically set line width based on number of points
+        var strokeWidth = points.length > 500 ? 1 : 1.1;
+
+        function redraw() {
+            ctx.clearRect(0, 0, width + margin.left + margin.right, height + margin.top + margin.bottom);
+            draw()
+        }
+
+        function draw() {
+
+            var cx, cy;
+
+            _.forEach(self.data.points, function(p) {
+                var alpha, fill;
+                if (selected.length > 0) {
+                    if (_.indexOf(selected, p.i) >= 0) {
+                        alpha = 0.9
+                    } else {
+                        alpha = 0.1
+                    }
+                } else {
+                    alpha = p.a
+                }
+                if (_.indexOf(highlighted, p.i) >= 0) {
+                    fill = d3.rgb(d3.hsl(p.c).darker(0.75))
+                } else {
+                    fill = p.c
+                }
+                cx = self.x(p.x);
+                cy = self.y(p.y);
+                ctx.beginPath();
+                ctx.arc(cx, cy, p.s, 0, 2 * Math.PI, false);
+                ctx.fillStyle = utils.buildRGBA(fill, alpha);
+                ctx.strokeWidth = strokeWidth;
+                ctx.strokeStyle = utils.buildRGBA(p.k, alpha);
+                ctx.fill();
+                ctx.stroke();
+            });
+
+            if(highlighted.length) {
+                self.showTooltip(self.data.points[highlighted[0]]);
+            }
+        }
+
+        function updateAxis() {
+
+            svg.select('.x.axis').call(self.xAxis);
+            svg.select('.y.axis').call(self.yAxis);
+            svg.select('.x.grid')
+                .call(makeXAxis()
+                    .tickSize(-(height - margin.top - margin.bottom), 0, 0)
+                    .tickFormat(''));
+            svg.select('.y.grid')
+                .call(makeYAxis()
+                    .tickSize(-(width - margin.left - margin.right), 0, 0)
+                    .tickFormat(''));
+
+        }
+
+        function zoomed() {
+            ctx.clearRect(0, 0, width - margin.left - margin.right, height - margin.top - margin.bottom);
+            updateAxis();
+            draw();
+        }
+
+        var txt;
+        if(_.has(this.data, 'xaxis')) {
+            txt = this.data.xaxis;
+            if(_.isArray(txt)) {
+                txt = txt[0];
+            }
+            svg.append('text')
+                .attr('class', 'x label')
+                .attr('text-anchor', 'middle')
+                .attr('x', (width - margin.left - margin.right) / 2)
+                .attr('y', height - margin.top - 5)
+                .text(txt);
+        }
+        if(_.has(this.data, 'yaxis')) {
+            txt = this.data.yaxis;
+            if(_.isArray(txt)) {
+                txt = txt[0];
+            }
+
+            svg.append('text')
+                .attr('class', 'y label')
+                .attr('text-anchor', 'middle')
+                .attr('transform', 'rotate(-90)')
+                .attr('x', - (height - margin.top - margin.bottom) / 2)
+                .attr('y', -margin.left + 20)
+                .text(txt);
+        }
+
+        d3.select(selector).attr('tabindex', -1);
+
+        function getUserData() {
+
+            utils.sendCommMessage(self, 'selection', selected);
+            var x = _.map(selected, function(d) {return points[d].x});
+            var y = _.map(selected, function(d) {return points[d].y});
+            utils.updateSettings(self, {
+                selected: selected,
+                x: x,
+                y: y
+            }, function(err) {
+                if(err) {
+                    console.log('err saving user data');
+                }
+            });
+        }
+
+        draw();
+        
+        this.redraw = redraw;
+
+    },
+
+    formatData: function(data) {
+
+        var retColor = utils.getColorFromData(data);
+        var retSize = data.size || [];
+        var retAlpha = data.alpha || [];
+        var styles = this.styles;
+
+        var c, s, a;
+
+        data.points = data.points.map(function(d, i) {
+            d.x = d[0];
+            d.y = d[1];
+            d.i = i;
+            c = retColor.length > 1 ? retColor[i] : retColor[0];
+            s = retSize.length > 1 ? retSize[i] : retSize[0];
+            a = retAlpha.length > 1 ? retAlpha[i] : retAlpha[0];
+            d.c = c ? c : styles.color;
+            d.s = s ? s : styles.size;
+            d.k = c ? c.darker(0.75) : styles.stroke;
+            d.a = a ? a : styles.alpha;
+            d.label = (data.labels || []).length > i ? data.labels[i] : null;
+            return d;
+        });
+
+        return data
+    },
+
+    updateData: function(formattedData) {
+        this.data = formattedData;
+        this.redraw();
+    },
+
+    appendData: function(formattedData) {        
+        this.data.points = this.data.points.concat(formattedData.points);
+        this.redraw();
+    },
+
+    getLabelForDataPoint: function(d) {
+        if(!_.isNull(d.label) && !_.isUndefined(d.label)) {
+            return d.label;
+        }
+        return ('x: ' + d3.round(d.x, 2) + '<br>' + 'y: ' + d3.round(d.y, 2));
+    },
+
+    buildTooltip: function(d) {
+        
+        var label = this.getLabelForDataPoint(d);
+        this.removeTooltip();
+
+        var cx = this.x(d.x);
+        var cy = this.y(d.y);
+        if(cx < 0 || cx > (this.width - this.margin.left - this.margin.right)) {
+            return;
+        }
+        if(cy < 0 || cy > (this.height - this.margin.top - this.margin.bottom)) {
+            return;
+        }
+
+        this.tooltipEl = document.createElement('div');
+        
+        this.tooltipEl.className = 'lightning-tooltip';        
+        this.tooltipEl.innerHTML = label;
+        this.tooltipEl.style.left = (this.x(d.x) + this.margin.left - 50) + 'px';
+        this.tooltipEl.style.bottom = (this.height - this.y(d.y) + 20) + 'px';
+    },
+
+    renderTooltip: function() {
+
+        var container = this.qwery(this.selector + ' div')[0];
+        if(this.tooltipEl && container) {
+            container.appendChild(this.tooltipEl);
+        }
+
+    },
+
+    showTooltip: function(d) {
+        if(!this.options.tooltips) {
+            return;
+        }
+        this.buildTooltip(d);
+        this.renderTooltip();
+    },
+
+    removeTooltip: function() {
+        if(this.tooltipEl) {
+            this.tooltipEl.remove();
+            this.tooltipEl = null;
+        }
+    }
+
+});
+
+
+module.exports = Visualization;
+
+}).call(this,require("buffer").Buffer)
+},{"buffer":1,"d3":301,"d3-multiaxis-zoom":299,"lightning-client-utils":302,"lightning-visualization":316,"lodash":320}]},{},[297]);
 ;window.define = window._define;window.require = window._require;
