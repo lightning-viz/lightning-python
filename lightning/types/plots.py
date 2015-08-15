@@ -19,7 +19,7 @@ class Scatter(Base):
     _name = 'scatter'
 
     @staticmethod
-    def clean(x, y, color=None, label=None, value=None, colormap=None, size=None, alpha=None, xaxis=None, yaxis=None):
+    def clean(x, y, color=None, group=None, labels=None, value=None, colormap=None, size=None, alpha=None, xaxis=None, yaxis=None):
         """
         Plot two-dimensional data as points.
 
@@ -33,8 +33,11 @@ class Scatter(Base):
         color : array-like, optional, singleton or (n,3)
             Single rgb value or array to set colors
 
-        label : array-like, optional, singleton or (n,)
+        group : array-like, optional, singleton or (n,)
             Single integer or array to set colors via groups
+
+        labels : array-like, optional, (n,)
+            Array to set tooltip label text per data point
 
         value : array-like, optional, singleton or (n,)
             Values to set node colors via a linear scale
@@ -59,7 +62,8 @@ class Scatter(Base):
         outdict = {'points': points}
 
         outdict = add_property(outdict, color, 'color')
-        outdict = add_property(outdict, label, 'label')
+        outdict = add_property(outdict, group, 'group')
+        outdict = add_property(outdict, labels, 'labels')
         outdict = add_property(outdict, value, 'value')
         outdict = add_property(outdict, colormap, 'colormap')
         outdict = add_property(outdict, size, 'size')
