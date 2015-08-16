@@ -62,6 +62,9 @@ class Visualization(object):
     def get_permalink(self):
         return self.session.host + '/visualizations/' + str(self.id)
 
+    def get_publiclink(self):
+        return self.get_permalink() + '/public/'
+
     def get_embed_link(self):
         return self._format_url(self.get_permalink() + '/embed')
 
@@ -70,7 +73,7 @@ class Visualization(object):
         return r.text
 
     def open(self):
-        webbrowser.open(self.session.host + '/visualizations/' + str(self.id) + '/')
+        webbrowser.open(self.get_publiclink())
 
     def delete(self):
         url = self.get_permalink()
