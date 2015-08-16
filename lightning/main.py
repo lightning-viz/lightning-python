@@ -29,10 +29,10 @@ class Lightning(object):
 
         if ipython:
             self.enable_ipython()
+            self.set_size(size)
         else:
             self.ipython_enabled = False
-
-        self.set_size(size)
+            self.set_size('full')
 
     def __repr__(self):
         s = 'Lightning\n'
