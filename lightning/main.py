@@ -176,7 +176,9 @@ class Lightning(object):
             else:
                 print("Connected to server at %s" % self.host)
                 return True
-        except (requests.exceptions.ConnectionError, requests.exceptions.MissingSchema) as e:
+        except (requests.exceptions.ConnectionError,
+                requests.exceptions.MissingSchema,
+                requests.exceptions.InvalidSchema) as e:
             print("Problem connecting to server at %s" % self.host)
             print("error: %s" % e)
             return False
