@@ -92,7 +92,7 @@ class Visualization(object):
             self.comm_handlers[message['type']](message['data'])
 
     @classmethod
-    def _create(cls, session=None, data=None, images=None, type=None, options=None):
+    def _create(cls, session=None, data=None, images=None, type=None, options=None, description=None):
 
         if options is None:
             options = {}
@@ -101,6 +101,8 @@ class Visualization(object):
 
         if not images:
             payload = {'data': data, 'type': type, 'options': options}
+            if description:
+                payload['description'] = description
             headers = {'Content-type': 'application/json', 'Accept': 'text/plain'}
             r = requests.post(url, data=json.dumps(payload), headers=headers, auth=session.auth)
             if r.status_code == 404:
@@ -113,7 +115,10 @@ class Visualization(object):
         else:
             first_image, remaining_images = images[0], images[1:]
             files = {'file': first_image}
-            r = requests.post(url, files=files, data={'type': type, 'options': json.dumps(options)}, auth=session.auth)
+            payload = {'type': type, 'options': json.dumps(options)}
+            if description:
+                payload['description'] = description
+            r = requests.post(url, files=files, data=payload, auth=session.auth)
             if r.status_code == 404:
                 raise Exception(r.text)
             elif not r.status_code == requests.codes.ok:

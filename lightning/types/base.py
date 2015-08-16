@@ -8,12 +8,9 @@ class Base(Visualization, VisualizationLocal):
     _name = 'base'
 
     _options = {
-        'width': {
-            'default': None
-        },
-        'height': {
-            'default': None
-        }
+        'width': {'default': None},
+        'height': {'default': None},
+        'description': {'default': None}
     }
 
     _data_dict_inputs = {}
@@ -97,19 +94,22 @@ class Base(Visualization, VisualizationLocal):
     def _clean_options(cls, **kwargs):
 
         options = {}
+        description = None
         if hasattr(cls, '_options'):
             for key, value in six.iteritems(kwargs):
                 if key in cls._options:
                     lgn_option = cls._options[key].get('name', key)
                     options[lgn_option] = value
+                if key == 'description':
+                    description = value
 
-        return options
+        return options, description
 
     @classmethod
     def _baseplot_local(cls, type, *args, **kwargs):
 
         data = cls._clean_data(*args)
-        options = cls._clean_options(**kwargs)
+        options, description = cls._clean_options(**kwargs)
 
         payload = {'type': type, 'options': options}
 
@@ -142,13 +142,13 @@ class Base(Visualization, VisualizationLocal):
         if not type:
             raise Exception("Must provide a plot type")
 
-        options = cls._clean_options(**kwargs)
+        options, description = cls._clean_options(**kwargs)
         data = cls._clean_data(*args)
 
         if 'images' in data and len(data) > 1:
             images = data['images']
             del data['images']
-            viz = cls._create(session, data=data, type=type)
+            viz = cls._create(session, data=data, type=type, description=description)
             first_image, remaining_images = images[0], images[1:]
             viz._append_image(first_image)
             for image in remaining_images:
@@ -156,10 +156,10 @@ class Base(Visualization, VisualizationLocal):
 
         elif 'images' in data:
             images = data['images']
-            viz = cls._create(session, images=images, type=type, options=options)
+            viz = cls._create(session, images=images, type=type, options=options, description=description)
 
         else:
-            viz = cls._create(session, data=data, type=type, options=options)
+            viz = cls._create(session, data=data, type=type, options=options, description=description)
 
         return viz
 
