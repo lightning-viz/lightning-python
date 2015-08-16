@@ -9,12 +9,10 @@ class Base(Visualization, VisualizationLocal):
 
     _options = {
         'width': {
-            'default_value': None,
-            'lightning_name': 'width'
+            'default': None
         },
         'height': {
-            'default_value': None,
-            'lightning_name': 'height'
+            'default': None
         }
     }
 
@@ -102,7 +100,7 @@ class Base(Visualization, VisualizationLocal):
         if hasattr(cls, '_options'):
             for key, value in six.iteritems(kwargs):
                 if key in cls._options:
-                    lgn_option = cls._options[key].get('lightning_name')
+                    lgn_option = cls._options[key].get('name', key)
                     options[lgn_option] = value
 
         return options

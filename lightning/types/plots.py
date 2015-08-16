@@ -18,14 +18,14 @@ class Scatter(Base):
 
     _name = 'scatter'
     _options = dict(Base._options, **{
-        'tooltips': {
-            'default_value': True,
-            'lightning_name': 'tooltips'
+        'tooltips': {'default': True},
+        'zoom': {'default': True},
+        'brush': {'default': True}
         }
-    })
+    )
 
     @staticmethod
-    def clean(x, y, color=None, group=None, labels=None, value=None, colormap=None, size=None, alpha=None, xaxis=None, yaxis=None):
+    def clean(x, y, labels=None, values=None, color=None, group=None, colormap=None, size=None, alpha=None, xaxis=None, yaxis=None):
         """
         Plot two-dimensional data as points.
 
@@ -36,17 +36,17 @@ class Scatter(Base):
         x, y : array-like, each (n,)
             Input data
 
+        values : array-like, optional, singleton or (n,)
+            Values to set node colors via a linear scale
+
+        labels : array-like, optional, (n,)
+            Array of text labels to set tooltips
+
         color : array-like, optional, singleton or (n,3)
             Single rgb value or array to set colors
 
         group : array-like, optional, singleton or (n,)
             Single integer or array to set colors via groups
-
-        labels : array-like, optional, (n,)
-            Array to set tooltip label text per data point
-
-        value : array-like, optional, singleton or (n,)
-            Values to set node colors via a linear scale
 
         colormap : string
             Specification of color map, only colorbrewer types supported
@@ -70,7 +70,7 @@ class Scatter(Base):
         outdict = add_property(outdict, color, 'color')
         outdict = add_property(outdict, group, 'group')
         outdict = add_property(outdict, labels, 'labels')
-        outdict = add_property(outdict, value, 'value')
+        outdict = add_property(outdict, values, 'values')
         outdict = add_property(outdict, colormap, 'colormap')
         outdict = add_property(outdict, size, 'size')
         outdict = add_property(outdict, alpha, 'alpha')
@@ -103,9 +103,13 @@ class Scatter(Base):
 class Matrix(Base):
 
     _name = 'matrix'
+    _options = dict(Base._options, **{
+        'numbers': {'default': False}
+        }
+    )
 
     @staticmethod
-    def clean(matrix, colormap=None):
+    def clean(matrix, colormap=None, row_labels=None, column_labels=None):
         """
         Visualize a dense matrix or table as a heat map.
 
@@ -113,17 +117,28 @@ class Matrix(Base):
 
         Parameters
         ----------
-        matrix : array-like
+        matrix : array-like (n,m)
             Two-dimensional array of matrix data
+
+        row_labels : array-like (n,)
+            Array of rows to label columns
+
+        column_labels : array-like (m,)
+            Array of strings to label columns
 
         colormap : string
             Specification of color map, only colorbrewer types supported
+
+        numbers : boolean, optional, default=True
+            Whether to show numbers on cells
         """
 
         matrix = mat_to_array(matrix)
         outdict = {'matrix': matrix}
 
         outdict = add_property(outdict, colormap, 'colormap')
+        outdict = add_property(outdict, row_labels, 'rowLabels')
+        outdict = add_property(outdict, column_labels, 'columnLabels')
 
         return outdict
 
@@ -131,10 +146,15 @@ class Matrix(Base):
 class Adjacency(Base):
 
     _name = 'adjacency'
+    _options = dict(Base._options, **{
+        'numbers': {'default': False},
+        'symmetric': {'default': True},
+        'sort': {'default': 'group'}
+        }
+    )
 
     @staticmethod
-    def clean(conn, label=None):
-
+    def clean(conn, labels=None, group=None):
         """
         Visualize a sparse adjacency matrix.
 
@@ -142,21 +162,34 @@ class Adjacency(Base):
 
         Parameters
         ----------
-       conn : array-like, (n,n) or (n,3) or (n,2)
+        conn : array-like, (n,n) or (n,3) or (n,2)
             Input connectivity data as either a matrix or a list of links.
             Matrix can be binary or continuous valued. Links should contain
             either 2 elements per link (source, target),
             or 3 elements (source, target, value).
 
-        label : array-like, optional, singleton or (n,)
+        labels : array-like, (n,)
+            Text labels for each item (will label rows and columns)
+
+        group : array-like, optional, singleton or (n,)
             Single integer or array to set colors via groups
+
+        sort : str, optional, default='group'
+            What to sort by, options are 'group' | 'degree'
+
+        numbers : boolean, optional, default=False
+            Whether to show numbers on cells
+
+        symmetric : boolean, optional, default=True
+            Whether to make links symmetrical
         """
         links = parse_links(conn)
         nodes = parse_nodes(conn)
 
         outdict = {'links': links, 'nodes': nodes}
 
-        outdict = add_property(outdict, label, 'label')
+        outdict = add_property(outdict, labels, 'labels')
+        outdict = add_property(outdict, group, 'group')
 
         return outdict
 
@@ -165,9 +198,13 @@ class Adjacency(Base):
 class Line(Base):
 
     _name = 'line'
+    _options = dict(Base._options, **{
+        'zoom': {'default': True}
+        }
+    )
 
     @staticmethod
-    def clean(series, index=None, color=None, label=None, size=None, xaxis=None, yaxis=None):
+    def clean(series, index=None, color=None, group=None, size=None, xaxis=None, yaxis=None):
         """
         Plot one-dimensional series data as lines.
 
@@ -185,8 +222,8 @@ class Line(Base):
         color : array-like, optional, singleton or (n,3)
             Single rgb value or array to set line colors
 
-        label : array-like, optional, singleton or (n,)
-            Single integer or array to set line colors via group labels
+        group : array-like, optional, singleton or (n,)
+            Single integer or array to set line colors via group assignment
 
         size : array-like, optional, singleton or (n,)
             Single size or array to set line thickness
@@ -196,6 +233,9 @@ class Line(Base):
 
         yaxis : str, optional, default = None
             Label for y-axis
+
+        zoom : boolean, optional, default=True
+            Whether to allow zooming
         """
 
         series = array_to_lines(series)
@@ -203,61 +243,26 @@ class Line(Base):
 
         outdict = add_property(outdict, color, 'color')
         outdict = add_property(outdict, size, 'size')
-        outdict = add_property(outdict, label, 'label')
+        outdict = add_property(outdict, group, 'group')
         outdict = add_property(outdict, index, 'index')
         outdict = add_property(outdict, xaxis, 'xaxis')
         outdict = add_property(outdict, yaxis, 'yaxis')
 
         return outdict
 
-
-@viztype
-class LineStacked(Base):
-
-    _name = 'line-stacked'
-    _func = 'linestacked'
-
-    @staticmethod
-    def clean(series, color=None, label=None, size=None):
-        """
-        Create a browsable array of line plots.
-
-        .. image:: linestacked.png
-
-        Parameters
-        ----------
-        series : array-like, (n,m)
-            Input data for lines, typically n series each of length m.
-            Can also pass a list where each individual series is of a different length.
-
-        color : array-like, optional, singleton or (n,3)
-            Single rgb value or array to set line colors
-
-        label : array-like, optional, singleton or (n,)
-            Single integer or array to set line colors via group labels
-
-        size : array-like, optional, singleton or (n,)
-            Single size or array to set line thickness
-        """
-
-        series = array_to_lines(series)
-        outdict = {'series': series}
-
-        outdict = add_property(outdict, color, 'color')
-        outdict = add_property(outdict, size, 'size')
-        outdict = add_property(outdict, label, 'label')
-
-        return outdict
-
-
 @viztype
 class Force(Base):
 
     _name = 'force'
-    _func = 'force'
+    _options = dict(Base._options, **{
+        'tooltips': {'default': True},
+        'zoom': {'default': True},
+        'brush': {'default': True}
+        }
+    )
 
     @staticmethod
-    def clean(conn, color=None, label=None, value=None, colormap=None, size=None):
+    def clean(conn, values=None, labels=None, color=None, group=None, colormap=None, size=None):
         """
         Create a force-directed network from connectivity.
 
@@ -271,20 +276,32 @@ class Force(Base):
             either 2 elements per link (source, target),
             or 3 elements (source, target, value).
 
+        values : array-like, optional, singleton or (n,)
+            Values to set node colors via a linear scale
+
+        labels : array-like, optional, (n,)
+            Array of text labels to set tooltips
+
         color : array-like, optional, singleton or (n,3)
             Single rgb value or array to set node colors
 
-        label : array-like, optional, singleton or (n,)
-            Single integer or array to set node colors via group labels
-
-        value : array-like, optional, singleton or (n,)
-            Values to set node colors via a linear scale
+        group : array-like, optional, singleton or (n,)
+            Single integer or array to set node colors via group assignment
 
         colormap : string
             Specification of color map, only colorbrewer types supported
 
         size : array-like, optional, singleton or (n,)
             Single size or array to set node sizes
+
+        tooltips : boolean, optional, default=True
+            Whether to show tooltips
+
+        zoom : boolean, optional, default=True
+            Whether to allow zooming
+
+        brush : boolean, optional, default=True
+            Whether to support brushing
         """
 
         links = parse_links(conn)
@@ -293,8 +310,9 @@ class Force(Base):
         outdict = {'links': links, 'nodes': nodes}
 
         outdict = add_property(outdict, color, 'color')
-        outdict = add_property(outdict, label, 'label')
-        outdict = add_property(outdict, value, 'value')
+        outdict = add_property(outdict, group, 'group')
+        outdict = add_property(outdict, values, 'values')
+        outdict = add_property(outdict, labels, 'labels')
         outdict = add_property(outdict, colormap, 'colormap')
         outdict = add_property(outdict, size, 'size')
 
@@ -314,10 +332,15 @@ class Force(Base):
 class Graph(Base):
 
     _name = 'graph'
-    _func = 'graph'
+    _options = dict(Base._options, **{
+        'tooltips': {'default': True},
+        'zoom': {'default': True},
+        'brush': {'default': True}
+        }
+    )
 
     @staticmethod
-    def clean(x, y, conn, color=None, label=None, value=None, colormap=None, size=None, imagedata=None):
+    def clean(x, y, conn, values=None, labels=None,color=None, group=None, colormap=None, size=None):
         """
         Create a node-link graph from spatial points and their connectivity.
 
@@ -334,20 +357,32 @@ class Graph(Base):
             either 2 elements per link (source, target),
             or 3 elements (source, target, value).
 
+        values : array-like, optional, singleton or (n,)
+            Values to set node colors via a linear scale
+
+        labels : array-like, optional, (n,)
+            Array of text labels to set tooltips
+
         color : array-like, optional, singleton or (n,) or (n,3)
             Single rgb value or array to set node colors
 
-        label : array-like, optional, singleton or (n,)
-            Single integer or array to set node colors via group labels
-
-        value : array-like, optional, singleton or (n,)
-            Values to set node colors via a linear scale
+        group : array-like, optional, singleton or (n,)
+            Single integer or array to set node colors via group assignment
 
         colormap : string
             Specification of color map, only colorbrewer types supported
 
         size : array-like, optional, singleton or (n,)
             Single size or array to set node sizes
+
+        tooltips : boolean, optional, default=True
+            Whether to show tooltips
+
+        zoom : boolean, optional, default=True
+            Whether to allow zooming
+
+        brush : boolean, optional, default=True
+            Whether to support brushing
         """
 
         links = parse_links(conn)
@@ -356,14 +391,11 @@ class Graph(Base):
         outdict = {'links': links, 'nodes': nodes}
 
         outdict = add_property(outdict, color, 'color')
-        outdict = add_property(outdict, label, 'label')
-        outdict = add_property(outdict, value, 'value')
+        outdict = add_property(outdict, group, 'group')
+        outdict = add_property(outdict, values, 'values')
+        outdict = add_property(outdict, labels, 'labels')
         outdict = add_property(outdict, colormap, 'colormap')
         outdict = add_property(outdict, size, 'size')
-
-        if imagedata is not None:
-            images = array_to_im(imagedata)
-            outdict['images'] = images
 
         return outdict
 
@@ -373,9 +405,15 @@ class GraphBundled(Base):
 
     _name = 'graph-bundled'
     _func = 'graphbundled'
+    _options = dict(Base._options, **{
+        'tooltips': {'default': True},
+        'zoom': {'default': True},
+        'brush': {'default': True}
+        }
+    )
 
     @staticmethod
-    def clean(x, y, conn, color=None, label=None, value=None, colormap=None, size=None, imagedata=None):
+    def clean(x, y, conn, labels=None, values=None, color=None, group=None, colormap=None, size=None):
         """
         Create a node-link graph with bundled edges from spatial points and their connectivity.
 
@@ -392,20 +430,32 @@ class GraphBundled(Base):
             either 2 elements per link (source, target),
             or 3 elements (source, target, value).
 
+        values : array-like, optional, singleton or (n,)
+            Values to set node colors via a linear scale
+
+        labels : array-like, optional, (n,)
+            Array of text labels to set tooltips
+
         color : array-like, optional, singleton or (n,) or (n,3)
             Single rgb value or array to set node colors
 
-        label : array-like, optional, singleton or (n,)
-            Single integer or array to set node colors via group labels
-
-        value : array-like, optional, singleton or (n,)
-            Values to set node colors via a linear scale
+        group : array-like, optional, singleton or (n,)
+            Single integer or array to set node colors via group assignment
 
         colormap : string
             Specification of color map, only colorbrewer types supported
 
         size : array-like, optional, singleton or (n,)
             Single size or array to set node sizes
+
+        tooltips : boolean, optional, default=True
+            Whether to show tooltips
+
+        zoom : boolean, optional, default=True
+            Whether to allow zooming
+
+        brush : boolean, optional, default=True
+            Whether to support brushing
         """
         links, _ = parse_links(conn)
         points = vecs_to_points(x, y)
@@ -413,14 +463,11 @@ class GraphBundled(Base):
         outdict = {'links': links, 'nodes': points}
 
         outdict = add_property(outdict, color, 'color')
-        outdict = add_property(outdict, label, 'label')
-        outdict = add_property(outdict, value, 'value')
+        outdict = add_property(outdict, group, 'group')
+        outdict = add_property(outdict, values, 'values')
+        outdict = add_property(outdict, labels, 'labels')
         outdict = add_property(outdict, colormap, 'colormap')
         outdict = add_property(outdict, size, 'size')
-
-        if imagedata is not None:
-            images = array_to_im(imagedata)
-            outdict['images'] = images
 
         return outdict
 

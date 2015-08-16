@@ -16,11 +16,11 @@ class TestLightningPlots(object):
 
         x = random.randn(100)
         y = random.randn(100)
-        l = ceil(random.rand(100) * 5)
+        g = ceil(random.rand(100) * 5)
         s = random.rand(100) * 10 + 10
         a = clip(random.rand(100) + 0.1, 0, 1)
 
-        viz = lgn.scatter(x, y, label=l, size=s, alpha=a)
+        viz = lgn.scatter(x, y, group=g, size=s, alpha=a)
 
         assert isinstance(viz, Visualization)
         assert hasattr(viz, 'id')
@@ -33,7 +33,7 @@ class TestLightningPlots(object):
         s = random.rand(100) * 10 + 10
         a = clip(random.rand(100) + 0.1, 0, 1)
 
-        viz = lgn.scatter(x, y, value=v, colormap="Purples", size=s, alpha=a)
+        viz = lgn.scatter(x, y, values=v, colormap="Purples", size=s, alpha=a)
 
         assert isinstance(viz, Visualization)
         assert hasattr(viz, 'id')
@@ -74,8 +74,8 @@ class TestLightningPlots(object):
 
         mat = random.randn(10, 10)
         mat[mat < 0.8] = 0
-        l = ceil(random.rand(10)*4)
-        viz = lgn.adjacency(mat, label=l)
+        g = ceil(random.rand(10)*4)
+        viz = lgn.adjacency(mat, group=g)
 
         assert isinstance(viz, Visualization)
         assert hasattr(viz, 'id')

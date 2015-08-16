@@ -9,6 +9,11 @@ class LineStreaming(Base):
     _name = 'line-streaming'
     _func = 'linestreaming'
     _local = False
+    _options = dict(Base._options, **{
+        'max_width': {'default': 50, 'name': 'maxWidth'},
+        'zoom': {'default': False}
+        }
+    )
 
     @staticmethod
     def clean(series, index=None, color=None, label=None, size=None, xaxis=None, yaxis=None):
@@ -64,9 +69,15 @@ class ScatterStreaming(Base):
     _name = 'scatter-streaming'
     _func = 'scatterstreaming'
     _local = False
+    _options = dict(Base._options, **{
+        'brush': {'default': False},
+        'zoom': {'default': True},
+        'tooltips': {'default': False},
+        }
+    )
 
     @staticmethod
-    def clean(x, y, color=None, label=None, value=None, colormap=None, size=None, xaxis=None, yaxis=None):
+    def clean(x, y, values=None, labels=None, group=None, color=None, colormap=None, size=None, xaxis=None, yaxis=None):
         """
         Create a streaming scatter plot of x and y.
 
@@ -81,14 +92,17 @@ class ScatterStreaming(Base):
         x, y : array-like, each (n,)
             Input data
 
+        values : array-like, optional, singleton or (n,)
+            Values to set node colors via a linear scale
+
+        labels : array-like, optional, (n,)
+            Array of text labels to set tooltips
+
         color : array-like, optional, singleton or (n,3)
             Single rgb value or array to set colors
 
-        label : array-like, optional, singleton or (n,)
+        group : array-like, optional, singleton or (n,)
             Single integer or array to set colors via groups
-
-        value : array-like, optional, singleton or (n,)
-            Values to set node colors via a linear scale
 
         colormap : string
             Specification of color map, only colorbrewer types supported
@@ -107,8 +121,9 @@ class ScatterStreaming(Base):
         outdict = {'points': points}
 
         outdict = add_property(outdict, color, 'color')
-        outdict = add_property(outdict, label, 'label')
-        outdict = add_property(outdict, value, 'value')
+        outdict = add_property(outdict, group, 'group')
+        outdict = add_property(outdict, values, 'values')
+        outdict = add_property(outdict, labels, 'labels')
         outdict = add_property(outdict, colormap, 'colormap')
         outdict = add_property(outdict, size, 'size')
         outdict = add_property(outdict, xaxis, 'xaxis')

@@ -9,7 +9,7 @@ def viztype(VizType):
     @wraps(VizType.clean)
     def plotter(self, *args, **kwargs):
 
-        if True and kwargs['height'] is None and kwargs['width'] is None:
+        if kwargs['height'] is None and kwargs['width'] is None:
             if self.size != 'full':
                 kwargs['width'] = SIZES[self.size]
 
@@ -42,7 +42,13 @@ def viztype(VizType):
     if hasattr(VizType, '_options'):
         options = VizType._options
 
-    formatted_options = ', '.join(['%s=%s' % (key, value.get('default_value')) for (key, value) in options.items()])
+    def parse(val):
+        if isinstance(val, str):
+            return "'" + val + "'"
+        else:
+            return val
+
+    formatted_options = ', '.join(['%s=%s' % (key, parse(value.get('default'))) for (key, value) in options.items()])
     argspec = inspect.getargspec(VizType.clean)
     formatted_args = inspect.formatargspec(*argspec)
     fndef = 'lambda self, %s, %s: plotter(self,%s, %s)' \
