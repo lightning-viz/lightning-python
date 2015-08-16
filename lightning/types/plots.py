@@ -1,8 +1,7 @@
 from lightning.types.base import Base
 from lightning.types.decorators import viztype
 from lightning.types.utils import array_to_lines, vecs_to_points, \
-    parse_links, array_to_im, add_property, mat_to_array, list_to_regions, \
-    check_colormap, parse_nodes
+    parse_links, add_property, mat_to_array, list_to_regions, parse_nodes
 
 
 @viztype
@@ -25,7 +24,8 @@ class Scatter(Base):
     )
 
     @staticmethod
-    def clean(x, y, labels=None, values=None, color=None, group=None, colormap=None, size=None, alpha=None, xaxis=None, yaxis=None):
+    def clean(x, y, labels=None, values=None, color=None, group=None, colormap=None,
+              size=None, alpha=None, xaxis=None, yaxis=None):
         """
         Plot two-dimensional data as points.
 
@@ -62,6 +62,15 @@ class Scatter(Base):
 
         yaxis : str, optional, default = None
             Label for y-axis
+
+        tooltips : boolean, optional, default=True
+            Whether to show tooltips
+
+        zoom : boolean, optional, default=True
+            Whether to allow zooming
+
+        brush : boolean, optional, default=True
+            Whether to support brushing
         """
 
         points = vecs_to_points(x, y)
