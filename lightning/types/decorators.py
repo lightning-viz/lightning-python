@@ -1,4 +1,5 @@
 from lightning import Lightning
+from lightning.types.base import Base
 from functools import wraps
 import inspect
 
@@ -61,6 +62,9 @@ def viztype(VizType):
 
     # manually assign a plot-specific name (instead of 'clean')
     plotter.__name__ = func
+
+    if plotter.__doc__:
+        plotter.__doc__ += Base._doc
 
     # add plotter to class
     setattr(Lightning, func, plotter)

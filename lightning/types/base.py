@@ -13,6 +13,18 @@ class Base(Visualization, VisualizationLocal):
         'description': {'default': None}
     }
 
+    _doc = """
+        width : int, optional, default=None
+            Width of visualization in pixels.
+
+        height : int, optional, default=None
+            Height of visualization in pixels.
+
+        description : str, optional, default=None
+            Markdown formatted text to show with visualization
+            when displayed in a Lightning server.
+    """
+
     _data_dict_inputs = {}
 
     @classmethod
