@@ -68,7 +68,7 @@ class ImagePoly(Base):
         """
         Raw coordinates of regions retrieved from visualization user data.
         """
-        user_data = self.get_user_data()['settings']
+        user_data = self._get_user_data()['settings']
         if 'coords' in user_data.keys():
             return [c for c in user_data['coords'] if len(c) > 1]
         else:
