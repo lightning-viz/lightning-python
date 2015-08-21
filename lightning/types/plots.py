@@ -1,7 +1,7 @@
 from lightning.types.base import Base
 from lightning.types.decorators import viztype
 from lightning.types.utils import array_to_lines, vecs_to_points, \
-    parse_links, add_property, mat_to_array, list_to_regions, parse_nodes
+    parse_links, add_property, mat_to_array, list_to_regions, parse_nodes, ndarray
 
 
 @viztype
@@ -336,6 +336,56 @@ class Force(Base):
             return user_data['selected']
         else:
             return []
+
+@viztype
+class Circle(Base):
+
+    _name = 'circle'
+
+    @staticmethod
+    def clean(conn, group=None, labels=None):
+        """
+        Create a circular graph from connectivity data.
+
+        .. image:: circle.png
+
+        Parameters
+        ----------
+        conn : array-like, (n,n) or (n,3) or (n,2)
+            Input connectivity data as either a matrix or a list of links.
+            Matrix can be binary or continuous valued. Links should contain
+            either 2 elements per link (source, target),
+            or 3 elements (source, target, value).
+
+        group : array-like, optional, (m,n) or (n,)
+            Hierarchical group assignments
+
+        labels : array-like, optional, (n,)
+            Array of text labels to label nodes
+        """
+        links = parse_links(conn)
+        nodes = parse_nodes(conn)
+
+        outdict = {'links': links, 'nodes': nodes}
+
+        outdict = add_property(outdict, labels, 'labels')
+
+        if group is not None:
+            if isinstance(group, ndarray):
+                group = group.tolist()
+            if isinstance(group, list):
+                if not isinstance(group[0], list):
+                    if isinstance(group[0], ndarray):
+                        group = [g.tolist() for g in group]
+                    else:
+                        group = [group]
+            else:
+                raise ValueError('group must be list or nested list')
+
+            outdict['group'] = group
+
+        return outdict
+
 
 @viztype
 class Graph(Base):
