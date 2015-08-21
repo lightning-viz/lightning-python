@@ -92,7 +92,7 @@ class Scatter(Base):
         """
         Selected points from scatter plot as indices
         """
-        user_data = self.get_user_data()['settings']
+        user_data = self._get_user_data()['settings']
         if 'selected' in user_data.keys():
             return user_data['selected']
         else:
@@ -102,7 +102,7 @@ class Scatter(Base):
         """
         Selected points from scatter plot as x,y coordinates
         """
-        user_data = self.get_user_data()['settings']
+        user_data = self._get_user_data()['settings']
         if 'x' in user_data.keys() and 'y' in user_data.keys():
             return user_data['x'], user_data['y']
         else:
@@ -331,7 +331,7 @@ class Force(Base):
         """
         Selected points from force plot
         """
-        user_data = self.get_user_data()['settings']
+        user_data = self._get_user_data()['settings']
         if 'selected' in user_data.keys():
             return user_data['selected']
         else:
@@ -466,7 +466,7 @@ class GraphBundled(Base):
         brush : boolean, optional, default=True
             Whether to support brushing
         """
-        links, _ = parse_links(conn)
+        links = parse_links(conn)
         points = vecs_to_points(x, y)
 
         outdict = {'links': links, 'nodes': points}
