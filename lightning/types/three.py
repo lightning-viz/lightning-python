@@ -11,7 +11,7 @@ class Scatter3(Base):
     _func = 'scatter3'
 
     @staticmethod
-    def clean(x, y, z, color=None, label=None, alpha=None, size=None):
+    def clean(x, y, z, color=None, group=None, alpha=None, size=None):
         """
         Plot three-dimensional data as points.
 
@@ -25,7 +25,7 @@ class Scatter3(Base):
         color : array-like, optional, singleton or (n,3)
             Single rgb value or array to set colors
 
-        label : array-like, optional, singleton or (n,)
+        group : array-like, optional, singleton or (n,)
             Single integer or array to set colors via groups
 
         size : array-like, optional, singleton or (n,)
@@ -40,7 +40,7 @@ class Scatter3(Base):
         outdict = {'points': points}
 
         outdict = add_property(outdict, color, 'color')
-        outdict = add_property(outdict, label, 'label')
+        outdict = add_property(outdict, group, 'group')
         outdict = add_property(outdict, size, 'size')
         outdict = add_property(outdict, alpha, 'alpha')
 
