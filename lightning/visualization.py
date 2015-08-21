@@ -147,7 +147,7 @@ class VisualizationLocal(object):
         t = Template(cls.load_template())
 
         options = escape(json.dumps(options))
-        random_id = ''.join(random.choice(string.ascii_uppercase + string.digits) for _ in range(10))
+        random_id = 'A' + ''.join(random.choice(string.ascii_uppercase + string.digits) for _ in range(9))
         fields = {'viz': type, 'options': options, 'viz_id': random_id}
 
         if images:
