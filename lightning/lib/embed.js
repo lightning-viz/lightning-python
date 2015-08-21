@@ -25316,41 +25316,9 @@ var Visualization = Matrix.extend({
 
 module.exports = Visualization;
 
-},{"d3":9,"lightning-client-utils":10,"lightning-matrix":220,"lodash":319}],23:[function(require,module,exports){
+},{"d3":9,"lightning-client-utils":10,"lightning-matrix":245,"lodash":344}],23:[function(require,module,exports){
 arguments[4][6][0].apply(exports,arguments)
 },{"./src":47,"dup":6}],24:[function(require,module,exports){
-arguments[4][9][0].apply(exports,arguments)
-},{"dup":9}],25:[function(require,module,exports){
-arguments[4][10][0].apply(exports,arguments)
-},{"color":26,"colorbrewer":32,"d3-color":33,"d3-scale":34,"dup":10,"lodash":35,"superagent":36}],26:[function(require,module,exports){
-arguments[4][11][0].apply(exports,arguments)
-},{"color-convert":28,"color-string":29,"dup":11}],27:[function(require,module,exports){
-arguments[4][12][0].apply(exports,arguments)
-},{"dup":12}],28:[function(require,module,exports){
-arguments[4][13][0].apply(exports,arguments)
-},{"./conversions":27,"dup":13}],29:[function(require,module,exports){
-arguments[4][14][0].apply(exports,arguments)
-},{"color-name":30,"dup":14}],30:[function(require,module,exports){
-arguments[4][15][0].apply(exports,arguments)
-},{"dup":15}],31:[function(require,module,exports){
-arguments[4][7][0].apply(exports,arguments)
-},{"dup":7}],32:[function(require,module,exports){
-arguments[4][8][0].apply(exports,arguments)
-},{"./colorbrewer.js":31,"dup":8}],33:[function(require,module,exports){
-arguments[4][16][0].apply(exports,arguments)
-},{"dup":16}],34:[function(require,module,exports){
-arguments[4][17][0].apply(exports,arguments)
-},{"dup":17}],35:[function(require,module,exports){
-arguments[4][18][0].apply(exports,arguments)
-},{"dup":18}],36:[function(require,module,exports){
-arguments[4][19][0].apply(exports,arguments)
-},{"dup":19,"emitter":37,"reduce":38}],37:[function(require,module,exports){
-arguments[4][20][0].apply(exports,arguments)
-},{"dup":20}],38:[function(require,module,exports){
-arguments[4][21][0].apply(exports,arguments)
-},{"dup":21}],39:[function(require,module,exports){
-arguments[4][6][0].apply(exports,arguments)
-},{"./src":46,"dup":6}],40:[function(require,module,exports){
 var d3_multiaxis_zoom = require('./src');
  
 // export as a Node module, an AMD module or a global browser variable
@@ -25366,7 +25334,7 @@ if (typeof module !== 'undefined') {
     window.d3_multiaxis_zoom = d3_multiaxis_zoom;
 }
 
-},{"./src":41}],41:[function(require,module,exports){
+},{"./src":25}],25:[function(require,module,exports){
 
 
 var Plugin = function(d3) {
@@ -27842,7 +27810,37 @@ var d3_behavior_zoomDelta, d3_behavior_zoomWheel = "onwheel" in d3_document ? (d
 }
 
 module.exports = Plugin;
-},{}],42:[function(require,module,exports){
+},{}],26:[function(require,module,exports){
+arguments[4][9][0].apply(exports,arguments)
+},{"dup":9}],27:[function(require,module,exports){
+arguments[4][10][0].apply(exports,arguments)
+},{"color":28,"colorbrewer":34,"d3-color":35,"d3-scale":36,"dup":10,"lodash":37,"superagent":38}],28:[function(require,module,exports){
+arguments[4][11][0].apply(exports,arguments)
+},{"color-convert":30,"color-string":31,"dup":11}],29:[function(require,module,exports){
+arguments[4][12][0].apply(exports,arguments)
+},{"dup":12}],30:[function(require,module,exports){
+arguments[4][13][0].apply(exports,arguments)
+},{"./conversions":29,"dup":13}],31:[function(require,module,exports){
+arguments[4][14][0].apply(exports,arguments)
+},{"color-name":32,"dup":14}],32:[function(require,module,exports){
+arguments[4][15][0].apply(exports,arguments)
+},{"dup":15}],33:[function(require,module,exports){
+arguments[4][7][0].apply(exports,arguments)
+},{"dup":7}],34:[function(require,module,exports){
+arguments[4][8][0].apply(exports,arguments)
+},{"./colorbrewer.js":33,"dup":8}],35:[function(require,module,exports){
+arguments[4][16][0].apply(exports,arguments)
+},{"dup":16}],36:[function(require,module,exports){
+arguments[4][17][0].apply(exports,arguments)
+},{"dup":17}],37:[function(require,module,exports){
+arguments[4][18][0].apply(exports,arguments)
+},{"dup":18}],38:[function(require,module,exports){
+arguments[4][19][0].apply(exports,arguments)
+},{"dup":19,"emitter":39,"reduce":40}],39:[function(require,module,exports){
+arguments[4][20][0].apply(exports,arguments)
+},{"dup":20}],40:[function(require,module,exports){
+arguments[4][21][0].apply(exports,arguments)
+},{"dup":21}],41:[function(require,module,exports){
 var _ = require('lodash');
 var insertCSS = require('insert-css');
 var inherits = require('inherits');
@@ -27960,7 +27958,7 @@ LightningVisualization.extend = function(protoProps, staticProps) {
 module.exports = LightningVisualization;
 
 
-},{"events":5,"inherits":43,"insert-css":44,"lodash":319,"qwery":45}],43:[function(require,module,exports){
+},{"events":5,"inherits":42,"insert-css":43,"lodash":344,"qwery":44}],42:[function(require,module,exports){
 if (typeof Object.create === 'function') {
   // implementation from standard node.js 'util' module
   module.exports = function inherits(ctor, superCtor) {
@@ -27985,7 +27983,7 @@ if (typeof Object.create === 'function') {
   }
 }
 
-},{}],44:[function(require,module,exports){
+},{}],43:[function(require,module,exports){
 var inserted = {};
 
 module.exports = function (css, options) {
@@ -28009,7 +28007,7 @@ module.exports = function (css, options) {
     }
 };
 
-},{}],45:[function(require,module,exports){
+},{}],44:[function(require,module,exports){
 /*!
   * @preserve Qwery - A selector engine
   * https://github.com/ded/qwery
@@ -28105,7 +28103,1569 @@ module.exports = function (css, options) {
   return qwery
 }, this);
 
+},{}],45:[function(require,module,exports){
+//     Underscore.js 1.3.3
+//     (c) 2009-2012 Jeremy Ashkenas, DocumentCloud Inc.
+//     Underscore is freely distributable under the MIT license.
+//     Portions of Underscore are inspired or borrowed from Prototype,
+//     Oliver Steele's Functional, and John Resig's Micro-Templating.
+//     For all details and documentation:
+//     http://documentcloud.github.com/underscore
+
+(function() {
+
+  // Baseline setup
+  // --------------
+
+  // Establish the root object, `window` in the browser, or `global` on the server.
+  var root = this;
+
+  // Save the previous value of the `_` variable.
+  var previousUnderscore = root._;
+
+  // Establish the object that gets returned to break out of a loop iteration.
+  var breaker = {};
+
+  // Save bytes in the minified (but not gzipped) version:
+  var ArrayProto = Array.prototype, ObjProto = Object.prototype, FuncProto = Function.prototype;
+
+  // Create quick reference variables for speed access to core prototypes.
+  var slice            = ArrayProto.slice,
+      unshift          = ArrayProto.unshift,
+      toString         = ObjProto.toString,
+      hasOwnProperty   = ObjProto.hasOwnProperty;
+
+  // All **ECMAScript 5** native function implementations that we hope to use
+  // are declared here.
+  var
+    nativeForEach      = ArrayProto.forEach,
+    nativeMap          = ArrayProto.map,
+    nativeReduce       = ArrayProto.reduce,
+    nativeReduceRight  = ArrayProto.reduceRight,
+    nativeFilter       = ArrayProto.filter,
+    nativeEvery        = ArrayProto.every,
+    nativeSome         = ArrayProto.some,
+    nativeIndexOf      = ArrayProto.indexOf,
+    nativeLastIndexOf  = ArrayProto.lastIndexOf,
+    nativeIsArray      = Array.isArray,
+    nativeKeys         = Object.keys,
+    nativeBind         = FuncProto.bind;
+
+  // Create a safe reference to the Underscore object for use below.
+  var _ = function(obj) { return new wrapper(obj); };
+
+  // Export the Underscore object for **Node.js**, with
+  // backwards-compatibility for the old `require()` API. If we're in
+  // the browser, add `_` as a global object via a string identifier,
+  // for Closure Compiler "advanced" mode.
+  if (typeof exports !== 'undefined') {
+    if (typeof module !== 'undefined' && module.exports) {
+      exports = module.exports = _;
+    }
+    exports._ = _;
+  } else {
+    root['_'] = _;
+  }
+
+  // Current version.
+  _.VERSION = '1.3.3';
+
+  // Collection Functions
+  // --------------------
+
+  // The cornerstone, an `each` implementation, aka `forEach`.
+  // Handles objects with the built-in `forEach`, arrays, and raw objects.
+  // Delegates to **ECMAScript 5**'s native `forEach` if available.
+  var each = _.each = _.forEach = function(obj, iterator, context) {
+    if (obj == null) return;
+    if (nativeForEach && obj.forEach === nativeForEach) {
+      obj.forEach(iterator, context);
+    } else if (obj.length === +obj.length) {
+      for (var i = 0, l = obj.length; i < l; i++) {
+        if (i in obj && iterator.call(context, obj[i], i, obj) === breaker) return;
+      }
+    } else {
+      for (var key in obj) {
+        if (_.has(obj, key)) {
+          if (iterator.call(context, obj[key], key, obj) === breaker) return;
+        }
+      }
+    }
+  };
+
+  // Return the results of applying the iterator to each element.
+  // Delegates to **ECMAScript 5**'s native `map` if available.
+  _.map = _.collect = function(obj, iterator, context) {
+    var results = [];
+    if (obj == null) return results;
+    if (nativeMap && obj.map === nativeMap) return obj.map(iterator, context);
+    each(obj, function(value, index, list) {
+      results[results.length] = iterator.call(context, value, index, list);
+    });
+    if (obj.length === +obj.length) results.length = obj.length;
+    return results;
+  };
+
+  // **Reduce** builds up a single result from a list of values, aka `inject`,
+  // or `foldl`. Delegates to **ECMAScript 5**'s native `reduce` if available.
+  _.reduce = _.foldl = _.inject = function(obj, iterator, memo, context) {
+    var initial = arguments.length > 2;
+    if (obj == null) obj = [];
+    if (nativeReduce && obj.reduce === nativeReduce) {
+      if (context) iterator = _.bind(iterator, context);
+      return initial ? obj.reduce(iterator, memo) : obj.reduce(iterator);
+    }
+    each(obj, function(value, index, list) {
+      if (!initial) {
+        memo = value;
+        initial = true;
+      } else {
+        memo = iterator.call(context, memo, value, index, list);
+      }
+    });
+    if (!initial) throw new TypeError('Reduce of empty array with no initial value');
+    return memo;
+  };
+
+  // The right-associative version of reduce, also known as `foldr`.
+  // Delegates to **ECMAScript 5**'s native `reduceRight` if available.
+  _.reduceRight = _.foldr = function(obj, iterator, memo, context) {
+    var initial = arguments.length > 2;
+    if (obj == null) obj = [];
+    if (nativeReduceRight && obj.reduceRight === nativeReduceRight) {
+      if (context) iterator = _.bind(iterator, context);
+      return initial ? obj.reduceRight(iterator, memo) : obj.reduceRight(iterator);
+    }
+    var reversed = _.toArray(obj).reverse();
+    if (context && !initial) iterator = _.bind(iterator, context);
+    return initial ? _.reduce(reversed, iterator, memo, context) : _.reduce(reversed, iterator);
+  };
+
+  // Return the first value which passes a truth test. Aliased as `detect`.
+  _.find = _.detect = function(obj, iterator, context) {
+    var result;
+    any(obj, function(value, index, list) {
+      if (iterator.call(context, value, index, list)) {
+        result = value;
+        return true;
+      }
+    });
+    return result;
+  };
+
+  // Return all the elements that pass a truth test.
+  // Delegates to **ECMAScript 5**'s native `filter` if available.
+  // Aliased as `select`.
+  _.filter = _.select = function(obj, iterator, context) {
+    var results = [];
+    if (obj == null) return results;
+    if (nativeFilter && obj.filter === nativeFilter) return obj.filter(iterator, context);
+    each(obj, function(value, index, list) {
+      if (iterator.call(context, value, index, list)) results[results.length] = value;
+    });
+    return results;
+  };
+
+  // Return all the elements for which a truth test fails.
+  _.reject = function(obj, iterator, context) {
+    var results = [];
+    if (obj == null) return results;
+    each(obj, function(value, index, list) {
+      if (!iterator.call(context, value, index, list)) results[results.length] = value;
+    });
+    return results;
+  };
+
+  // Determine whether all of the elements match a truth test.
+  // Delegates to **ECMAScript 5**'s native `every` if available.
+  // Aliased as `all`.
+  _.every = _.all = function(obj, iterator, context) {
+    var result = true;
+    if (obj == null) return result;
+    if (nativeEvery && obj.every === nativeEvery) return obj.every(iterator, context);
+    each(obj, function(value, index, list) {
+      if (!(result = result && iterator.call(context, value, index, list))) return breaker;
+    });
+    return !!result;
+  };
+
+  // Determine if at least one element in the object matches a truth test.
+  // Delegates to **ECMAScript 5**'s native `some` if available.
+  // Aliased as `any`.
+  var any = _.some = _.any = function(obj, iterator, context) {
+    iterator || (iterator = _.identity);
+    var result = false;
+    if (obj == null) return result;
+    if (nativeSome && obj.some === nativeSome) return obj.some(iterator, context);
+    each(obj, function(value, index, list) {
+      if (result || (result = iterator.call(context, value, index, list))) return breaker;
+    });
+    return !!result;
+  };
+
+  // Determine if a given value is included in the array or object using `===`.
+  // Aliased as `contains`.
+  _.include = _.contains = function(obj, target) {
+    var found = false;
+    if (obj == null) return found;
+    if (nativeIndexOf && obj.indexOf === nativeIndexOf) return obj.indexOf(target) != -1;
+    found = any(obj, function(value) {
+      return value === target;
+    });
+    return found;
+  };
+
+  // Invoke a method (with arguments) on every item in a collection.
+  _.invoke = function(obj, method) {
+    var args = slice.call(arguments, 2);
+    return _.map(obj, function(value) {
+      return (_.isFunction(method) ? method || value : value[method]).apply(value, args);
+    });
+  };
+
+  // Convenience version of a common use case of `map`: fetching a property.
+  _.pluck = function(obj, key) {
+    return _.map(obj, function(value){ return value[key]; });
+  };
+
+  // Return the maximum element or (element-based computation).
+  _.max = function(obj, iterator, context) {
+    if (!iterator && _.isArray(obj) && obj[0] === +obj[0]) return Math.max.apply(Math, obj);
+    if (!iterator && _.isEmpty(obj)) return -Infinity;
+    var result = {computed : -Infinity};
+    each(obj, function(value, index, list) {
+      var computed = iterator ? iterator.call(context, value, index, list) : value;
+      computed >= result.computed && (result = {value : value, computed : computed});
+    });
+    return result.value;
+  };
+
+  // Return the minimum element (or element-based computation).
+  _.min = function(obj, iterator, context) {
+    if (!iterator && _.isArray(obj) && obj[0] === +obj[0]) return Math.min.apply(Math, obj);
+    if (!iterator && _.isEmpty(obj)) return Infinity;
+    var result = {computed : Infinity};
+    each(obj, function(value, index, list) {
+      var computed = iterator ? iterator.call(context, value, index, list) : value;
+      computed < result.computed && (result = {value : value, computed : computed});
+    });
+    return result.value;
+  };
+
+  // Shuffle an array.
+  _.shuffle = function(obj) {
+    var shuffled = [], rand;
+    each(obj, function(value, index, list) {
+      rand = Math.floor(Math.random() * (index + 1));
+      shuffled[index] = shuffled[rand];
+      shuffled[rand] = value;
+    });
+    return shuffled;
+  };
+
+  // Sort the object's values by a criterion produced by an iterator.
+  _.sortBy = function(obj, val, context) {
+    var iterator = _.isFunction(val) ? val : function(obj) { return obj[val]; };
+    return _.pluck(_.map(obj, function(value, index, list) {
+      return {
+        value : value,
+        criteria : iterator.call(context, value, index, list)
+      };
+    }).sort(function(left, right) {
+      var a = left.criteria, b = right.criteria;
+      if (a === void 0) return 1;
+      if (b === void 0) return -1;
+      return a < b ? -1 : a > b ? 1 : 0;
+    }), 'value');
+  };
+
+  // Groups the object's values by a criterion. Pass either a string attribute
+  // to group by, or a function that returns the criterion.
+  _.groupBy = function(obj, val) {
+    var result = {};
+    var iterator = _.isFunction(val) ? val : function(obj) { return obj[val]; };
+    each(obj, function(value, index) {
+      var key = iterator(value, index);
+      (result[key] || (result[key] = [])).push(value);
+    });
+    return result;
+  };
+
+  // Use a comparator function to figure out at what index an object should
+  // be inserted so as to maintain order. Uses binary search.
+  _.sortedIndex = function(array, obj, iterator) {
+    iterator || (iterator = _.identity);
+    var low = 0, high = array.length;
+    while (low < high) {
+      var mid = (low + high) >> 1;
+      iterator(array[mid]) < iterator(obj) ? low = mid + 1 : high = mid;
+    }
+    return low;
+  };
+
+  // Safely convert anything iterable into a real, live array.
+  _.toArray = function(obj) {
+    if (!obj)                                     return [];
+    if (_.isArray(obj))                           return slice.call(obj);
+    if (_.isArguments(obj))                       return slice.call(obj);
+    if (obj.toArray && _.isFunction(obj.toArray)) return obj.toArray();
+    return _.values(obj);
+  };
+
+  // Return the number of elements in an object.
+  _.size = function(obj) {
+    return _.isArray(obj) ? obj.length : _.keys(obj).length;
+  };
+
+  // Array Functions
+  // ---------------
+
+  // Get the first element of an array. Passing **n** will return the first N
+  // values in the array. Aliased as `head` and `take`. The **guard** check
+  // allows it to work with `_.map`.
+  _.first = _.head = _.take = function(array, n, guard) {
+    return (n != null) && !guard ? slice.call(array, 0, n) : array[0];
+  };
+
+  // Returns everything but the last entry of the array. Especcialy useful on
+  // the arguments object. Passing **n** will return all the values in
+  // the array, excluding the last N. The **guard** check allows it to work with
+  // `_.map`.
+  _.initial = function(array, n, guard) {
+    return slice.call(array, 0, array.length - ((n == null) || guard ? 1 : n));
+  };
+
+  // Get the last element of an array. Passing **n** will return the last N
+  // values in the array. The **guard** check allows it to work with `_.map`.
+  _.last = function(array, n, guard) {
+    if ((n != null) && !guard) {
+      return slice.call(array, Math.max(array.length - n, 0));
+    } else {
+      return array[array.length - 1];
+    }
+  };
+
+  // Returns everything but the first entry of the array. Aliased as `tail`.
+  // Especially useful on the arguments object. Passing an **index** will return
+  // the rest of the values in the array from that index onward. The **guard**
+  // check allows it to work with `_.map`.
+  _.rest = _.tail = function(array, index, guard) {
+    return slice.call(array, (index == null) || guard ? 1 : index);
+  };
+
+  // Trim out all falsy values from an array.
+  _.compact = function(array) {
+    return _.filter(array, function(value){ return !!value; });
+  };
+
+  // Return a completely flattened version of an array.
+  _.flatten = function(array, shallow) {
+    return _.reduce(array, function(memo, value) {
+      if (_.isArray(value)) return memo.concat(shallow ? value : _.flatten(value));
+      memo[memo.length] = value;
+      return memo;
+    }, []);
+  };
+
+  // Return a version of the array that does not contain the specified value(s).
+  _.without = function(array) {
+    return _.difference(array, slice.call(arguments, 1));
+  };
+
+  // Produce a duplicate-free version of the array. If the array has already
+  // been sorted, you have the option of using a faster algorithm.
+  // Aliased as `unique`.
+  _.uniq = _.unique = function(array, isSorted, iterator) {
+    var initial = iterator ? _.map(array, iterator) : array;
+    var results = [];
+    // The `isSorted` flag is irrelevant if the array only contains two elements.
+    if (array.length < 3) isSorted = true;
+    _.reduce(initial, function (memo, value, index) {
+      if (isSorted ? _.last(memo) !== value || !memo.length : !_.include(memo, value)) {
+        memo.push(value);
+        results.push(array[index]);
+      }
+      return memo;
+    }, []);
+    return results;
+  };
+
+  // Produce an array that contains the union: each distinct element from all of
+  // the passed-in arrays.
+  _.union = function() {
+    return _.uniq(_.flatten(arguments, true));
+  };
+
+  // Produce an array that contains every item shared between all the
+  // passed-in arrays. (Aliased as "intersect" for back-compat.)
+  _.intersection = _.intersect = function(array) {
+    var rest = slice.call(arguments, 1);
+    return _.filter(_.uniq(array), function(item) {
+      return _.every(rest, function(other) {
+        return _.indexOf(other, item) >= 0;
+      });
+    });
+  };
+
+  // Take the difference between one array and a number of other arrays.
+  // Only the elements present in just the first array will remain.
+  _.difference = function(array) {
+    var rest = _.flatten(slice.call(arguments, 1), true);
+    return _.filter(array, function(value){ return !_.include(rest, value); });
+  };
+
+  // Zip together multiple lists into a single array -- elements that share
+  // an index go together.
+  _.zip = function() {
+    var args = slice.call(arguments);
+    var length = _.max(_.pluck(args, 'length'));
+    var results = new Array(length);
+    for (var i = 0; i < length; i++) results[i] = _.pluck(args, "" + i);
+    return results;
+  };
+
+  // If the browser doesn't supply us with indexOf (I'm looking at you, **MSIE**),
+  // we need this function. Return the position of the first occurrence of an
+  // item in an array, or -1 if the item is not included in the array.
+  // Delegates to **ECMAScript 5**'s native `indexOf` if available.
+  // If the array is large and already in sort order, pass `true`
+  // for **isSorted** to use binary search.
+  _.indexOf = function(array, item, isSorted) {
+    if (array == null) return -1;
+    var i, l;
+    if (isSorted) {
+      i = _.sortedIndex(array, item);
+      return array[i] === item ? i : -1;
+    }
+    if (nativeIndexOf && array.indexOf === nativeIndexOf) return array.indexOf(item);
+    for (i = 0, l = array.length; i < l; i++) if (i in array && array[i] === item) return i;
+    return -1;
+  };
+
+  // Delegates to **ECMAScript 5**'s native `lastIndexOf` if available.
+  _.lastIndexOf = function(array, item) {
+    if (array == null) return -1;
+    if (nativeLastIndexOf && array.lastIndexOf === nativeLastIndexOf) return array.lastIndexOf(item);
+    var i = array.length;
+    while (i--) if (i in array && array[i] === item) return i;
+    return -1;
+  };
+
+  // Generate an integer Array containing an arithmetic progression. A port of
+  // the native Python `range()` function. See
+  // [the Python documentation](http://docs.python.org/library/functions.html#range).
+  _.range = function(start, stop, step) {
+    if (arguments.length <= 1) {
+      stop = start || 0;
+      start = 0;
+    }
+    step = arguments[2] || 1;
+
+    var len = Math.max(Math.ceil((stop - start) / step), 0);
+    var idx = 0;
+    var range = new Array(len);
+
+    while(idx < len) {
+      range[idx++] = start;
+      start += step;
+    }
+
+    return range;
+  };
+
+  // Function (ahem) Functions
+  // ------------------
+
+  // Reusable constructor function for prototype setting.
+  var ctor = function(){};
+
+  // Create a function bound to a given object (assigning `this`, and arguments,
+  // optionally). Binding with arguments is also known as `curry`.
+  // Delegates to **ECMAScript 5**'s native `Function.bind` if available.
+  // We check for `func.bind` first, to fail fast when `func` is undefined.
+  _.bind = function bind(func, context) {
+    var bound, args;
+    if (func.bind === nativeBind && nativeBind) return nativeBind.apply(func, slice.call(arguments, 1));
+    if (!_.isFunction(func)) throw new TypeError;
+    args = slice.call(arguments, 2);
+    return bound = function() {
+      if (!(this instanceof bound)) return func.apply(context, args.concat(slice.call(arguments)));
+      ctor.prototype = func.prototype;
+      var self = new ctor;
+      var result = func.apply(self, args.concat(slice.call(arguments)));
+      if (Object(result) === result) return result;
+      return self;
+    };
+  };
+
+  // Bind all of an object's methods to that object. Useful for ensuring that
+  // all callbacks defined on an object belong to it.
+  _.bindAll = function(obj) {
+    var funcs = slice.call(arguments, 1);
+    if (funcs.length == 0) funcs = _.functions(obj);
+    each(funcs, function(f) { obj[f] = _.bind(obj[f], obj); });
+    return obj;
+  };
+
+  // Memoize an expensive function by storing its results.
+  _.memoize = function(func, hasher) {
+    var memo = {};
+    hasher || (hasher = _.identity);
+    return function() {
+      var key = hasher.apply(this, arguments);
+      return _.has(memo, key) ? memo[key] : (memo[key] = func.apply(this, arguments));
+    };
+  };
+
+  // Delays a function for the given number of milliseconds, and then calls
+  // it with the arguments supplied.
+  _.delay = function(func, wait) {
+    var args = slice.call(arguments, 2);
+    return setTimeout(function(){ return func.apply(null, args); }, wait);
+  };
+
+  // Defers a function, scheduling it to run after the current call stack has
+  // cleared.
+  _.defer = function(func) {
+    return _.delay.apply(_, [func, 1].concat(slice.call(arguments, 1)));
+  };
+
+  // Returns a function, that, when invoked, will only be triggered at most once
+  // during a given window of time.
+  _.throttle = function(func, wait) {
+    var context, args, timeout, throttling, more, result;
+    var whenDone = _.debounce(function(){ more = throttling = false; }, wait);
+    return function() {
+      context = this; args = arguments;
+      var later = function() {
+        timeout = null;
+        if (more) func.apply(context, args);
+        whenDone();
+      };
+      if (!timeout) timeout = setTimeout(later, wait);
+      if (throttling) {
+        more = true;
+      } else {
+        result = func.apply(context, args);
+      }
+      whenDone();
+      throttling = true;
+      return result;
+    };
+  };
+
+  // Returns a function, that, as long as it continues to be invoked, will not
+  // be triggered. The function will be called after it stops being called for
+  // N milliseconds. If `immediate` is passed, trigger the function on the
+  // leading edge, instead of the trailing.
+  _.debounce = function(func, wait, immediate) {
+    var timeout;
+    return function() {
+      var context = this, args = arguments;
+      var later = function() {
+        timeout = null;
+        if (!immediate) func.apply(context, args);
+      };
+      if (immediate && !timeout) func.apply(context, args);
+      clearTimeout(timeout);
+      timeout = setTimeout(later, wait);
+    };
+  };
+
+  // Returns a function that will be executed at most one time, no matter how
+  // often you call it. Useful for lazy initialization.
+  _.once = function(func) {
+    var ran = false, memo;
+    return function() {
+      if (ran) return memo;
+      ran = true;
+      return memo = func.apply(this, arguments);
+    };
+  };
+
+  // Returns the first function passed as an argument to the second,
+  // allowing you to adjust arguments, run code before and after, and
+  // conditionally execute the original function.
+  _.wrap = function(func, wrapper) {
+    return function() {
+      var args = [func].concat(slice.call(arguments, 0));
+      return wrapper.apply(this, args);
+    };
+  };
+
+  // Returns a function that is the composition of a list of functions, each
+  // consuming the return value of the function that follows.
+  _.compose = function() {
+    var funcs = arguments;
+    return function() {
+      var args = arguments;
+      for (var i = funcs.length - 1; i >= 0; i--) {
+        args = [funcs[i].apply(this, args)];
+      }
+      return args[0];
+    };
+  };
+
+  // Returns a function that will only be executed after being called N times.
+  _.after = function(times, func) {
+    if (times <= 0) return func();
+    return function() {
+      if (--times < 1) { return func.apply(this, arguments); }
+    };
+  };
+
+  // Object Functions
+  // ----------------
+
+  // Retrieve the names of an object's properties.
+  // Delegates to **ECMAScript 5**'s native `Object.keys`
+  _.keys = nativeKeys || function(obj) {
+    if (obj !== Object(obj)) throw new TypeError('Invalid object');
+    var keys = [];
+    for (var key in obj) if (_.has(obj, key)) keys[keys.length] = key;
+    return keys;
+  };
+
+  // Retrieve the values of an object's properties.
+  _.values = function(obj) {
+    return _.map(obj, _.identity);
+  };
+
+  // Return a sorted list of the function names available on the object.
+  // Aliased as `methods`
+  _.functions = _.methods = function(obj) {
+    var names = [];
+    for (var key in obj) {
+      if (_.isFunction(obj[key])) names.push(key);
+    }
+    return names.sort();
+  };
+
+  // Extend a given object with all the properties in passed-in object(s).
+  _.extend = function(obj) {
+    each(slice.call(arguments, 1), function(source) {
+      for (var prop in source) {
+        obj[prop] = source[prop];
+      }
+    });
+    return obj;
+  };
+
+  // Return a copy of the object only containing the whitelisted properties.
+  _.pick = function(obj) {
+    var result = {};
+    each(_.flatten(slice.call(arguments, 1)), function(key) {
+      if (key in obj) result[key] = obj[key];
+    });
+    return result;
+  };
+
+  // Fill in a given object with default properties.
+  _.defaults = function(obj) {
+    each(slice.call(arguments, 1), function(source) {
+      for (var prop in source) {
+        if (obj[prop] == null) obj[prop] = source[prop];
+      }
+    });
+    return obj;
+  };
+
+  // Create a (shallow-cloned) duplicate of an object.
+  _.clone = function(obj) {
+    if (!_.isObject(obj)) return obj;
+    return _.isArray(obj) ? obj.slice() : _.extend({}, obj);
+  };
+
+  // Invokes interceptor with the obj, and then returns obj.
+  // The primary purpose of this method is to "tap into" a method chain, in
+  // order to perform operations on intermediate results within the chain.
+  _.tap = function(obj, interceptor) {
+    interceptor(obj);
+    return obj;
+  };
+
+  // Internal recursive comparison function.
+  function eq(a, b, stack) {
+    // Identical objects are equal. `0 === -0`, but they aren't identical.
+    // See the Harmony `egal` proposal: http://wiki.ecmascript.org/doku.php?id=harmony:egal.
+    if (a === b) return a !== 0 || 1 / a == 1 / b;
+    // A strict comparison is necessary because `null == undefined`.
+    if (a == null || b == null) return a === b;
+    // Unwrap any wrapped objects.
+    if (a._chain) a = a._wrapped;
+    if (b._chain) b = b._wrapped;
+    // Invoke a custom `isEqual` method if one is provided.
+    if (a.isEqual && _.isFunction(a.isEqual)) return a.isEqual(b);
+    if (b.isEqual && _.isFunction(b.isEqual)) return b.isEqual(a);
+    // Compare `[[Class]]` names.
+    var className = toString.call(a);
+    if (className != toString.call(b)) return false;
+    switch (className) {
+      // Strings, numbers, dates, and booleans are compared by value.
+      case '[object String]':
+        // Primitives and their corresponding object wrappers are equivalent; thus, `"5"` is
+        // equivalent to `new String("5")`.
+        return a == String(b);
+      case '[object Number]':
+        // `NaN`s are equivalent, but non-reflexive. An `egal` comparison is performed for
+        // other numeric values.
+        return a != +a ? b != +b : (a == 0 ? 1 / a == 1 / b : a == +b);
+      case '[object Date]':
+      case '[object Boolean]':
+        // Coerce dates and booleans to numeric primitive values. Dates are compared by their
+        // millisecond representations. Note that invalid dates with millisecond representations
+        // of `NaN` are not equivalent.
+        return +a == +b;
+      // RegExps are compared by their source patterns and flags.
+      case '[object RegExp]':
+        return a.source == b.source &&
+               a.global == b.global &&
+               a.multiline == b.multiline &&
+               a.ignoreCase == b.ignoreCase;
+    }
+    if (typeof a != 'object' || typeof b != 'object') return false;
+    // Assume equality for cyclic structures. The algorithm for detecting cyclic
+    // structures is adapted from ES 5.1 section 15.12.3, abstract operation `JO`.
+    var length = stack.length;
+    while (length--) {
+      // Linear search. Performance is inversely proportional to the number of
+      // unique nested structures.
+      if (stack[length] == a) return true;
+    }
+    // Add the first object to the stack of traversed objects.
+    stack.push(a);
+    var size = 0, result = true;
+    // Recursively compare objects and arrays.
+    if (className == '[object Array]') {
+      // Compare array lengths to determine if a deep comparison is necessary.
+      size = a.length;
+      result = size == b.length;
+      if (result) {
+        // Deep compare the contents, ignoring non-numeric properties.
+        while (size--) {
+          // Ensure commutative equality for sparse arrays.
+          if (!(result = size in a == size in b && eq(a[size], b[size], stack))) break;
+        }
+      }
+    } else {
+      // Objects with different constructors are not equivalent.
+      if ('constructor' in a != 'constructor' in b || a.constructor != b.constructor) return false;
+      // Deep compare objects.
+      for (var key in a) {
+        if (_.has(a, key)) {
+          // Count the expected number of properties.
+          size++;
+          // Deep compare each member.
+          if (!(result = _.has(b, key) && eq(a[key], b[key], stack))) break;
+        }
+      }
+      // Ensure that both objects contain the same number of properties.
+      if (result) {
+        for (key in b) {
+          if (_.has(b, key) && !(size--)) break;
+        }
+        result = !size;
+      }
+    }
+    // Remove the first object from the stack of traversed objects.
+    stack.pop();
+    return result;
+  }
+
+  // Perform a deep comparison to check if two objects are equal.
+  _.isEqual = function(a, b) {
+    return eq(a, b, []);
+  };
+
+  // Is a given array, string, or object empty?
+  // An "empty" object has no enumerable own-properties.
+  _.isEmpty = function(obj) {
+    if (obj == null) return true;
+    if (_.isArray(obj) || _.isString(obj)) return obj.length === 0;
+    for (var key in obj) if (_.has(obj, key)) return false;
+    return true;
+  };
+
+  // Is a given value a DOM element?
+  _.isElement = function(obj) {
+    return !!(obj && obj.nodeType == 1);
+  };
+
+  // Is a given value an array?
+  // Delegates to ECMA5's native Array.isArray
+  _.isArray = nativeIsArray || function(obj) {
+    return toString.call(obj) == '[object Array]';
+  };
+
+  // Is a given variable an object?
+  _.isObject = function(obj) {
+    return obj === Object(obj);
+  };
+
+  // Is a given variable an arguments object?
+  _.isArguments = function(obj) {
+    return toString.call(obj) == '[object Arguments]';
+  };
+  if (!_.isArguments(arguments)) {
+    _.isArguments = function(obj) {
+      return !!(obj && _.has(obj, 'callee'));
+    };
+  }
+
+  // Is a given value a function?
+  _.isFunction = function(obj) {
+    return toString.call(obj) == '[object Function]';
+  };
+
+  // Is a given value a string?
+  _.isString = function(obj) {
+    return toString.call(obj) == '[object String]';
+  };
+
+  // Is a given value a number?
+  _.isNumber = function(obj) {
+    return toString.call(obj) == '[object Number]';
+  };
+
+  // Is a given object a finite number?
+  _.isFinite = function(obj) {
+    return _.isNumber(obj) && isFinite(obj);
+  };
+
+  // Is the given value `NaN`?
+  _.isNaN = function(obj) {
+    // `NaN` is the only value for which `===` is not reflexive.
+    return obj !== obj;
+  };
+
+  // Is a given value a boolean?
+  _.isBoolean = function(obj) {
+    return obj === true || obj === false || toString.call(obj) == '[object Boolean]';
+  };
+
+  // Is a given value a date?
+  _.isDate = function(obj) {
+    return toString.call(obj) == '[object Date]';
+  };
+
+  // Is the given value a regular expression?
+  _.isRegExp = function(obj) {
+    return toString.call(obj) == '[object RegExp]';
+  };
+
+  // Is a given value equal to null?
+  _.isNull = function(obj) {
+    return obj === null;
+  };
+
+  // Is a given variable undefined?
+  _.isUndefined = function(obj) {
+    return obj === void 0;
+  };
+
+  // Has own property?
+  _.has = function(obj, key) {
+    return hasOwnProperty.call(obj, key);
+  };
+
+  // Utility Functions
+  // -----------------
+
+  // Run Underscore.js in *noConflict* mode, returning the `_` variable to its
+  // previous owner. Returns a reference to the Underscore object.
+  _.noConflict = function() {
+    root._ = previousUnderscore;
+    return this;
+  };
+
+  // Keep the identity function around for default iterators.
+  _.identity = function(value) {
+    return value;
+  };
+
+  // Run a function **n** times.
+  _.times = function (n, iterator, context) {
+    for (var i = 0; i < n; i++) iterator.call(context, i);
+  };
+
+  // Escape a string for HTML interpolation.
+  _.escape = function(string) {
+    return (''+string).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;').replace(/'/g, '&#x27;').replace(/\//g,'&#x2F;');
+  };
+
+  // If the value of the named property is a function then invoke it;
+  // otherwise, return it.
+  _.result = function(object, property) {
+    if (object == null) return null;
+    var value = object[property];
+    return _.isFunction(value) ? value.call(object) : value;
+  };
+
+  // Add your own custom functions to the Underscore object, ensuring that
+  // they're correctly added to the OOP wrapper as well.
+  _.mixin = function(obj) {
+    each(_.functions(obj), function(name){
+      addToWrapper(name, _[name] = obj[name]);
+    });
+  };
+
+  // Generate a unique integer id (unique within the entire client session).
+  // Useful for temporary DOM ids.
+  var idCounter = 0;
+  _.uniqueId = function(prefix) {
+    var id = idCounter++;
+    return prefix ? prefix + id : id;
+  };
+
+  // By default, Underscore uses ERB-style template delimiters, change the
+  // following template settings to use alternative delimiters.
+  _.templateSettings = {
+    evaluate    : /<%([\s\S]+?)%>/g,
+    interpolate : /<%=([\s\S]+?)%>/g,
+    escape      : /<%-([\s\S]+?)%>/g
+  };
+
+  // When customizing `templateSettings`, if you don't want to define an
+  // interpolation, evaluation or escaping regex, we need one that is
+  // guaranteed not to match.
+  var noMatch = /.^/;
+
+  // Certain characters need to be escaped so that they can be put into a
+  // string literal.
+  var escapes = {
+    '\\': '\\',
+    "'": "'",
+    'r': '\r',
+    'n': '\n',
+    't': '\t',
+    'u2028': '\u2028',
+    'u2029': '\u2029'
+  };
+
+  for (var p in escapes) escapes[escapes[p]] = p;
+  var escaper = /\\|'|\r|\n|\t|\u2028|\u2029/g;
+  var unescaper = /\\(\\|'|r|n|t|u2028|u2029)/g;
+
+  // Within an interpolation, evaluation, or escaping, remove HTML escaping
+  // that had been previously added.
+  var unescape = function(code) {
+    return code.replace(unescaper, function(match, escape) {
+      return escapes[escape];
+    });
+  };
+
+  // JavaScript micro-templating, similar to John Resig's implementation.
+  // Underscore templating handles arbitrary delimiters, preserves whitespace,
+  // and correctly escapes quotes within interpolated code.
+  _.template = function(text, data, settings) {
+    settings = _.defaults(settings || {}, _.templateSettings);
+
+    // Compile the template source, taking care to escape characters that
+    // cannot be included in a string literal and then unescape them in code
+    // blocks.
+    var source = "__p+='" + text
+      .replace(escaper, function(match) {
+        return '\\' + escapes[match];
+      })
+      .replace(settings.escape || noMatch, function(match, code) {
+        return "'+\n_.escape(" + unescape(code) + ")+\n'";
+      })
+      .replace(settings.interpolate || noMatch, function(match, code) {
+        return "'+\n(" + unescape(code) + ")+\n'";
+      })
+      .replace(settings.evaluate || noMatch, function(match, code) {
+        return "';\n" + unescape(code) + "\n;__p+='";
+      }) + "';\n";
+
+    // If a variable is not specified, place data values in local scope.
+    if (!settings.variable) source = 'with(obj||{}){\n' + source + '}\n';
+
+    source = "var __p='';" +
+      "var print=function(){__p+=Array.prototype.join.call(arguments, '')};\n" +
+      source + "return __p;\n";
+
+    var render = new Function(settings.variable || 'obj', '_', source);
+    if (data) return render(data, _);
+    var template = function(data) {
+      return render.call(this, data, _);
+    };
+
+    // Provide the compiled function source as a convenience for build time
+    // precompilation.
+    template.source = 'function(' + (settings.variable || 'obj') + '){\n' +
+      source + '}';
+
+    return template;
+  };
+
+  // Add a "chain" function, which will delegate to the wrapper.
+  _.chain = function(obj) {
+    return _(obj).chain();
+  };
+
+  // The OOP Wrapper
+  // ---------------
+
+  // If Underscore is called as a function, it returns a wrapped object that
+  // can be used OO-style. This wrapper holds altered versions of all the
+  // underscore functions. Wrapped objects may be chained.
+  var wrapper = function(obj) { this._wrapped = obj; };
+
+  // Expose `wrapper.prototype` as `_.prototype`
+  _.prototype = wrapper.prototype;
+
+  // Helper function to continue chaining intermediate results.
+  var result = function(obj, chain) {
+    return chain ? _(obj).chain() : obj;
+  };
+
+  // A method to easily add functions to the OOP wrapper.
+  var addToWrapper = function(name, func) {
+    wrapper.prototype[name] = function() {
+      var args = slice.call(arguments);
+      unshift.call(args, this._wrapped);
+      return result(func.apply(_, args), this._chain);
+    };
+  };
+
+  // Add all of the Underscore functions to the wrapper object.
+  _.mixin(_);
+
+  // Add all mutator Array functions to the wrapper.
+  each(['pop', 'push', 'reverse', 'shift', 'sort', 'splice', 'unshift'], function(name) {
+    var method = ArrayProto[name];
+    wrapper.prototype[name] = function() {
+      var wrapped = this._wrapped;
+      method.apply(wrapped, arguments);
+      var length = wrapped.length;
+      if ((name == 'shift' || name == 'splice') && length === 0) delete wrapped[0];
+      return result(wrapped, this._chain);
+    };
+  });
+
+  // Add all accessor Array functions to the wrapper.
+  each(['concat', 'join', 'slice'], function(name) {
+    var method = ArrayProto[name];
+    wrapper.prototype[name] = function() {
+      return result(method.apply(this._wrapped, arguments), this._chain);
+    };
+  });
+
+  // Start chaining a wrapped Underscore object.
+  wrapper.prototype.chain = function() {
+    this._chain = true;
+    return this;
+  };
+
+  // Extracts the result from a wrapped and chained object.
+  wrapper.prototype.value = function() {
+    return this._wrapped;
+  };
+
+}).call(this);
+
 },{}],46:[function(require,module,exports){
+/**
+* underscore.nest - v0.1.1 - 7/13/2012
+* http://github.com/iros/underscore.nest/
+* Copyright (c) 2012 Irene Ros;
+* Underscore.Nest is freely distributable under the MIT license.
+*/
+(function(global) {
+
+  var _ = global._;
+
+  if(_ === undefined) {
+    if (typeof require !== 'undefined') {
+      _ = require('underscore');
+    }
+  }
+
+
+  var nester = global.nest = {};
+
+  // helper that converts a group object like so:
+  // { category : [{}, {}, {}, ... ], category2 : ...}
+  // to:
+  // [{ name : category, children : [{}, {}, {}, ...]},
+  //  { name : category2, children : [{}, {}, {}, ...]}]
+  var _transformGrouping = function(group) {
+    return _.map(group, function(rows, key) {
+      return { name : key, children : rows };
+    });
+  };
+
+  /**
+  * convert a series of rows to a nested tree structure
+  * based on the list of keys to bin by. 
+  * optionally reduce the resulting sub collections of rows
+  * with a "reduce" function that returns a single row.
+  */
+  nester.nest = function(rows, keys, reduce) {
+    
+    if (_.isString(keys)) {
+      keys = [keys];
+    }
+
+    var _infiniteNest = function(parent, keyIndex, childIndex) {
+
+      if (keyIndex === 0) {
+        // build initial children arrays by grouping first level
+        parent.children = _transformGrouping(_.groupBy(rows, keys[0]));      
+
+        // if we have more keys to traverse, go through every
+        // child grouping and nest that.
+        if (keyIndex < keys.length) {
+          for (var i = 0; i < parent.children.length; i++) {
+            _infiniteNest(parent.children[i], keyIndex + 1, i);
+          }
+        }
+      } else {
+
+        // save the position of this specific child in
+        // its parent child heirarchy
+        parent.index = childIndex;
+
+        if (keyIndex >= keys.length) {
+
+          // if we have a reduce method provided, reduce the
+          // children
+          if (typeof reduce !== "undefined") {
+            
+            parent.value = reduce(parent.children);
+
+            // remove the original children array, since we've 
+            // reduced it.
+            delete parent.children;
+          } 
+
+        } else {
+
+          parent.children = _transformGrouping(
+            _.groupBy(parent.children, keys[keyIndex])
+          );
+
+          for(var m = 0; m < parent.children.length; m++) {
+            _infiniteNest(parent.children[m], keyIndex + 1, m);
+          }
+        }
+      }
+
+      return parent;
+    };
+
+    return _infiniteNest({}, 0);
+  };
+  
+// CommonJS module is defined
+  if (typeof exports !== 'undefined') {
+    if (typeof module !== 'undefined' && module.exports) {
+      // Export module
+      module.exports = nester;
+    }
+    exports.nester = nester;
+
+  } else if (typeof define === 'function' && define.amd) {
+    // Register as a named module with AMD.
+    define('underscore.nest', [], function() {
+      return nester;
+    });
+
+  } else {
+    // Integrate with Underscore.js if defined
+    global._.mixin(nester);
+  }
+
+}(this));
+
+
+},{"underscore":45}],47:[function(require,module,exports){
+(function (Buffer){
+'use strict';
+
+var LightningVisualization = require('lightning-visualization');
+var utils = require('lightning-client-utils');
+var _ = require('lodash');
+var nester = require('underscore.nest');
+var d3 = require('d3');
+var MultiAxisZoom = require('d3-multiaxis-zoom');
+
+var css = Buffer("LmNpcmNsZS1wbG90IC5ub2RlIHsKICBmb250LXNpemU6IDExcHg7CiAgZmlsbDogI2JiYjsKICBjdXJzb3I6IHBvaW50ZXI7Cn0KCi5jaXJjbGUtcGxvdCAubGluayB7CiAgZmlsbDogbm9uZTsKICBzdHJva2Utd2lkdGg6IDJweDsKICBwb2ludGVyLWV2ZW50czogbm9uZTsKICBzaGFwZS1yZW5kZXJpbmc6IGF1dG87Cn0KCi5jaXJjbGUtcGxvdCAuYXJjLS1oaWdobGlnaHQsCi5jaXJjbGUtcGxvdCAuYXJjLS1oaWdobGlnaHQtLXN0aWNrIHsKICBmaWxsOiAjNTA1MDUwICFpbXBvcnRhbnQ7Cn0KCi5jaXJjbGUtcGxvdCAubm9kZS0taGlnaGxpZ2h0LAouY2lyY2xlLXBsb3QgLm5vZGUtLWhpZ2hsaWdodC0tc3RpY2sgewogIGZvbnQtd2VpZ2h0OiA2MDAgIWltcG9ydGFudDsKICBmaWxsOiAjNTA1MDUwICFpbXBvcnRhbnQ7Cn0KCi5jaXJjbGUtcGxvdCAubGluay0taGlnaGxpZ2h0IHsKICBvcGFjaXR5OiAwLjggIWltcG9ydGFudDsKICBzdHJva2Utd2lkdGg6IDNweCAhaW1wb3J0YW50OwogIHN0cm9rZTogIzMyMzIzMiAhaW1wb3J0YW50Owp9CgouY2lyY2xlLXBsb3QgLmxpbmstLWZhZGUtLWluIHsKICB2aXNpYmlsaXR5OiB2aXNpYmxlOwp9CgouY2lyY2xlLXBsb3QgLmxpbmstLWZhZGUtLW91dCB7CiAgZGlzcGxheTogbm9uZTsKfQoKLmNpcmNsZS1wbG90IC5saW5rLS1mYWRlLS1zdGljayB7CiAgdmlzaWJpbGl0eTogdmlzaWJpbGU7Cn0K","base64");
+
+
+var Visualization = LightningVisualization.extend({
+
+    css: css,
+
+    defaultColor: '#deebfa',
+
+    init: function() {
+        MultiAxisZoom(d3);
+        this.render();
+    },
+
+
+    formatData: function(data) {
+
+        // get primary fields
+        var nodes = data.nodes
+        var level = data.level
+        data.group = data.group ? data.group : [_.fill(Array(nodes.length), 0)]
+        var group = data.group
+        var labels = data.labels ? data.labels : []
+
+        // get colors using top-level group
+        data.group = data.group[0]
+        var retColor = utils.getColorFromData(data)
+
+        // infer level
+        var level = []
+        _.each(group, function(l, i) {
+            level[i] = _.range(_.max(l))
+        })
+
+        // build array of items with their grouping attributes
+        var items = []
+        _.each(nodes, function(n, i) {
+            var entry = {}
+            entry["i"] = i
+            entry["c"] = retColor[i]
+            entry["l"] = labels[i] ? labels[i] : i
+            _.each(level, function(l, j) {
+                entry[j] = l[group[j][i]]
+            })
+            items.push(entry)
+        });
+
+        // nest it up
+        data.nodes = nester.nest(items, _.range(0, level.length))
+
+        return data
+    },
+
+    render: function() {
+
+        var opts = this.opts
+        var height = this.height
+        var width = this.width
+        var selector = this.selector
+        var self = this
+
+        var nodes = this.data.nodes
+        var links = this.data.links
+
+        var diameter = width * 0.8
+        var radius = diameter / 2
+        var innerRadius = radius - 120
+
+        var cluster = d3.layout.cluster()
+           .size([360, innerRadius])
+           .sort(null)
+
+        var partition = d3.layout.partition()
+            .size([2 * Math.PI, innerRadius])
+            .sort(null)
+            .value(function(d) { return 1; });
+
+        var bundle = d3.layout.bundle();
+
+        var line = d3.svg.line.radial()
+            .interpolate("bundle")
+            .tension(0.7)
+            .radius(function(d) { return d.y; })
+            .angle(function(d) { return d.x / 180 * Math.PI; });
+
+        var svg = d3.select(selector)
+            .append("svg")
+            .attr("width", diameter)
+            .attr("height", diameter)
+            .attr('class', 'circle-plot')
+            .append("g")
+            .attr('transform', 'translate(' + radius + ',' + radius + ')')
+
+        var link = svg.append("g").selectAll(".link"),
+            node = svg.append("g").selectAll(".node");
+
+        var tree = cluster.nodes(nodes);
+        var maxDepth = d3.max(tree, function(d) {return d.depth})
+        var points = _.sortBy(tree.filter(function (n) { return !n.children;}), function (n) {return n.i})
+        
+        links = links.map( function(d) {
+            return {source: points[d[0]], target: points[d[1]]}
+        })
+
+        link = link
+            .data(bundle(links))
+        .enter().append("path")
+            .each(function(d) { d.source = d[0], d.target = d[d.length - 1]; })
+            .attr("class", "link")
+            .attr("d", line)
+            .style("stroke", function(d) {return d.source.c ? d.source.c : self.defaultColor})
+            .style("opacity", 0.7)
+
+        node = node
+            .data(tree.filter(function(n) { return !n.children; }))
+        .enter().append("text")
+            .attr("class", "node")
+            .attr("dy", ".31em")
+            .attr("transform", function(d) { return "rotate(" + (d.x - 90) + ")translate(" + (d.y + maxDepth * 10 + 10) + ",0)" + (d.x < 180 ? "" : "rotate(180)"); })
+            .style("text-anchor", function(d) { return d.x < 180 ? "start" : "end"; })
+            .text(function(d) { return d.l; })
+            .style("fill", function(d) {return d.c ? d.c : self.defaultColor})
+            .on("click", clicklink)
+
+        link.classed("link--fade--out", false)
+        link.classed("link--fade--stick", false)
+
+        function clickarc(d) {
+
+            if (d.depth == (maxDepth - 1)) {
+
+                d3.select(this).classed("arc--highlight--stick", !d3.select(this).classed("arc--highlight--stick"))
+
+                var children = _.flatten(getChildren(d))
+                
+                link.classed("link--fade--out", function(l) {
+                    if ((_.indexOf(children, l.target) > -1) | (_.indexOf(children, l.source) > -1)) {
+                        if (d3.select(this).classed("link--fade--stick")) {
+                            return true
+                        } else {
+                            return false
+                        }
+                    } else {
+                        if (d3.select(this).classed("link--fade--stick")) {
+                            return false
+                        } else {
+                            return true
+                        }  
+                    }
+                })
+
+                link.classed("link--fade--stick", function(l) {
+                    if ((_.indexOf(children, l.target) > -1) | (_.indexOf(children, l.source) > -1)) {
+                        return !d3.select(this).classed("link--fade--stick")
+                    } else {
+                        return d3.select(this).classed("link--fade--stick")
+                    }
+                })
+
+                var total = 0
+                link.classed("link--fade--out", function(l) {
+                    if (d3.select(this).classed("link--fade--out")) {
+                        total += 1
+                    }
+                    return d3.select(this).classed("link--fade--out")
+                })
+
+                if (total == links.length) {
+                    link.classed("link--fade--out", false)
+                }
+
+            }
+
+        }
+
+        function clicklink(d) {
+
+            link.classed("link--highlight", function(l) { 
+                    if (l.target === d | l.source === d) { 
+                        return !d3.select(this).classed("link--highlight")
+                    } else {
+                        return d3.select(this).classed("link--highlight")
+                    }
+                })
+
+            d3.select(this).classed("node--highlight--stick", !d3.select(this).classed("node--highlight--stick"))
+        }
+
+
+        // get colors from groups
+        var n = d3.max(tree.filter(function (d) {return d.depth == 1}), function(d) {return d.index})
+        var colors = utils.getColors(n + 1)
+        
+        // color the first level
+        tree.filter(function (d) {return d.depth == 1}).map(function(d) {
+            d.c = colors[d.index] 
+            return d
+        })
+
+        // color all subsequent levels
+        var i
+        for (i = 1; i < maxDepth; i++) {
+            tree.filter(function (d) {return d.depth == i}).map(function(d) {
+                var nchildren = d.children.length
+                if (nchildren > 1) {
+                    var baseColor = d.c
+                    var newColors = [d3.rgb(baseColor).darker(0.3), d3.rgb(baseColor).brighter(0.3)]                
+                    d.children.map(function(e) {
+                        e.c = (e.index % 2) == 0 ? newColors[0] : newColors[1];
+                        return e
+                    })
+                } else {
+                    d.children.map(function(e) {
+                        e.c = d.c
+                        return e
+                    })
+                }
+                return d
+            })
+        }
+
+        var top = tree.filter(function (d) { return d.depth < maxDepth && d.depth > 0;})
+
+        var arc = d3.svg.arc()
+             .startAngle(function(d) { return findStartAngle(d); })
+             .endAngle(function(d) { return findEndAngle(d); })
+             .innerRadius(function(d) {return d.depth * 10 + innerRadius})
+             .outerRadius(function(d) {return d.depth * 10 + innerRadius + 7})
+
+        var arcs = svg.append("g").selectAll(".path")
+             .data(top)
+             .enter().append("path")
+             .attr("d", arc)
+             .attr("class", "arc")
+             .style("fill", function(d) {return d.c ? d.c : self.defaultColor})
+             .on("click", clickarc)
+
+        function findStartAngle(d) {
+            var min = treeMinPos(d) - 1
+            return (min * Math.PI) / 180;
+        }
+
+        function findEndAngle(d) {
+            var max = treeMaxPos(d) + 1
+            return (max * Math.PI) / 180;
+        }
+
+        function treeMaxPos(obj) {
+            var max = 0
+            if (obj.children) {
+                obj.children.forEach(function (d) {
+                    var tmpMax = treeMaxPos(d)
+                    if (tmpMax > max) {
+                        max = tmpMax
+                    }
+                })
+                return max
+            } else {
+                return obj.x
+            }
+        }
+
+        function treeMinPos(obj) {
+            var min = Number.POSITIVE_INFINITY
+            if (obj.children) {
+                obj.children.forEach(function (d) {
+                    var tmpMin = treeMinPos(d)
+                    if (tmpMin < min) {
+                        min = tmpMin
+                    }
+                })
+                return min
+            } else {
+                return obj.x
+            }
+        }
+
+        
+        function getChildren(obj) {
+            var children = []
+            if (obj.children) {
+                obj.children.forEach(function(d) {
+                    var tmp = getChildren(d)
+                    if (tmp) {
+                        children.push(tmp)
+                    }
+                })
+                return children
+            } else {
+                return obj
+            }
+        }
+
+        d3.select(selector).attr('tabindex', -1);
+        d3.select(selector).on('keydown', update)
+
+        var tension = 0.7
+        function update() {
+            if (d3.event.keyCode == 37 | d3.event.keyCode == 39) {
+                d3.event.preventDefault();
+            }
+            if (d3.event.keyCode == 38 | d3.event.keyCode == 40) {
+                d3.event.preventDefault();
+                if (d3.event.keyCode == 40) {
+                    tension = tension - 0.05
+                    if (tension < 0) {
+                        tension = 0
+                    }
+                }
+                if (d3.event.keyCode == 38) {
+                    tension = tension + 0.05
+                    if (tension > 1) {
+                        tension = 1
+                    }
+                }
+                console.log(tension)
+                line.tension(tension)
+                link.attr("d", line)
+            }
+        }
+
+    }
+
+});
+
+
+module.exports = Visualization;
+
+}).call(this,require("buffer").Buffer)
+},{"buffer":1,"d3":26,"d3-multiaxis-zoom":24,"lightning-client-utils":27,"lightning-visualization":41,"lodash":344,"underscore.nest":46}],48:[function(require,module,exports){
+arguments[4][6][0].apply(exports,arguments)
+},{"./src":72,"dup":6}],49:[function(require,module,exports){
+arguments[4][9][0].apply(exports,arguments)
+},{"dup":9}],50:[function(require,module,exports){
+arguments[4][10][0].apply(exports,arguments)
+},{"color":51,"colorbrewer":57,"d3-color":58,"d3-scale":59,"dup":10,"lodash":60,"superagent":61}],51:[function(require,module,exports){
+arguments[4][11][0].apply(exports,arguments)
+},{"color-convert":53,"color-string":54,"dup":11}],52:[function(require,module,exports){
+arguments[4][12][0].apply(exports,arguments)
+},{"dup":12}],53:[function(require,module,exports){
+arguments[4][13][0].apply(exports,arguments)
+},{"./conversions":52,"dup":13}],54:[function(require,module,exports){
+arguments[4][14][0].apply(exports,arguments)
+},{"color-name":55,"dup":14}],55:[function(require,module,exports){
+arguments[4][15][0].apply(exports,arguments)
+},{"dup":15}],56:[function(require,module,exports){
+arguments[4][7][0].apply(exports,arguments)
+},{"dup":7}],57:[function(require,module,exports){
+arguments[4][8][0].apply(exports,arguments)
+},{"./colorbrewer.js":56,"dup":8}],58:[function(require,module,exports){
+arguments[4][16][0].apply(exports,arguments)
+},{"dup":16}],59:[function(require,module,exports){
+arguments[4][17][0].apply(exports,arguments)
+},{"dup":17}],60:[function(require,module,exports){
+arguments[4][18][0].apply(exports,arguments)
+},{"dup":18}],61:[function(require,module,exports){
+arguments[4][19][0].apply(exports,arguments)
+},{"dup":19,"emitter":62,"reduce":63}],62:[function(require,module,exports){
+arguments[4][20][0].apply(exports,arguments)
+},{"dup":20}],63:[function(require,module,exports){
+arguments[4][21][0].apply(exports,arguments)
+},{"dup":21}],64:[function(require,module,exports){
+arguments[4][6][0].apply(exports,arguments)
+},{"./src":71,"dup":6}],65:[function(require,module,exports){
+arguments[4][24][0].apply(exports,arguments)
+},{"./src":66,"dup":24}],66:[function(require,module,exports){
+arguments[4][25][0].apply(exports,arguments)
+},{"dup":25}],67:[function(require,module,exports){
+arguments[4][41][0].apply(exports,arguments)
+},{"dup":41,"events":5,"inherits":68,"insert-css":69,"lodash":344,"qwery":70}],68:[function(require,module,exports){
+arguments[4][42][0].apply(exports,arguments)
+},{"dup":42}],69:[function(require,module,exports){
+arguments[4][43][0].apply(exports,arguments)
+},{"dup":43}],70:[function(require,module,exports){
+arguments[4][44][0].apply(exports,arguments)
+},{"dup":44}],71:[function(require,module,exports){
 (function (Buffer){
 var LightningVisualization = require('lightning-visualization');
 var d3 = require('d3');
@@ -28552,7 +30112,7 @@ var Visualization = LightningVisualization.extend({
 module.exports = Visualization;
 
 }).call(this,require("buffer").Buffer)
-},{"buffer":1,"d3":24,"d3-multiaxis-zoom":40,"lightning-client-utils":25,"lightning-visualization":42,"lodash":319}],47:[function(require,module,exports){
+},{"buffer":1,"d3":49,"d3-multiaxis-zoom":65,"lightning-client-utils":50,"lightning-visualization":67,"lodash":344}],72:[function(require,module,exports){
 'use strict';
 var d3 = require('d3');
 var Graph = require('lightning-graph')
@@ -28639,17 +30199,17 @@ var Visualization = Graph.extend({
 
 module.exports = Visualization;
 
-},{"d3":24,"lightning-client-utils":25,"lightning-graph":39,"lodash":319}],48:[function(require,module,exports){
+},{"d3":49,"lightning-client-utils":50,"lightning-graph":64,"lodash":344}],73:[function(require,module,exports){
 arguments[4][6][0].apply(exports,arguments)
-},{"./src":53,"dup":6}],49:[function(require,module,exports){
+},{"./src":78,"dup":6}],74:[function(require,module,exports){
+arguments[4][41][0].apply(exports,arguments)
+},{"dup":41,"events":5,"inherits":75,"insert-css":76,"lodash":344,"qwery":77}],75:[function(require,module,exports){
 arguments[4][42][0].apply(exports,arguments)
-},{"dup":42,"events":5,"inherits":50,"insert-css":51,"lodash":319,"qwery":52}],50:[function(require,module,exports){
+},{"dup":42}],76:[function(require,module,exports){
 arguments[4][43][0].apply(exports,arguments)
-},{"dup":43}],51:[function(require,module,exports){
+},{"dup":43}],77:[function(require,module,exports){
 arguments[4][44][0].apply(exports,arguments)
-},{"dup":44}],52:[function(require,module,exports){
-arguments[4][45][0].apply(exports,arguments)
-},{"dup":45}],53:[function(require,module,exports){
+},{"dup":44}],78:[function(require,module,exports){
 (function (Buffer){
 'use strict';
 
@@ -28732,7 +30292,7 @@ var Visualization = LightningVisualization.extend({
 module.exports = Visualization;
 
 }).call(this,require("buffer").Buffer)
-},{"buffer":1,"lightning-image":138,"lightning-visualization":49,"lodash":319}],54:[function(require,module,exports){
+},{"buffer":1,"lightning-image":163,"lightning-visualization":74,"lodash":344}],79:[function(require,module,exports){
 
 var ForceEdgeBundling = function(){
         var data_nodes = {},        // {'nodeid':{'x':,'y':},..}
@@ -29145,55 +30705,55 @@ var ForceEdgeBundling = function(){
 
 
 module.exports = ForceEdgeBundling;
-},{}],55:[function(require,module,exports){
+},{}],80:[function(require,module,exports){
 arguments[4][6][0].apply(exports,arguments)
-},{"./src":79,"dup":6}],56:[function(require,module,exports){
+},{"./src":104,"dup":6}],81:[function(require,module,exports){
 arguments[4][9][0].apply(exports,arguments)
-},{"dup":9}],57:[function(require,module,exports){
+},{"dup":9}],82:[function(require,module,exports){
 arguments[4][10][0].apply(exports,arguments)
-},{"color":58,"colorbrewer":64,"d3-color":65,"d3-scale":66,"dup":10,"lodash":67,"superagent":68}],58:[function(require,module,exports){
+},{"color":83,"colorbrewer":89,"d3-color":90,"d3-scale":91,"dup":10,"lodash":92,"superagent":93}],83:[function(require,module,exports){
 arguments[4][11][0].apply(exports,arguments)
-},{"color-convert":60,"color-string":61,"dup":11}],59:[function(require,module,exports){
+},{"color-convert":85,"color-string":86,"dup":11}],84:[function(require,module,exports){
 arguments[4][12][0].apply(exports,arguments)
-},{"dup":12}],60:[function(require,module,exports){
+},{"dup":12}],85:[function(require,module,exports){
 arguments[4][13][0].apply(exports,arguments)
-},{"./conversions":59,"dup":13}],61:[function(require,module,exports){
+},{"./conversions":84,"dup":13}],86:[function(require,module,exports){
 arguments[4][14][0].apply(exports,arguments)
-},{"color-name":62,"dup":14}],62:[function(require,module,exports){
+},{"color-name":87,"dup":14}],87:[function(require,module,exports){
 arguments[4][15][0].apply(exports,arguments)
-},{"dup":15}],63:[function(require,module,exports){
+},{"dup":15}],88:[function(require,module,exports){
 arguments[4][7][0].apply(exports,arguments)
-},{"dup":7}],64:[function(require,module,exports){
+},{"dup":7}],89:[function(require,module,exports){
 arguments[4][8][0].apply(exports,arguments)
-},{"./colorbrewer.js":63,"dup":8}],65:[function(require,module,exports){
+},{"./colorbrewer.js":88,"dup":8}],90:[function(require,module,exports){
 arguments[4][16][0].apply(exports,arguments)
-},{"dup":16}],66:[function(require,module,exports){
+},{"dup":16}],91:[function(require,module,exports){
 arguments[4][17][0].apply(exports,arguments)
-},{"dup":17}],67:[function(require,module,exports){
+},{"dup":17}],92:[function(require,module,exports){
 arguments[4][18][0].apply(exports,arguments)
-},{"dup":18}],68:[function(require,module,exports){
+},{"dup":18}],93:[function(require,module,exports){
 arguments[4][19][0].apply(exports,arguments)
-},{"dup":19,"emitter":69,"reduce":70}],69:[function(require,module,exports){
+},{"dup":19,"emitter":94,"reduce":95}],94:[function(require,module,exports){
 arguments[4][20][0].apply(exports,arguments)
-},{"dup":20}],70:[function(require,module,exports){
+},{"dup":20}],95:[function(require,module,exports){
 arguments[4][21][0].apply(exports,arguments)
-},{"dup":21}],71:[function(require,module,exports){
+},{"dup":21}],96:[function(require,module,exports){
 arguments[4][6][0].apply(exports,arguments)
-},{"./src":78,"dup":6}],72:[function(require,module,exports){
-arguments[4][40][0].apply(exports,arguments)
-},{"./src":73,"dup":40}],73:[function(require,module,exports){
+},{"./src":103,"dup":6}],97:[function(require,module,exports){
+arguments[4][24][0].apply(exports,arguments)
+},{"./src":98,"dup":24}],98:[function(require,module,exports){
+arguments[4][25][0].apply(exports,arguments)
+},{"dup":25}],99:[function(require,module,exports){
 arguments[4][41][0].apply(exports,arguments)
-},{"dup":41}],74:[function(require,module,exports){
+},{"dup":41,"events":5,"inherits":100,"insert-css":101,"lodash":344,"qwery":102}],100:[function(require,module,exports){
 arguments[4][42][0].apply(exports,arguments)
-},{"dup":42,"events":5,"inherits":75,"insert-css":76,"lodash":319,"qwery":77}],75:[function(require,module,exports){
+},{"dup":42}],101:[function(require,module,exports){
 arguments[4][43][0].apply(exports,arguments)
-},{"dup":43}],76:[function(require,module,exports){
+},{"dup":43}],102:[function(require,module,exports){
 arguments[4][44][0].apply(exports,arguments)
-},{"dup":44}],77:[function(require,module,exports){
-arguments[4][45][0].apply(exports,arguments)
-},{"dup":45}],78:[function(require,module,exports){
-arguments[4][46][0].apply(exports,arguments)
-},{"buffer":1,"d3":56,"d3-multiaxis-zoom":72,"dup":46,"lightning-client-utils":57,"lightning-visualization":74,"lodash":319}],79:[function(require,module,exports){
+},{"dup":44}],103:[function(require,module,exports){
+arguments[4][71][0].apply(exports,arguments)
+},{"buffer":1,"d3":81,"d3-multiaxis-zoom":97,"dup":71,"lightning-client-utils":82,"lightning-visualization":99,"lodash":344}],104:[function(require,module,exports){
 'use strict';
 var Graph = require('lightning-graph');
 var d3 = require('d3');
@@ -29269,55 +30829,55 @@ var Visualization = Graph.extend({
 
 module.exports = Visualization;
 
-},{"../deps/force-edge-bundling":54,"d3":56,"lightning-client-utils":57,"lightning-graph":71,"lodash":319}],80:[function(require,module,exports){
+},{"../deps/force-edge-bundling":79,"d3":81,"lightning-client-utils":82,"lightning-graph":96,"lodash":344}],105:[function(require,module,exports){
 arguments[4][6][0].apply(exports,arguments)
-},{"./src":102,"dup":6}],81:[function(require,module,exports){
-arguments[4][40][0].apply(exports,arguments)
-},{"./src":82,"dup":40}],82:[function(require,module,exports){
-arguments[4][41][0].apply(exports,arguments)
-},{"dup":41}],83:[function(require,module,exports){
+},{"./src":127,"dup":6}],106:[function(require,module,exports){
+arguments[4][24][0].apply(exports,arguments)
+},{"./src":107,"dup":24}],107:[function(require,module,exports){
+arguments[4][25][0].apply(exports,arguments)
+},{"dup":25}],108:[function(require,module,exports){
 arguments[4][9][0].apply(exports,arguments)
-},{"dup":9}],84:[function(require,module,exports){
+},{"dup":9}],109:[function(require,module,exports){
 arguments[4][10][0].apply(exports,arguments)
-},{"color":85,"colorbrewer":91,"d3-color":92,"d3-scale":93,"dup":10,"lodash":94,"superagent":95}],85:[function(require,module,exports){
+},{"color":110,"colorbrewer":116,"d3-color":117,"d3-scale":118,"dup":10,"lodash":119,"superagent":120}],110:[function(require,module,exports){
 arguments[4][11][0].apply(exports,arguments)
-},{"color-convert":87,"color-string":88,"dup":11}],86:[function(require,module,exports){
+},{"color-convert":112,"color-string":113,"dup":11}],111:[function(require,module,exports){
 arguments[4][12][0].apply(exports,arguments)
-},{"dup":12}],87:[function(require,module,exports){
+},{"dup":12}],112:[function(require,module,exports){
 arguments[4][13][0].apply(exports,arguments)
-},{"./conversions":86,"dup":13}],88:[function(require,module,exports){
+},{"./conversions":111,"dup":13}],113:[function(require,module,exports){
 arguments[4][14][0].apply(exports,arguments)
-},{"color-name":89,"dup":14}],89:[function(require,module,exports){
+},{"color-name":114,"dup":14}],114:[function(require,module,exports){
 arguments[4][15][0].apply(exports,arguments)
-},{"dup":15}],90:[function(require,module,exports){
+},{"dup":15}],115:[function(require,module,exports){
 arguments[4][7][0].apply(exports,arguments)
-},{"dup":7}],91:[function(require,module,exports){
+},{"dup":7}],116:[function(require,module,exports){
 arguments[4][8][0].apply(exports,arguments)
-},{"./colorbrewer.js":90,"dup":8}],92:[function(require,module,exports){
+},{"./colorbrewer.js":115,"dup":8}],117:[function(require,module,exports){
 arguments[4][16][0].apply(exports,arguments)
-},{"dup":16}],93:[function(require,module,exports){
+},{"dup":16}],118:[function(require,module,exports){
 arguments[4][17][0].apply(exports,arguments)
-},{"dup":17}],94:[function(require,module,exports){
+},{"dup":17}],119:[function(require,module,exports){
 arguments[4][18][0].apply(exports,arguments)
-},{"dup":18}],95:[function(require,module,exports){
+},{"dup":18}],120:[function(require,module,exports){
 arguments[4][19][0].apply(exports,arguments)
-},{"dup":19,"emitter":96,"reduce":97}],96:[function(require,module,exports){
+},{"dup":19,"emitter":121,"reduce":122}],121:[function(require,module,exports){
 arguments[4][20][0].apply(exports,arguments)
-},{"dup":20}],97:[function(require,module,exports){
+},{"dup":20}],122:[function(require,module,exports){
 arguments[4][21][0].apply(exports,arguments)
-},{"dup":21}],98:[function(require,module,exports){
+},{"dup":21}],123:[function(require,module,exports){
+arguments[4][41][0].apply(exports,arguments)
+},{"dup":41,"events":5,"inherits":124,"insert-css":125,"lodash":344,"qwery":126}],124:[function(require,module,exports){
 arguments[4][42][0].apply(exports,arguments)
-},{"dup":42,"events":5,"inherits":99,"insert-css":100,"lodash":319,"qwery":101}],99:[function(require,module,exports){
+},{"dup":42}],125:[function(require,module,exports){
 arguments[4][43][0].apply(exports,arguments)
-},{"dup":43}],100:[function(require,module,exports){
+},{"dup":43}],126:[function(require,module,exports){
 arguments[4][44][0].apply(exports,arguments)
-},{"dup":44}],101:[function(require,module,exports){
-arguments[4][45][0].apply(exports,arguments)
-},{"dup":45}],102:[function(require,module,exports){
-arguments[4][46][0].apply(exports,arguments)
-},{"buffer":1,"d3":83,"d3-multiaxis-zoom":81,"dup":46,"lightning-client-utils":84,"lightning-visualization":98,"lodash":319}],103:[function(require,module,exports){
+},{"dup":44}],127:[function(require,module,exports){
+arguments[4][71][0].apply(exports,arguments)
+},{"buffer":1,"d3":108,"d3-multiaxis-zoom":106,"dup":71,"lightning-client-utils":109,"lightning-visualization":123,"lodash":344}],128:[function(require,module,exports){
 arguments[4][6][0].apply(exports,arguments)
-},{"./src":137,"dup":6}],104:[function(require,module,exports){
+},{"./src":162,"dup":6}],129:[function(require,module,exports){
 /**
 * geoJSON validation according to the GeoJSON spefication Version 1
 * @module geoJSONValidation
@@ -30202,7 +31762,7 @@ arguments[4][6][0].apply(exports,arguments)
 
 })(typeof exports === 'undefined'? this['GJV']={}: exports);
 
-},{}],105:[function(require,module,exports){
+},{}],130:[function(require,module,exports){
 /*!
  * jQuery JavaScript Library v2.1.4
  * http://jquery.com/
@@ -39414,7 +40974,7 @@ return jQuery;
 
 }));
 
-},{}],106:[function(require,module,exports){
+},{}],131:[function(require,module,exports){
 "use strict";
 
 var $math = Math;
@@ -39714,7 +41274,7 @@ ConcaveHull.prototype = {
 };
 
 module.exports = ConcaveHull;
-},{}],107:[function(require,module,exports){
+},{}],132:[function(require,module,exports){
 "use strict";
 var d3 = require('d3');
 var ClipperLib = require('js-clipper');
@@ -41305,7 +42865,7 @@ module.exports = function(L) {
 };
 
 
-},{"./Hull":108,"./Memory":109,"./Options":110,"./Utilities":111,"d3":113,"js-clipper":115}],108:[function(require,module,exports){
+},{"./Hull":133,"./Memory":134,"./Options":135,"./Utilities":136,"d3":138,"js-clipper":140}],133:[function(require,module,exports){
 
 "use strict";
 
@@ -41398,7 +42958,7 @@ Hull.prototype = {
 
 
 module.exports = Hull;
-},{"./ConcaveHull":106,"graham_scan":114}],109:[function(require,module,exports){
+},{"./ConcaveHull":131,"graham_scan":139}],134:[function(require,module,exports){
 
 
 "use strict";
@@ -41538,7 +43098,7 @@ Memory.prototype = {
 };
 
 module.exports = Memory;
-},{}],110:[function(require,module,exports){
+},{}],135:[function(require,module,exports){
 
 
 "use strict";
@@ -41827,7 +43387,7 @@ Options.prototype = {
 
 
 module.exports = Options;
-},{}],111:[function(require,module,exports){
+},{}],136:[function(require,module,exports){
 
 
 "use strict";
@@ -41896,7 +43456,7 @@ module.exports = {
     }
 
 };
-},{}],112:[function(require,module,exports){
+},{}],137:[function(require,module,exports){
 
 
 
@@ -41905,9 +43465,9 @@ module.exports = function(L) {
 };
 
 
-},{"./components/FreeDraw":107}],113:[function(require,module,exports){
+},{"./components/FreeDraw":132}],138:[function(require,module,exports){
 arguments[4][9][0].apply(exports,arguments)
-},{"dup":9}],114:[function(require,module,exports){
+},{"dup":9}],139:[function(require,module,exports){
 /**
  * Graham's Scan Convex Hull Algorithm
  * @desc An implementation of the Graham's Scan Convex Hull algorithm in Javascript.
@@ -42070,7 +43630,7 @@ if (typeof module !== 'undefined') {
     module.exports = ConvexHullGrahamScan;
 }
 
-},{}],115:[function(require,module,exports){
+},{}],140:[function(require,module,exports){
 // rev 452
 /********************************************************************************
 *                                                                              *
@@ -49057,7 +50617,7 @@ ClipperLib.JS.PolyTreeToExPolygons = function (polytree)
 
 
 module.exports = ClipperLib;
-},{}],116:[function(require,module,exports){
+},{}],141:[function(require,module,exports){
 /*
  Leaflet, a JavaScript library for mobile-friendly interactive maps. http://leafletjs.com
  (c) 2010-2013, Vladimir Agafonkin
@@ -58238,7 +59798,7 @@ L.Map.include({
 
 
 }(window, document));
-},{}],117:[function(require,module,exports){
+},{}],142:[function(require,module,exports){
 
 var _ = require('lodash');
 var request = require('superagent');
@@ -58638,35 +60198,35 @@ var utils = {
 
 
 module.exports = utils;
-},{"color":118,"colorbrewer":124,"d3-color":125,"d3-scale":126,"lodash":127,"superagent":128}],118:[function(require,module,exports){
+},{"color":143,"colorbrewer":149,"d3-color":150,"d3-scale":151,"lodash":152,"superagent":153}],143:[function(require,module,exports){
 arguments[4][11][0].apply(exports,arguments)
-},{"color-convert":120,"color-string":121,"dup":11}],119:[function(require,module,exports){
+},{"color-convert":145,"color-string":146,"dup":11}],144:[function(require,module,exports){
 arguments[4][12][0].apply(exports,arguments)
-},{"dup":12}],120:[function(require,module,exports){
+},{"dup":12}],145:[function(require,module,exports){
 arguments[4][13][0].apply(exports,arguments)
-},{"./conversions":119,"dup":13}],121:[function(require,module,exports){
+},{"./conversions":144,"dup":13}],146:[function(require,module,exports){
 arguments[4][14][0].apply(exports,arguments)
-},{"color-name":122,"dup":14}],122:[function(require,module,exports){
+},{"color-name":147,"dup":14}],147:[function(require,module,exports){
 arguments[4][15][0].apply(exports,arguments)
-},{"dup":15}],123:[function(require,module,exports){
+},{"dup":15}],148:[function(require,module,exports){
 arguments[4][7][0].apply(exports,arguments)
-},{"dup":7}],124:[function(require,module,exports){
+},{"dup":7}],149:[function(require,module,exports){
 arguments[4][8][0].apply(exports,arguments)
-},{"./colorbrewer.js":123,"dup":8}],125:[function(require,module,exports){
+},{"./colorbrewer.js":148,"dup":8}],150:[function(require,module,exports){
 arguments[4][16][0].apply(exports,arguments)
-},{"dup":16}],126:[function(require,module,exports){
+},{"dup":16}],151:[function(require,module,exports){
 arguments[4][17][0].apply(exports,arguments)
-},{"dup":17}],127:[function(require,module,exports){
+},{"dup":17}],152:[function(require,module,exports){
 arguments[4][18][0].apply(exports,arguments)
-},{"dup":18}],128:[function(require,module,exports){
+},{"dup":18}],153:[function(require,module,exports){
 arguments[4][19][0].apply(exports,arguments)
-},{"dup":19,"emitter":129,"reduce":130}],129:[function(require,module,exports){
+},{"dup":19,"emitter":154,"reduce":155}],154:[function(require,module,exports){
 arguments[4][20][0].apply(exports,arguments)
-},{"dup":20}],130:[function(require,module,exports){
+},{"dup":20}],155:[function(require,module,exports){
 arguments[4][21][0].apply(exports,arguments)
-},{"dup":21}],131:[function(require,module,exports){
+},{"dup":21}],156:[function(require,module,exports){
 arguments[4][6][0].apply(exports,arguments)
-},{"./src":132,"dup":6}],132:[function(require,module,exports){
+},{"./src":157,"dup":6}],157:[function(require,module,exports){
 (function (Buffer){
 'use strict';
 
@@ -58767,15 +60327,15 @@ var Visualization = LightningVisualization.extend({
 module.exports = Visualization;
 
 }).call(this,require("buffer").Buffer)
-},{"buffer":1,"jquery":105,"leaflet":116,"lightning-client-utils":117,"lightning-visualization":133,"lodash":319}],133:[function(require,module,exports){
+},{"buffer":1,"jquery":130,"leaflet":141,"lightning-client-utils":142,"lightning-visualization":158,"lodash":344}],158:[function(require,module,exports){
+arguments[4][41][0].apply(exports,arguments)
+},{"dup":41,"events":5,"inherits":159,"insert-css":160,"lodash":344,"qwery":161}],159:[function(require,module,exports){
 arguments[4][42][0].apply(exports,arguments)
-},{"dup":42,"events":5,"inherits":134,"insert-css":135,"lodash":319,"qwery":136}],134:[function(require,module,exports){
+},{"dup":42}],160:[function(require,module,exports){
 arguments[4][43][0].apply(exports,arguments)
-},{"dup":43}],135:[function(require,module,exports){
+},{"dup":43}],161:[function(require,module,exports){
 arguments[4][44][0].apply(exports,arguments)
-},{"dup":44}],136:[function(require,module,exports){
-arguments[4][45][0].apply(exports,arguments)
-},{"dup":45}],137:[function(require,module,exports){
+},{"dup":44}],162:[function(require,module,exports){
 (function (Buffer){
 'use strict';
 
@@ -59087,97 +60647,97 @@ var Visualization = ImageViz.extend({
 module.exports = Visualization;
 
 }).call(this,require("buffer").Buffer)
-},{"buffer":1,"geojson-validation":104,"leaflet":116,"leaflet.freedraw-browserify":112,"lightning-client-utils":117,"lightning-image":131,"lodash":319}],138:[function(require,module,exports){
+},{"buffer":1,"geojson-validation":129,"leaflet":141,"leaflet.freedraw-browserify":137,"lightning-client-utils":142,"lightning-image":156,"lodash":344}],163:[function(require,module,exports){
 arguments[4][6][0].apply(exports,arguments)
-},{"./src":159,"dup":6}],139:[function(require,module,exports){
-arguments[4][105][0].apply(exports,arguments)
-},{"dup":105}],140:[function(require,module,exports){
-arguments[4][116][0].apply(exports,arguments)
-},{"dup":116}],141:[function(require,module,exports){
-arguments[4][117][0].apply(exports,arguments)
-},{"color":142,"colorbrewer":148,"d3-color":149,"d3-scale":150,"dup":117,"lodash":151,"superagent":152}],142:[function(require,module,exports){
+},{"./src":184,"dup":6}],164:[function(require,module,exports){
+arguments[4][130][0].apply(exports,arguments)
+},{"dup":130}],165:[function(require,module,exports){
+arguments[4][141][0].apply(exports,arguments)
+},{"dup":141}],166:[function(require,module,exports){
+arguments[4][142][0].apply(exports,arguments)
+},{"color":167,"colorbrewer":173,"d3-color":174,"d3-scale":175,"dup":142,"lodash":176,"superagent":177}],167:[function(require,module,exports){
 arguments[4][11][0].apply(exports,arguments)
-},{"color-convert":144,"color-string":145,"dup":11}],143:[function(require,module,exports){
+},{"color-convert":169,"color-string":170,"dup":11}],168:[function(require,module,exports){
 arguments[4][12][0].apply(exports,arguments)
-},{"dup":12}],144:[function(require,module,exports){
+},{"dup":12}],169:[function(require,module,exports){
 arguments[4][13][0].apply(exports,arguments)
-},{"./conversions":143,"dup":13}],145:[function(require,module,exports){
+},{"./conversions":168,"dup":13}],170:[function(require,module,exports){
 arguments[4][14][0].apply(exports,arguments)
-},{"color-name":146,"dup":14}],146:[function(require,module,exports){
+},{"color-name":171,"dup":14}],171:[function(require,module,exports){
 arguments[4][15][0].apply(exports,arguments)
-},{"dup":15}],147:[function(require,module,exports){
+},{"dup":15}],172:[function(require,module,exports){
 arguments[4][7][0].apply(exports,arguments)
-},{"dup":7}],148:[function(require,module,exports){
+},{"dup":7}],173:[function(require,module,exports){
 arguments[4][8][0].apply(exports,arguments)
-},{"./colorbrewer.js":147,"dup":8}],149:[function(require,module,exports){
+},{"./colorbrewer.js":172,"dup":8}],174:[function(require,module,exports){
 arguments[4][16][0].apply(exports,arguments)
-},{"dup":16}],150:[function(require,module,exports){
+},{"dup":16}],175:[function(require,module,exports){
 arguments[4][17][0].apply(exports,arguments)
-},{"dup":17}],151:[function(require,module,exports){
+},{"dup":17}],176:[function(require,module,exports){
 arguments[4][18][0].apply(exports,arguments)
-},{"dup":18}],152:[function(require,module,exports){
+},{"dup":18}],177:[function(require,module,exports){
 arguments[4][19][0].apply(exports,arguments)
-},{"dup":19,"emitter":153,"reduce":154}],153:[function(require,module,exports){
+},{"dup":19,"emitter":178,"reduce":179}],178:[function(require,module,exports){
 arguments[4][20][0].apply(exports,arguments)
-},{"dup":20}],154:[function(require,module,exports){
+},{"dup":20}],179:[function(require,module,exports){
 arguments[4][21][0].apply(exports,arguments)
-},{"dup":21}],155:[function(require,module,exports){
-arguments[4][42][0].apply(exports,arguments)
-},{"dup":42,"events":5,"inherits":156,"insert-css":157,"lodash":319,"qwery":158}],156:[function(require,module,exports){
-arguments[4][43][0].apply(exports,arguments)
-},{"dup":43}],157:[function(require,module,exports){
-arguments[4][44][0].apply(exports,arguments)
-},{"dup":44}],158:[function(require,module,exports){
-arguments[4][45][0].apply(exports,arguments)
-},{"dup":45}],159:[function(require,module,exports){
-arguments[4][132][0].apply(exports,arguments)
-},{"buffer":1,"dup":132,"jquery":139,"leaflet":140,"lightning-client-utils":141,"lightning-visualization":155,"lodash":319}],160:[function(require,module,exports){
-arguments[4][6][0].apply(exports,arguments)
-},{"./src":184,"dup":6}],161:[function(require,module,exports){
-arguments[4][6][0].apply(exports,arguments)
-},{"./src":183,"dup":6}],162:[function(require,module,exports){
-arguments[4][40][0].apply(exports,arguments)
-},{"./src":163,"dup":40}],163:[function(require,module,exports){
+},{"dup":21}],180:[function(require,module,exports){
 arguments[4][41][0].apply(exports,arguments)
-},{"dup":41}],164:[function(require,module,exports){
-arguments[4][9][0].apply(exports,arguments)
-},{"dup":9}],165:[function(require,module,exports){
-arguments[4][10][0].apply(exports,arguments)
-},{"color":166,"colorbrewer":172,"d3-color":173,"d3-scale":174,"dup":10,"lodash":175,"superagent":176}],166:[function(require,module,exports){
-arguments[4][11][0].apply(exports,arguments)
-},{"color-convert":168,"color-string":169,"dup":11}],167:[function(require,module,exports){
-arguments[4][12][0].apply(exports,arguments)
-},{"dup":12}],168:[function(require,module,exports){
-arguments[4][13][0].apply(exports,arguments)
-},{"./conversions":167,"dup":13}],169:[function(require,module,exports){
-arguments[4][14][0].apply(exports,arguments)
-},{"color-name":170,"dup":14}],170:[function(require,module,exports){
-arguments[4][15][0].apply(exports,arguments)
-},{"dup":15}],171:[function(require,module,exports){
-arguments[4][7][0].apply(exports,arguments)
-},{"dup":7}],172:[function(require,module,exports){
-arguments[4][8][0].apply(exports,arguments)
-},{"./colorbrewer.js":171,"dup":8}],173:[function(require,module,exports){
-arguments[4][16][0].apply(exports,arguments)
-},{"dup":16}],174:[function(require,module,exports){
-arguments[4][17][0].apply(exports,arguments)
-},{"dup":17}],175:[function(require,module,exports){
-arguments[4][18][0].apply(exports,arguments)
-},{"dup":18}],176:[function(require,module,exports){
-arguments[4][19][0].apply(exports,arguments)
-},{"dup":19,"emitter":177,"reduce":178}],177:[function(require,module,exports){
-arguments[4][20][0].apply(exports,arguments)
-},{"dup":20}],178:[function(require,module,exports){
-arguments[4][21][0].apply(exports,arguments)
-},{"dup":21}],179:[function(require,module,exports){
+},{"dup":41,"events":5,"inherits":181,"insert-css":182,"lodash":344,"qwery":183}],181:[function(require,module,exports){
 arguments[4][42][0].apply(exports,arguments)
-},{"dup":42,"events":5,"inherits":180,"insert-css":181,"lodash":319,"qwery":182}],180:[function(require,module,exports){
+},{"dup":42}],182:[function(require,module,exports){
 arguments[4][43][0].apply(exports,arguments)
-},{"dup":43}],181:[function(require,module,exports){
+},{"dup":43}],183:[function(require,module,exports){
 arguments[4][44][0].apply(exports,arguments)
-},{"dup":44}],182:[function(require,module,exports){
-arguments[4][45][0].apply(exports,arguments)
-},{"dup":45}],183:[function(require,module,exports){
+},{"dup":44}],184:[function(require,module,exports){
+arguments[4][157][0].apply(exports,arguments)
+},{"buffer":1,"dup":157,"jquery":164,"leaflet":165,"lightning-client-utils":166,"lightning-visualization":180,"lodash":344}],185:[function(require,module,exports){
+arguments[4][6][0].apply(exports,arguments)
+},{"./src":209,"dup":6}],186:[function(require,module,exports){
+arguments[4][6][0].apply(exports,arguments)
+},{"./src":208,"dup":6}],187:[function(require,module,exports){
+arguments[4][24][0].apply(exports,arguments)
+},{"./src":188,"dup":24}],188:[function(require,module,exports){
+arguments[4][25][0].apply(exports,arguments)
+},{"dup":25}],189:[function(require,module,exports){
+arguments[4][9][0].apply(exports,arguments)
+},{"dup":9}],190:[function(require,module,exports){
+arguments[4][10][0].apply(exports,arguments)
+},{"color":191,"colorbrewer":197,"d3-color":198,"d3-scale":199,"dup":10,"lodash":200,"superagent":201}],191:[function(require,module,exports){
+arguments[4][11][0].apply(exports,arguments)
+},{"color-convert":193,"color-string":194,"dup":11}],192:[function(require,module,exports){
+arguments[4][12][0].apply(exports,arguments)
+},{"dup":12}],193:[function(require,module,exports){
+arguments[4][13][0].apply(exports,arguments)
+},{"./conversions":192,"dup":13}],194:[function(require,module,exports){
+arguments[4][14][0].apply(exports,arguments)
+},{"color-name":195,"dup":14}],195:[function(require,module,exports){
+arguments[4][15][0].apply(exports,arguments)
+},{"dup":15}],196:[function(require,module,exports){
+arguments[4][7][0].apply(exports,arguments)
+},{"dup":7}],197:[function(require,module,exports){
+arguments[4][8][0].apply(exports,arguments)
+},{"./colorbrewer.js":196,"dup":8}],198:[function(require,module,exports){
+arguments[4][16][0].apply(exports,arguments)
+},{"dup":16}],199:[function(require,module,exports){
+arguments[4][17][0].apply(exports,arguments)
+},{"dup":17}],200:[function(require,module,exports){
+arguments[4][18][0].apply(exports,arguments)
+},{"dup":18}],201:[function(require,module,exports){
+arguments[4][19][0].apply(exports,arguments)
+},{"dup":19,"emitter":202,"reduce":203}],202:[function(require,module,exports){
+arguments[4][20][0].apply(exports,arguments)
+},{"dup":20}],203:[function(require,module,exports){
+arguments[4][21][0].apply(exports,arguments)
+},{"dup":21}],204:[function(require,module,exports){
+arguments[4][41][0].apply(exports,arguments)
+},{"dup":41,"events":5,"inherits":205,"insert-css":206,"lodash":344,"qwery":207}],205:[function(require,module,exports){
+arguments[4][42][0].apply(exports,arguments)
+},{"dup":42}],206:[function(require,module,exports){
+arguments[4][43][0].apply(exports,arguments)
+},{"dup":43}],207:[function(require,module,exports){
+arguments[4][44][0].apply(exports,arguments)
+},{"dup":44}],208:[function(require,module,exports){
 (function (Buffer){
 'use strict';
 var d3 = require('d3');
@@ -59502,7 +61062,7 @@ var Visualization = LightningVisualization.extend({
 module.exports = Visualization;
 
 }).call(this,require("buffer").Buffer)
-},{"buffer":1,"d3":164,"d3-multiaxis-zoom":162,"lightning-client-utils":165,"lightning-visualization":179,"lodash":319}],184:[function(require,module,exports){
+},{"buffer":1,"d3":189,"d3-multiaxis-zoom":187,"lightning-client-utils":190,"lightning-visualization":204,"lodash":344}],209:[function(require,module,exports){
 'use strict';
 var Line = require('lightning-line');
 var _ = require('lodash');
@@ -59550,59 +61110,59 @@ var Visualization = Line.extend({
 
 
 module.exports = Visualization;
-},{"lightning-line":161,"lodash":319}],185:[function(require,module,exports){
+},{"lightning-line":186,"lodash":344}],210:[function(require,module,exports){
 arguments[4][6][0].apply(exports,arguments)
-},{"./src":207,"dup":6}],186:[function(require,module,exports){
-arguments[4][40][0].apply(exports,arguments)
-},{"./src":187,"dup":40}],187:[function(require,module,exports){
-arguments[4][41][0].apply(exports,arguments)
-},{"dup":41}],188:[function(require,module,exports){
+},{"./src":232,"dup":6}],211:[function(require,module,exports){
+arguments[4][24][0].apply(exports,arguments)
+},{"./src":212,"dup":24}],212:[function(require,module,exports){
+arguments[4][25][0].apply(exports,arguments)
+},{"dup":25}],213:[function(require,module,exports){
 arguments[4][9][0].apply(exports,arguments)
-},{"dup":9}],189:[function(require,module,exports){
+},{"dup":9}],214:[function(require,module,exports){
 arguments[4][10][0].apply(exports,arguments)
-},{"color":190,"colorbrewer":196,"d3-color":197,"d3-scale":198,"dup":10,"lodash":199,"superagent":200}],190:[function(require,module,exports){
+},{"color":215,"colorbrewer":221,"d3-color":222,"d3-scale":223,"dup":10,"lodash":224,"superagent":225}],215:[function(require,module,exports){
 arguments[4][11][0].apply(exports,arguments)
-},{"color-convert":192,"color-string":193,"dup":11}],191:[function(require,module,exports){
+},{"color-convert":217,"color-string":218,"dup":11}],216:[function(require,module,exports){
 arguments[4][12][0].apply(exports,arguments)
-},{"dup":12}],192:[function(require,module,exports){
+},{"dup":12}],217:[function(require,module,exports){
 arguments[4][13][0].apply(exports,arguments)
-},{"./conversions":191,"dup":13}],193:[function(require,module,exports){
+},{"./conversions":216,"dup":13}],218:[function(require,module,exports){
 arguments[4][14][0].apply(exports,arguments)
-},{"color-name":194,"dup":14}],194:[function(require,module,exports){
+},{"color-name":219,"dup":14}],219:[function(require,module,exports){
 arguments[4][15][0].apply(exports,arguments)
-},{"dup":15}],195:[function(require,module,exports){
+},{"dup":15}],220:[function(require,module,exports){
 arguments[4][7][0].apply(exports,arguments)
-},{"dup":7}],196:[function(require,module,exports){
+},{"dup":7}],221:[function(require,module,exports){
 arguments[4][8][0].apply(exports,arguments)
-},{"./colorbrewer.js":195,"dup":8}],197:[function(require,module,exports){
+},{"./colorbrewer.js":220,"dup":8}],222:[function(require,module,exports){
 arguments[4][16][0].apply(exports,arguments)
-},{"dup":16}],198:[function(require,module,exports){
+},{"dup":16}],223:[function(require,module,exports){
 arguments[4][17][0].apply(exports,arguments)
-},{"dup":17}],199:[function(require,module,exports){
+},{"dup":17}],224:[function(require,module,exports){
 arguments[4][18][0].apply(exports,arguments)
-},{"dup":18}],200:[function(require,module,exports){
+},{"dup":18}],225:[function(require,module,exports){
 arguments[4][19][0].apply(exports,arguments)
-},{"dup":19,"emitter":201,"reduce":202}],201:[function(require,module,exports){
+},{"dup":19,"emitter":226,"reduce":227}],226:[function(require,module,exports){
 arguments[4][20][0].apply(exports,arguments)
-},{"dup":20}],202:[function(require,module,exports){
+},{"dup":20}],227:[function(require,module,exports){
 arguments[4][21][0].apply(exports,arguments)
-},{"dup":21}],203:[function(require,module,exports){
+},{"dup":21}],228:[function(require,module,exports){
+arguments[4][41][0].apply(exports,arguments)
+},{"dup":41,"events":5,"inherits":229,"insert-css":230,"lodash":344,"qwery":231}],229:[function(require,module,exports){
 arguments[4][42][0].apply(exports,arguments)
-},{"dup":42,"events":5,"inherits":204,"insert-css":205,"lodash":319,"qwery":206}],204:[function(require,module,exports){
+},{"dup":42}],230:[function(require,module,exports){
 arguments[4][43][0].apply(exports,arguments)
-},{"dup":43}],205:[function(require,module,exports){
+},{"dup":43}],231:[function(require,module,exports){
 arguments[4][44][0].apply(exports,arguments)
-},{"dup":44}],206:[function(require,module,exports){
-arguments[4][45][0].apply(exports,arguments)
-},{"dup":45}],207:[function(require,module,exports){
-arguments[4][183][0].apply(exports,arguments)
-},{"buffer":1,"d3":188,"d3-multiaxis-zoom":186,"dup":183,"lightning-client-utils":189,"lightning-visualization":203,"lodash":319}],208:[function(require,module,exports){
+},{"dup":44}],232:[function(require,module,exports){
+arguments[4][208][0].apply(exports,arguments)
+},{"buffer":1,"d3":213,"d3-multiaxis-zoom":211,"dup":208,"lightning-client-utils":214,"lightning-visualization":228,"lodash":344}],233:[function(require,module,exports){
 arguments[4][6][0].apply(exports,arguments)
-},{"./src":219,"dup":6}],209:[function(require,module,exports){
+},{"./src":244,"dup":6}],234:[function(require,module,exports){
 arguments[4][7][0].apply(exports,arguments)
-},{"dup":7}],210:[function(require,module,exports){
+},{"dup":7}],235:[function(require,module,exports){
 arguments[4][8][0].apply(exports,arguments)
-},{"./colorbrewer.js":209,"dup":8}],211:[function(require,module,exports){
+},{"./colorbrewer.js":234,"dup":8}],236:[function(require,module,exports){
 var d3 = require('d3');
 var topojson = require('topojson');
 
@@ -71773,9 +73333,9 @@ if ( window.jQuery ) {
 }
 
 module.exports = Datamap;
-},{"d3":212,"topojson":213}],212:[function(require,module,exports){
+},{"d3":237,"topojson":238}],237:[function(require,module,exports){
 arguments[4][9][0].apply(exports,arguments)
-},{"dup":9}],213:[function(require,module,exports){
+},{"dup":9}],238:[function(require,module,exports){
 !function() {
   var topojson = {
     version: "1.6.19",
@@ -72311,17 +73871,17 @@ arguments[4][9][0].apply(exports,arguments)
   else this.topojson = topojson;
 }();
 
-},{}],214:[function(require,module,exports){
-arguments[4][105][0].apply(exports,arguments)
-},{"dup":105}],215:[function(require,module,exports){
+},{}],239:[function(require,module,exports){
+arguments[4][130][0].apply(exports,arguments)
+},{"dup":130}],240:[function(require,module,exports){
+arguments[4][41][0].apply(exports,arguments)
+},{"dup":41,"events":5,"inherits":241,"insert-css":242,"lodash":344,"qwery":243}],241:[function(require,module,exports){
 arguments[4][42][0].apply(exports,arguments)
-},{"dup":42,"events":5,"inherits":216,"insert-css":217,"lodash":319,"qwery":218}],216:[function(require,module,exports){
+},{"dup":42}],242:[function(require,module,exports){
 arguments[4][43][0].apply(exports,arguments)
-},{"dup":43}],217:[function(require,module,exports){
+},{"dup":43}],243:[function(require,module,exports){
 arguments[4][44][0].apply(exports,arguments)
-},{"dup":44}],218:[function(require,module,exports){
-arguments[4][45][0].apply(exports,arguments)
-},{"dup":45}],219:[function(require,module,exports){
+},{"dup":44}],244:[function(require,module,exports){
 'use strict';
 var LightningVisualization = require('lightning-visualization');
 var Datamaps = require('datamaps-all-browserify');
@@ -72427,47 +73987,47 @@ var Visualization = LightningVisualization.extend({
 
 module.exports = Visualization;
 
-},{"colorbrewer":210,"datamaps-all-browserify":211,"jquery":214,"lightning-visualization":215,"lodash":319}],220:[function(require,module,exports){
+},{"colorbrewer":235,"datamaps-all-browserify":236,"jquery":239,"lightning-visualization":240,"lodash":344}],245:[function(require,module,exports){
 arguments[4][6][0].apply(exports,arguments)
-},{"./src":240,"dup":6}],221:[function(require,module,exports){
+},{"./src":265,"dup":6}],246:[function(require,module,exports){
 arguments[4][7][0].apply(exports,arguments)
-},{"dup":7}],222:[function(require,module,exports){
+},{"dup":7}],247:[function(require,module,exports){
 arguments[4][8][0].apply(exports,arguments)
-},{"./colorbrewer.js":221,"dup":8}],223:[function(require,module,exports){
+},{"./colorbrewer.js":246,"dup":8}],248:[function(require,module,exports){
 arguments[4][9][0].apply(exports,arguments)
-},{"dup":9}],224:[function(require,module,exports){
+},{"dup":9}],249:[function(require,module,exports){
 arguments[4][10][0].apply(exports,arguments)
-},{"color":225,"colorbrewer":222,"d3-color":230,"d3-scale":231,"dup":10,"lodash":232,"superagent":233}],225:[function(require,module,exports){
+},{"color":250,"colorbrewer":247,"d3-color":255,"d3-scale":256,"dup":10,"lodash":257,"superagent":258}],250:[function(require,module,exports){
 arguments[4][11][0].apply(exports,arguments)
-},{"color-convert":227,"color-string":228,"dup":11}],226:[function(require,module,exports){
+},{"color-convert":252,"color-string":253,"dup":11}],251:[function(require,module,exports){
 arguments[4][12][0].apply(exports,arguments)
-},{"dup":12}],227:[function(require,module,exports){
+},{"dup":12}],252:[function(require,module,exports){
 arguments[4][13][0].apply(exports,arguments)
-},{"./conversions":226,"dup":13}],228:[function(require,module,exports){
+},{"./conversions":251,"dup":13}],253:[function(require,module,exports){
 arguments[4][14][0].apply(exports,arguments)
-},{"color-name":229,"dup":14}],229:[function(require,module,exports){
+},{"color-name":254,"dup":14}],254:[function(require,module,exports){
 arguments[4][15][0].apply(exports,arguments)
-},{"dup":15}],230:[function(require,module,exports){
+},{"dup":15}],255:[function(require,module,exports){
 arguments[4][16][0].apply(exports,arguments)
-},{"dup":16}],231:[function(require,module,exports){
+},{"dup":16}],256:[function(require,module,exports){
 arguments[4][17][0].apply(exports,arguments)
-},{"dup":17}],232:[function(require,module,exports){
+},{"dup":17}],257:[function(require,module,exports){
 arguments[4][18][0].apply(exports,arguments)
-},{"dup":18}],233:[function(require,module,exports){
+},{"dup":18}],258:[function(require,module,exports){
 arguments[4][19][0].apply(exports,arguments)
-},{"dup":19,"emitter":234,"reduce":235}],234:[function(require,module,exports){
+},{"dup":19,"emitter":259,"reduce":260}],259:[function(require,module,exports){
 arguments[4][20][0].apply(exports,arguments)
-},{"dup":20}],235:[function(require,module,exports){
+},{"dup":20}],260:[function(require,module,exports){
 arguments[4][21][0].apply(exports,arguments)
-},{"dup":21}],236:[function(require,module,exports){
+},{"dup":21}],261:[function(require,module,exports){
+arguments[4][41][0].apply(exports,arguments)
+},{"dup":41,"events":5,"inherits":262,"insert-css":263,"lodash":344,"qwery":264}],262:[function(require,module,exports){
 arguments[4][42][0].apply(exports,arguments)
-},{"dup":42,"events":5,"inherits":237,"insert-css":238,"lodash":319,"qwery":239}],237:[function(require,module,exports){
+},{"dup":42}],263:[function(require,module,exports){
 arguments[4][43][0].apply(exports,arguments)
-},{"dup":43}],238:[function(require,module,exports){
+},{"dup":43}],264:[function(require,module,exports){
 arguments[4][44][0].apply(exports,arguments)
-},{"dup":44}],239:[function(require,module,exports){
-arguments[4][45][0].apply(exports,arguments)
-},{"dup":45}],240:[function(require,module,exports){
+},{"dup":44}],265:[function(require,module,exports){
 (function (Buffer){
 'use strict';
 var d3 = require('d3');
@@ -72846,45 +74406,45 @@ var Visualization = LightningVisualization.extend({
 module.exports = Visualization;
 
 }).call(this,require("buffer").Buffer)
-},{"buffer":1,"colorbrewer":222,"d3":223,"lightning-client-utils":224,"lightning-visualization":236,"lodash":319}],241:[function(require,module,exports){
+},{"buffer":1,"colorbrewer":247,"d3":248,"lightning-client-utils":249,"lightning-visualization":261,"lodash":344}],266:[function(require,module,exports){
 arguments[4][6][0].apply(exports,arguments)
-},{"./src":262,"dup":6}],242:[function(require,module,exports){
+},{"./src":287,"dup":6}],267:[function(require,module,exports){
 arguments[4][16][0].apply(exports,arguments)
-},{"dup":16}],243:[function(require,module,exports){
-arguments[4][117][0].apply(exports,arguments)
-},{"color":244,"colorbrewer":250,"d3-color":242,"d3-scale":251,"dup":117,"lodash":252,"superagent":253}],244:[function(require,module,exports){
+},{"dup":16}],268:[function(require,module,exports){
+arguments[4][142][0].apply(exports,arguments)
+},{"color":269,"colorbrewer":275,"d3-color":267,"d3-scale":276,"dup":142,"lodash":277,"superagent":278}],269:[function(require,module,exports){
 arguments[4][11][0].apply(exports,arguments)
-},{"color-convert":246,"color-string":247,"dup":11}],245:[function(require,module,exports){
+},{"color-convert":271,"color-string":272,"dup":11}],270:[function(require,module,exports){
 arguments[4][12][0].apply(exports,arguments)
-},{"dup":12}],246:[function(require,module,exports){
+},{"dup":12}],271:[function(require,module,exports){
 arguments[4][13][0].apply(exports,arguments)
-},{"./conversions":245,"dup":13}],247:[function(require,module,exports){
+},{"./conversions":270,"dup":13}],272:[function(require,module,exports){
 arguments[4][14][0].apply(exports,arguments)
-},{"color-name":248,"dup":14}],248:[function(require,module,exports){
+},{"color-name":273,"dup":14}],273:[function(require,module,exports){
 arguments[4][15][0].apply(exports,arguments)
-},{"dup":15}],249:[function(require,module,exports){
+},{"dup":15}],274:[function(require,module,exports){
 arguments[4][7][0].apply(exports,arguments)
-},{"dup":7}],250:[function(require,module,exports){
+},{"dup":7}],275:[function(require,module,exports){
 arguments[4][8][0].apply(exports,arguments)
-},{"./colorbrewer.js":249,"dup":8}],251:[function(require,module,exports){
+},{"./colorbrewer.js":274,"dup":8}],276:[function(require,module,exports){
 arguments[4][17][0].apply(exports,arguments)
-},{"dup":17}],252:[function(require,module,exports){
+},{"dup":17}],277:[function(require,module,exports){
 arguments[4][18][0].apply(exports,arguments)
-},{"dup":18}],253:[function(require,module,exports){
+},{"dup":18}],278:[function(require,module,exports){
 arguments[4][19][0].apply(exports,arguments)
-},{"dup":19,"emitter":254,"reduce":255}],254:[function(require,module,exports){
+},{"dup":19,"emitter":279,"reduce":280}],279:[function(require,module,exports){
 arguments[4][20][0].apply(exports,arguments)
-},{"dup":20}],255:[function(require,module,exports){
+},{"dup":20}],280:[function(require,module,exports){
 arguments[4][21][0].apply(exports,arguments)
-},{"dup":21}],256:[function(require,module,exports){
+},{"dup":21}],281:[function(require,module,exports){
+arguments[4][41][0].apply(exports,arguments)
+},{"dup":41,"events":5,"inherits":282,"insert-css":283,"lodash":344,"qwery":284}],282:[function(require,module,exports){
 arguments[4][42][0].apply(exports,arguments)
-},{"dup":42,"events":5,"inherits":257,"insert-css":258,"lodash":319,"qwery":259}],257:[function(require,module,exports){
+},{"dup":42}],283:[function(require,module,exports){
 arguments[4][43][0].apply(exports,arguments)
-},{"dup":43}],258:[function(require,module,exports){
+},{"dup":43}],284:[function(require,module,exports){
 arguments[4][44][0].apply(exports,arguments)
-},{"dup":44}],259:[function(require,module,exports){
-arguments[4][45][0].apply(exports,arguments)
-},{"dup":45}],260:[function(require,module,exports){
+},{"dup":44}],285:[function(require,module,exports){
 
 
 /**
@@ -73189,7 +74749,7 @@ module.exports = function(THREE) {
     };
 
 };
-},{}],261:[function(require,module,exports){
+},{}],286:[function(require,module,exports){
 // threejs.org/license
 'use strict';var THREE={REVISION:"70"};"object"===typeof module&&(module.exports=THREE);void 0===Math.sign&&(Math.sign=function(a){return 0>a?-1:0<a?1:0});THREE.MOUSE={LEFT:0,MIDDLE:1,RIGHT:2};THREE.CullFaceNone=0;THREE.CullFaceBack=1;THREE.CullFaceFront=2;THREE.CullFaceFrontBack=3;THREE.FrontFaceDirectionCW=0;THREE.FrontFaceDirectionCCW=1;THREE.BasicShadowMap=0;THREE.PCFShadowMap=1;THREE.PCFSoftShadowMap=2;THREE.FrontSide=0;THREE.BackSide=1;THREE.DoubleSide=2;THREE.NoShading=0;
 THREE.FlatShading=1;THREE.SmoothShading=2;THREE.NoColors=0;THREE.FaceColors=1;THREE.VertexColors=2;THREE.NoBlending=0;THREE.NormalBlending=1;THREE.AdditiveBlending=2;THREE.SubtractiveBlending=3;THREE.MultiplyBlending=4;THREE.CustomBlending=5;THREE.AddEquation=100;THREE.SubtractEquation=101;THREE.ReverseSubtractEquation=102;THREE.MinEquation=103;THREE.MaxEquation=104;THREE.ZeroFactor=200;THREE.OneFactor=201;THREE.SrcColorFactor=202;THREE.OneMinusSrcColorFactor=203;THREE.SrcAlphaFactor=204;
@@ -74012,7 +75572,7 @@ THREE.MorphBlendMesh.prototype.getAnimationDuration=function(a){var b=-1;if(a=th
 THREE.MorphBlendMesh.prototype.update=function(a){for(var b=0,c=this.animationsList.length;b<c;b++){var d=this.animationsList[b];if(d.active){var e=d.duration/d.length;d.time+=d.direction*a;if(d.mirroredLoop){if(d.time>d.duration||0>d.time)d.direction*=-1,d.time>d.duration&&(d.time=d.duration,d.directionBackwards=!0),0>d.time&&(d.time=0,d.directionBackwards=!1)}else d.time%=d.duration,0>d.time&&(d.time+=d.duration);var f=d.startFrame+THREE.Math.clamp(Math.floor(d.time/e),0,d.length-1),g=d.weight;
 f!==d.currentFrame&&(this.morphTargetInfluences[d.lastFrame]=0,this.morphTargetInfluences[d.currentFrame]=1*g,this.morphTargetInfluences[f]=0,d.lastFrame=d.currentFrame,d.currentFrame=f);e=d.time%e/e;d.directionBackwards&&(e=1-e);this.morphTargetInfluences[d.currentFrame]=e*g;this.morphTargetInfluences[d.lastFrame]=(1-e)*g}}};module.exports=THREE;
 
-},{}],262:[function(require,module,exports){
+},{}],287:[function(require,module,exports){
 'use strict';
 
 var LightningVisualization = require('lightning-visualization');
@@ -74272,53 +75832,53 @@ var Scatter3 = LightningVisualization.extend({
 
 module.exports = Scatter3;
 
-},{"d3-color":242,"lightning-client-utils":243,"lightning-visualization":256,"lodash":319,"three-fly-controls":260,"three.js":261}],263:[function(require,module,exports){
+},{"d3-color":267,"lightning-client-utils":268,"lightning-visualization":281,"lodash":344,"three-fly-controls":285,"three.js":286}],288:[function(require,module,exports){
 arguments[4][6][0].apply(exports,arguments)
-},{"./src":287,"dup":6}],264:[function(require,module,exports){
+},{"./src":312,"dup":6}],289:[function(require,module,exports){
 arguments[4][6][0].apply(exports,arguments)
-},{"./src":286,"dup":6}],265:[function(require,module,exports){
-arguments[4][40][0].apply(exports,arguments)
-},{"./src":266,"dup":40}],266:[function(require,module,exports){
-arguments[4][41][0].apply(exports,arguments)
-},{"dup":41}],267:[function(require,module,exports){
+},{"./src":311,"dup":6}],290:[function(require,module,exports){
+arguments[4][24][0].apply(exports,arguments)
+},{"./src":291,"dup":24}],291:[function(require,module,exports){
+arguments[4][25][0].apply(exports,arguments)
+},{"dup":25}],292:[function(require,module,exports){
 arguments[4][9][0].apply(exports,arguments)
-},{"dup":9}],268:[function(require,module,exports){
+},{"dup":9}],293:[function(require,module,exports){
 arguments[4][10][0].apply(exports,arguments)
-},{"color":269,"colorbrewer":275,"d3-color":276,"d3-scale":277,"dup":10,"lodash":278,"superagent":279}],269:[function(require,module,exports){
+},{"color":294,"colorbrewer":300,"d3-color":301,"d3-scale":302,"dup":10,"lodash":303,"superagent":304}],294:[function(require,module,exports){
 arguments[4][11][0].apply(exports,arguments)
-},{"color-convert":271,"color-string":272,"dup":11}],270:[function(require,module,exports){
+},{"color-convert":296,"color-string":297,"dup":11}],295:[function(require,module,exports){
 arguments[4][12][0].apply(exports,arguments)
-},{"dup":12}],271:[function(require,module,exports){
+},{"dup":12}],296:[function(require,module,exports){
 arguments[4][13][0].apply(exports,arguments)
-},{"./conversions":270,"dup":13}],272:[function(require,module,exports){
+},{"./conversions":295,"dup":13}],297:[function(require,module,exports){
 arguments[4][14][0].apply(exports,arguments)
-},{"color-name":273,"dup":14}],273:[function(require,module,exports){
+},{"color-name":298,"dup":14}],298:[function(require,module,exports){
 arguments[4][15][0].apply(exports,arguments)
-},{"dup":15}],274:[function(require,module,exports){
+},{"dup":15}],299:[function(require,module,exports){
 arguments[4][7][0].apply(exports,arguments)
-},{"dup":7}],275:[function(require,module,exports){
+},{"dup":7}],300:[function(require,module,exports){
 arguments[4][8][0].apply(exports,arguments)
-},{"./colorbrewer.js":274,"dup":8}],276:[function(require,module,exports){
+},{"./colorbrewer.js":299,"dup":8}],301:[function(require,module,exports){
 arguments[4][16][0].apply(exports,arguments)
-},{"dup":16}],277:[function(require,module,exports){
+},{"dup":16}],302:[function(require,module,exports){
 arguments[4][17][0].apply(exports,arguments)
-},{"dup":17}],278:[function(require,module,exports){
+},{"dup":17}],303:[function(require,module,exports){
 arguments[4][18][0].apply(exports,arguments)
-},{"dup":18}],279:[function(require,module,exports){
+},{"dup":18}],304:[function(require,module,exports){
 arguments[4][19][0].apply(exports,arguments)
-},{"dup":19,"emitter":280,"reduce":281}],280:[function(require,module,exports){
+},{"dup":19,"emitter":305,"reduce":306}],305:[function(require,module,exports){
 arguments[4][20][0].apply(exports,arguments)
-},{"dup":20}],281:[function(require,module,exports){
+},{"dup":20}],306:[function(require,module,exports){
 arguments[4][21][0].apply(exports,arguments)
-},{"dup":21}],282:[function(require,module,exports){
+},{"dup":21}],307:[function(require,module,exports){
+arguments[4][41][0].apply(exports,arguments)
+},{"dup":41,"events":5,"inherits":308,"insert-css":309,"lodash":344,"qwery":310}],308:[function(require,module,exports){
 arguments[4][42][0].apply(exports,arguments)
-},{"dup":42,"events":5,"inherits":283,"insert-css":284,"lodash":319,"qwery":285}],283:[function(require,module,exports){
+},{"dup":42}],309:[function(require,module,exports){
 arguments[4][43][0].apply(exports,arguments)
-},{"dup":43}],284:[function(require,module,exports){
+},{"dup":43}],310:[function(require,module,exports){
 arguments[4][44][0].apply(exports,arguments)
-},{"dup":44}],285:[function(require,module,exports){
-arguments[4][45][0].apply(exports,arguments)
-},{"dup":45}],286:[function(require,module,exports){
+},{"dup":44}],311:[function(require,module,exports){
 (function (Buffer){
 'use strict';
 var d3 = require('d3');
@@ -74822,7 +76382,7 @@ var Visualization = LightningVisualization.extend({
 module.exports = Visualization;
 
 }).call(this,require("buffer").Buffer)
-},{"buffer":1,"d3":267,"d3-multiaxis-zoom":265,"lightning-client-utils":268,"lightning-visualization":282,"lodash":319}],287:[function(require,module,exports){
+},{"buffer":1,"d3":292,"d3-multiaxis-zoom":290,"lightning-client-utils":293,"lightning-visualization":307,"lodash":344}],312:[function(require,module,exports){
 'use strict';
 var Scatter = require('lightning-scatter');
 var _ = require('lodash');
@@ -74858,67 +76418,67 @@ var Visualization = Scatter.extend({
 
 module.exports = Visualization;
 
-},{"lightning-scatter":264,"lodash":319}],288:[function(require,module,exports){
+},{"lightning-scatter":289,"lodash":344}],313:[function(require,module,exports){
 arguments[4][6][0].apply(exports,arguments)
-},{"./src":310,"dup":6}],289:[function(require,module,exports){
-arguments[4][40][0].apply(exports,arguments)
-},{"./src":290,"dup":40}],290:[function(require,module,exports){
-arguments[4][41][0].apply(exports,arguments)
-},{"dup":41}],291:[function(require,module,exports){
+},{"./src":335,"dup":6}],314:[function(require,module,exports){
+arguments[4][24][0].apply(exports,arguments)
+},{"./src":315,"dup":24}],315:[function(require,module,exports){
+arguments[4][25][0].apply(exports,arguments)
+},{"dup":25}],316:[function(require,module,exports){
 arguments[4][9][0].apply(exports,arguments)
-},{"dup":9}],292:[function(require,module,exports){
+},{"dup":9}],317:[function(require,module,exports){
 arguments[4][10][0].apply(exports,arguments)
-},{"color":293,"colorbrewer":299,"d3-color":300,"d3-scale":301,"dup":10,"lodash":302,"superagent":303}],293:[function(require,module,exports){
+},{"color":318,"colorbrewer":324,"d3-color":325,"d3-scale":326,"dup":10,"lodash":327,"superagent":328}],318:[function(require,module,exports){
 arguments[4][11][0].apply(exports,arguments)
-},{"color-convert":295,"color-string":296,"dup":11}],294:[function(require,module,exports){
+},{"color-convert":320,"color-string":321,"dup":11}],319:[function(require,module,exports){
 arguments[4][12][0].apply(exports,arguments)
-},{"dup":12}],295:[function(require,module,exports){
+},{"dup":12}],320:[function(require,module,exports){
 arguments[4][13][0].apply(exports,arguments)
-},{"./conversions":294,"dup":13}],296:[function(require,module,exports){
+},{"./conversions":319,"dup":13}],321:[function(require,module,exports){
 arguments[4][14][0].apply(exports,arguments)
-},{"color-name":297,"dup":14}],297:[function(require,module,exports){
+},{"color-name":322,"dup":14}],322:[function(require,module,exports){
 arguments[4][15][0].apply(exports,arguments)
-},{"dup":15}],298:[function(require,module,exports){
+},{"dup":15}],323:[function(require,module,exports){
 arguments[4][7][0].apply(exports,arguments)
-},{"dup":7}],299:[function(require,module,exports){
+},{"dup":7}],324:[function(require,module,exports){
 arguments[4][8][0].apply(exports,arguments)
-},{"./colorbrewer.js":298,"dup":8}],300:[function(require,module,exports){
+},{"./colorbrewer.js":323,"dup":8}],325:[function(require,module,exports){
 arguments[4][16][0].apply(exports,arguments)
-},{"dup":16}],301:[function(require,module,exports){
+},{"dup":16}],326:[function(require,module,exports){
 arguments[4][17][0].apply(exports,arguments)
-},{"dup":17}],302:[function(require,module,exports){
+},{"dup":17}],327:[function(require,module,exports){
 arguments[4][18][0].apply(exports,arguments)
-},{"dup":18}],303:[function(require,module,exports){
+},{"dup":18}],328:[function(require,module,exports){
 arguments[4][19][0].apply(exports,arguments)
-},{"dup":19,"emitter":304,"reduce":305}],304:[function(require,module,exports){
+},{"dup":19,"emitter":329,"reduce":330}],329:[function(require,module,exports){
 arguments[4][20][0].apply(exports,arguments)
-},{"dup":20}],305:[function(require,module,exports){
+},{"dup":20}],330:[function(require,module,exports){
 arguments[4][21][0].apply(exports,arguments)
-},{"dup":21}],306:[function(require,module,exports){
+},{"dup":21}],331:[function(require,module,exports){
+arguments[4][41][0].apply(exports,arguments)
+},{"dup":41,"events":5,"inherits":332,"insert-css":333,"lodash":344,"qwery":334}],332:[function(require,module,exports){
 arguments[4][42][0].apply(exports,arguments)
-},{"dup":42,"events":5,"inherits":307,"insert-css":308,"lodash":319,"qwery":309}],307:[function(require,module,exports){
+},{"dup":42}],333:[function(require,module,exports){
 arguments[4][43][0].apply(exports,arguments)
-},{"dup":43}],308:[function(require,module,exports){
+},{"dup":43}],334:[function(require,module,exports){
 arguments[4][44][0].apply(exports,arguments)
-},{"dup":44}],309:[function(require,module,exports){
-arguments[4][45][0].apply(exports,arguments)
-},{"dup":45}],310:[function(require,module,exports){
-arguments[4][286][0].apply(exports,arguments)
-},{"buffer":1,"d3":291,"d3-multiaxis-zoom":289,"dup":286,"lightning-client-utils":292,"lightning-visualization":306,"lodash":319}],311:[function(require,module,exports){
+},{"dup":44}],335:[function(require,module,exports){
+arguments[4][311][0].apply(exports,arguments)
+},{"buffer":1,"d3":316,"d3-multiaxis-zoom":314,"dup":311,"lightning-client-utils":317,"lightning-visualization":331,"lodash":344}],336:[function(require,module,exports){
 arguments[4][6][0].apply(exports,arguments)
-},{"./src":318,"dup":6}],312:[function(require,module,exports){
+},{"./src":343,"dup":6}],337:[function(require,module,exports){
+arguments[4][41][0].apply(exports,arguments)
+},{"dup":41,"events":5,"inherits":338,"insert-css":339,"lodash":344,"qwery":340}],338:[function(require,module,exports){
 arguments[4][42][0].apply(exports,arguments)
-},{"dup":42,"events":5,"inherits":313,"insert-css":314,"lodash":319,"qwery":315}],313:[function(require,module,exports){
+},{"dup":42}],339:[function(require,module,exports){
 arguments[4][43][0].apply(exports,arguments)
-},{"dup":43}],314:[function(require,module,exports){
+},{"dup":43}],340:[function(require,module,exports){
 arguments[4][44][0].apply(exports,arguments)
-},{"dup":44}],315:[function(require,module,exports){
-arguments[4][45][0].apply(exports,arguments)
-},{"dup":45}],316:[function(require,module,exports){
-arguments[4][260][0].apply(exports,arguments)
-},{"dup":260}],317:[function(require,module,exports){
-arguments[4][261][0].apply(exports,arguments)
-},{"dup":261}],318:[function(require,module,exports){
+},{"dup":44}],341:[function(require,module,exports){
+arguments[4][285][0].apply(exports,arguments)
+},{"dup":285}],342:[function(require,module,exports){
+arguments[4][286][0].apply(exports,arguments)
+},{"dup":286}],343:[function(require,module,exports){
 'use strict';
 
 var LightningVisualization = require('lightning-visualization');
@@ -75027,7 +76587,7 @@ var Visualization = LightningVisualization.extend({
 
 module.exports = Visualization;
 
-},{"lightning-visualization":312,"lodash":319,"three-fly-controls":316,"three.js":317}],319:[function(require,module,exports){
+},{"lightning-visualization":337,"lodash":344,"three-fly-controls":341,"three.js":342}],344:[function(require,module,exports){
 (function (global){
 /**
  * @license
@@ -87382,13 +88942,13 @@ module.exports = Visualization;
 }.call(this));
 
 }).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{}],320:[function(require,module,exports){
+},{}],345:[function(require,module,exports){
 
 var jQueryURL = '//ajax.googleapis.com/ajax/libs/jquery/1.11.0/jquery.min.js';
 
 // require all the default viz's
 require('lightning-adjacency');
-// require('lightning-circle');
+require('lightning-circle');
 require('lightning-force');
 require('lightning-gallery');
 require('lightning-graph');
@@ -87451,5 +89011,5 @@ if(!window.$) {
 window.lightning = window.lightning || {};
 window.lightning.initVisualizations = init;
 
-},{"lightning-adjacency":6,"lightning-force":23,"lightning-gallery":48,"lightning-graph":80,"lightning-graph-bundled":55,"lightning-image":138,"lightning-image-poly":103,"lightning-line":185,"lightning-line-streaming":160,"lightning-map":208,"lightning-matrix":220,"lightning-scatter":288,"lightning-scatter-3":241,"lightning-scatter-streaming":263,"lightning-volume":311}]},{},[320]);
+},{"lightning-adjacency":6,"lightning-circle":23,"lightning-force":48,"lightning-gallery":73,"lightning-graph":105,"lightning-graph-bundled":80,"lightning-image":163,"lightning-image-poly":128,"lightning-line":210,"lightning-line-streaming":185,"lightning-map":233,"lightning-matrix":245,"lightning-scatter":313,"lightning-scatter-3":266,"lightning-scatter-streaming":288,"lightning-volume":336}]},{},[345]);
 ;window.define = window._define;window.require = window._require;
