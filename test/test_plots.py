@@ -114,3 +114,13 @@ class TestLightningPlots(object):
 
         assert isinstance(viz, Visualization)
         assert hasattr(viz, 'id')
+
+    def test_create_graph_bundled(self, lgn):
+
+        mat = array([[random.uniform(0, 25) if random.random() > 0.9 else 0 for _ in range(25)] for _ in range(25)])
+        x = random.randn(25)
+        y = random.randn(25)
+        viz = lgn.graph(x, y, mat)
+
+        assert isinstance(viz, Visualization)
+        assert hasattr(viz, 'id')
