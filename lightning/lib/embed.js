@@ -12145,15 +12145,22 @@ var utils = {
     },
 
     getId: function(viz) {
+        /*
+         * TODO - move this logic to the visualization base class
+         *        so we aren't passing around viz objects everywhere
+         */
         var $el = viz.$el;
         if(!viz.$el) {
-            $el = $(viz.selection);
+            $el = $(viz.selector);
         }
         return $el.closest('[data-model=visualization]').data('model-id');
     },
 
     getUrl: function(viz) {
-
+        /*
+         * TODO - move this logic to the visualization base class
+         *        so we aren't passing around viz objects everywhere
+         */
         var vid = this.getId(viz);
         var host = '/';
 
@@ -12249,7 +12256,6 @@ var utils = {
         }
 
         var url = this.getUrl(viz);
-
         r = request.post(url + '/settings/', settings, function(err, res) {
 
             if(err) {
@@ -25316,7 +25322,7 @@ var Visualization = Matrix.extend({
 
 module.exports = Visualization;
 
-},{"d3":9,"lightning-client-utils":10,"lightning-matrix":245,"lodash":344}],23:[function(require,module,exports){
+},{"d3":9,"lightning-client-utils":10,"lightning-matrix":237,"lodash":336}],23:[function(require,module,exports){
 arguments[4][6][0].apply(exports,arguments)
 },{"./src":47,"dup":6}],24:[function(require,module,exports){
 var d3_multiaxis_zoom = require('./src');
@@ -27958,7 +27964,7 @@ LightningVisualization.extend = function(protoProps, staticProps) {
 module.exports = LightningVisualization;
 
 
-},{"events":5,"inherits":42,"insert-css":43,"lodash":344,"qwery":44}],42:[function(require,module,exports){
+},{"events":5,"inherits":42,"insert-css":43,"lodash":336,"qwery":44}],42:[function(require,module,exports){
 if (typeof Object.create === 'function') {
   // implementation from standard node.js 'util' module
   module.exports = function inherits(ctor, superCtor) {
@@ -29304,19 +29310,26 @@ var Visualization = LightningVisualization.extend({
         this.render();
     },
 
-
     formatData: function(data) {
 
         // get primary fields
         var nodes = data.nodes
         var level = data.level
-        data.group = data.group ? data.group : [_.fill(Array(nodes.length), 0)]
-        var group = data.group
+        var group = data.group ? data.group : [_.fill(Array(nodes.length), 0)]
         var labels = data.labels ? data.labels : []
 
-        // get colors using top-level group
-        data.group = data.group[0]
-        var retColor = utils.getColorFromData(data)
+        // if no colors passed, use group to generate a color per group
+        // if colors passed, use those instead
+        var groupColors
+        if (data.color) {
+            groupColors = data.color.map(function(d) {return d3.rgb(d[0], d[1], d[2]); });
+        } else {
+            var n = _.unique(group[0]).length
+            groupColors = utils.getColors(n + 1)
+        }
+        var itemColors = group[0].map(function(i) {return groupColors[i]})
+
+        data.groupColors = groupColors
 
         // infer level
         var level = []
@@ -29329,8 +29342,8 @@ var Visualization = LightningVisualization.extend({
         _.each(nodes, function(n, i) {
             var entry = {}
             entry["i"] = i
-            entry["c"] = retColor[i]
-            entry["l"] = labels[i] ? labels[i] : i
+            entry["c"] = itemColors[i]
+            entry["l"] = labels[i]
             _.each(level, function(l, j) {
                 entry[j] = l[group[j][i]]
             })
@@ -29345,7 +29358,7 @@ var Visualization = LightningVisualization.extend({
 
     render: function() {
 
-        var opts = this.opts
+        var options = this.options
         var height = this.height
         var width = this.width
         var selector = this.selector
@@ -29353,6 +29366,7 @@ var Visualization = LightningVisualization.extend({
 
         var nodes = this.data.nodes
         var links = this.data.links
+        var groupColors = this.data.groupColors
 
         var diameter = width * 0.8
         var radius = diameter / 2
@@ -29403,16 +29417,18 @@ var Visualization = LightningVisualization.extend({
             .style("stroke", function(d) {return d.source.c ? d.source.c : self.defaultColor})
             .style("opacity", 0.7)
 
-        node = node
-            .data(tree.filter(function(n) { return !n.children; }))
-        .enter().append("text")
-            .attr("class", "node")
-            .attr("dy", ".31em")
-            .attr("transform", function(d) { return "rotate(" + (d.x - 90) + ")translate(" + (d.y + maxDepth * 10 + 10) + ",0)" + (d.x < 180 ? "" : "rotate(180)"); })
-            .style("text-anchor", function(d) { return d.x < 180 ? "start" : "end"; })
-            .text(function(d) { return d.l; })
-            .style("fill", function(d) {return d.c ? d.c : self.defaultColor})
-            .on("click", clicklink)
+        if (this.data.labels) {
+            node = node
+                .data(tree.filter(function(n) { return !n.children; }))
+            .enter().append("text")
+                .attr("class", "node")
+                .attr("dy", ".31em")
+                .attr("transform", function(d) { return "rotate(" + (d.x - 90) + ")translate(" + (d.y + maxDepth * 10 + 10) + ",0)" + (d.x < 180 ? "" : "rotate(180)"); })
+                .style("text-anchor", function(d) { return d.x < 180 ? "start" : "end"; })
+                .text(function(d) { return d.l; })
+                .style("fill", function(d) {return d.c ? d.c : self.defaultColor})
+                .on("click", clicklink)
+        }
 
         link.classed("link--fade--out", false)
         link.classed("link--fade--stick", false)
@@ -29478,14 +29494,9 @@ var Visualization = LightningVisualization.extend({
             d3.select(this).classed("node--highlight--stick", !d3.select(this).classed("node--highlight--stick"))
         }
 
-
-        // get colors from groups
-        var n = d3.max(tree.filter(function (d) {return d.depth == 1}), function(d) {return d.index})
-        var colors = utils.getColors(n + 1)
-        
         // color the first level
         tree.filter(function (d) {return d.depth == 1}).map(function(d) {
-            d.c = colors[d.index] 
+            d.c = groupColors[d.index] 
             return d
         })
 
@@ -29619,9 +29630,9 @@ var Visualization = LightningVisualization.extend({
 module.exports = Visualization;
 
 }).call(this,require("buffer").Buffer)
-},{"buffer":1,"d3":26,"d3-multiaxis-zoom":24,"lightning-client-utils":27,"lightning-visualization":41,"lodash":344,"underscore.nest":46}],48:[function(require,module,exports){
+},{"buffer":1,"d3":26,"d3-multiaxis-zoom":24,"lightning-client-utils":27,"lightning-visualization":41,"lodash":336,"underscore.nest":46}],48:[function(require,module,exports){
 arguments[4][6][0].apply(exports,arguments)
-},{"./src":72,"dup":6}],49:[function(require,module,exports){
+},{"./src":64,"dup":6}],49:[function(require,module,exports){
 arguments[4][9][0].apply(exports,arguments)
 },{"dup":9}],50:[function(require,module,exports){
 arguments[4][10][0].apply(exports,arguments)
@@ -29652,20 +29663,645 @@ arguments[4][20][0].apply(exports,arguments)
 },{"dup":20}],63:[function(require,module,exports){
 arguments[4][21][0].apply(exports,arguments)
 },{"dup":21}],64:[function(require,module,exports){
+'use strict';
+var d3 = require('d3');
+var Graph = require('lightning-graph')
+var _ = require('lodash');
+var utils = require('lightning-client-utils');
+
+
+var Visualization = Graph.extend({
+
+    getDefaultStyles: function() {
+        return {
+            color: '#68a1e5',
+            stroke: 'white',
+            size: 8
+        }
+    },
+
+    formatData: function(data) {
+        var retColor = utils.getColorFromData(data);
+        var retSize = data.size || [];
+        var retName = data.name || [];
+        var styles = this.styles
+
+        var s, c, k
+
+        data.nodes = data.nodes.map(function (d,i) {
+            d = []
+            d.i = i
+            d.n = retName[i]
+            s = retSize.length > 1 ? retSize[i] : retSize[0]
+            c = retColor.length > 1 ? retColor[i] : retColor[0]
+            d.c = c ? c : styles.color
+            d.s = s ? s : styles.size
+            d.k = c ? c.darker(0.75) : styles.stroke
+            d.l = (data.labels || []).length > i ? data.labels[i] : null;
+            return d;
+        });
+
+        data.links = data.links.map(function (d) {
+            d.source = d[0];
+            d.target = d[1];
+            d.value = d[2];
+            return d;
+        });
+
+        var force = d3.layout.force()
+            .size([this.height, this.height])
+            .charge(-120)
+            .linkDistance(30)    
+            .nodes(data.nodes)
+            .links(data.links)
+
+        force.start();
+        for (var i = data.nodes.length * data.nodes.length; i > 0; --i) {
+            force.tick();
+        } 
+        force.stop();
+
+        return data;
+    },
+
+    getSource: function(l) {
+        return l.source.i
+    },
+
+    getTarget: function(l) {
+        return l.target.i
+    },
+
+    setScales: function() {
+        this.x.range([0, this.width]).domain([0, this.height])
+        this.y.range([this.height, 0])
+    },
+
+    getLine: function(link) {
+        var self = this;
+        var start = self.data.nodes[link.source.i]
+        var end = self.data.nodes[link.target.i]
+        return [[self.x(start.x), self.y(start.y)], [self.x(end.x), self.y(end.y)]]
+    }
+
+});
+
+
+module.exports = Visualization;
+
+},{"d3":49,"lightning-client-utils":50,"lightning-graph":97,"lodash":336}],65:[function(require,module,exports){
 arguments[4][6][0].apply(exports,arguments)
-},{"./src":71,"dup":6}],65:[function(require,module,exports){
-arguments[4][24][0].apply(exports,arguments)
-},{"./src":66,"dup":24}],66:[function(require,module,exports){
-arguments[4][25][0].apply(exports,arguments)
-},{"dup":25}],67:[function(require,module,exports){
+},{"./src":70,"dup":6}],66:[function(require,module,exports){
 arguments[4][41][0].apply(exports,arguments)
-},{"dup":41,"events":5,"inherits":68,"insert-css":69,"lodash":344,"qwery":70}],68:[function(require,module,exports){
+},{"dup":41,"events":5,"inherits":67,"insert-css":68,"lodash":336,"qwery":69}],67:[function(require,module,exports){
 arguments[4][42][0].apply(exports,arguments)
-},{"dup":42}],69:[function(require,module,exports){
+},{"dup":42}],68:[function(require,module,exports){
 arguments[4][43][0].apply(exports,arguments)
-},{"dup":43}],70:[function(require,module,exports){
+},{"dup":43}],69:[function(require,module,exports){
 arguments[4][44][0].apply(exports,arguments)
-},{"dup":44}],71:[function(require,module,exports){
+},{"dup":44}],70:[function(require,module,exports){
+(function (Buffer){
+'use strict';
+
+var LightningVisualization = require('lightning-visualization');
+var ImageViz = require('lightning-image');
+var _ = require('lodash');
+
+
+var css = Buffer("LmdhbGxlcnktdml6IGltZyB7CiAgd2lkdGg6IDEwMCU7CiAgZGlzcGxheTogYmxvY2s7Cn0KCi5nYWxsZXJ5LXZpeiAuZ2FsbGVyeS10aHVtYm5haWwgewogIGN1cnNvcjogcG9pbnRlcjsKICBkaXNwbGF5OiBpbmxpbmUtYmxvY2s7CiAgbWF4LXdpZHRoOiAxMCU7Cn0KCi5nYWxsZXJ5LXZpeiAuZ2FsbGVyeS10aHVtYm5haWw6bm90KDpmaXJzdC1jaGlsZCkgewogIG1hcmdpbi1sZWZ0OiAxMHB4Owp9CgouZ2FsbGVyeS12aXogLmxlYWZsZXQtY29udGFpbmVyIGltZy5sZWFmbGV0LWltYWdlLWxheWVyIHsKICBtYXgtd2lkdGg6IG5vbmUgIWltcG9ydGFudDsKfQoKLmdhbGxlcnktdml6IC5pbWFnZS1tYXAgLm92ZXJsYXkgewogIHBvc2l0aW9uOiBhYnNvbHV0ZTsKICB0b3A6IDA7CiAgbGVmdDogMDsKICBwb2ludGVyLWV2ZW50czogbm9uZTsKICBib3gtc2hhZG93OiBpbnNldCAtMTAwcHggMCAxMDBweCAtMTAwcHggcmdiYSgwLCAwLCAwLCAwLjI1KTsKICB3aWR0aDogMTAwJTsKICBoZWlnaHQ6IDEwMCU7CiAgei1pbmRleDogMjAwMTsKfQoKLmdhbGxlcnktdml6IC5pbWFnZS1tYXAgZyBwYXRoIHsKICB0cmFuc2l0aW9uOiBhbGwgMC4yNXM7CiAgc3Ryb2tlLXdpZHRoOiA0cHg7CiAgc3Ryb2tlLW9wYWNpdHk6IDE7CiAgc3Ryb2tlOiB3aGl0ZTsKICBwb3NpdGlvbjogYWJzb2x1dGU7CiAgei1pbmRleDogMTAwMTsKICBmaWxsOiB3aGl0ZTsKICBmaWxsLW9wYWNpdHk6IC42OwogIC13ZWJraXQtZmlsdGVyOiBub25lOwp9CgouZ2FsbGVyeS12aXogLmltYWdlLW1hcC5tb2RlLWRlbGV0ZSBwYXRoIHsKICBjdXJzb3I6IG5vLWRyb3A7Cn0KCi5nYWxsZXJ5LXZpeiAuaW1hZ2UtbWFwLm1vZGUtZGVsZXRlIHBhdGg6aG92ZXIgewogIGZpbGw6ICM0ZDRkNGQgIWltcG9ydGFudDsKfQoKLmdhbGxlcnktdml6IC5pbWFnZS1tYXAgZGl2LnBvbHlnb24tZWxib3cgewogIC13ZWJraXQtdHJhbnNpdGlvbjogb3BhY2l0eSAwLjI1czsKICBib3gtc2hhZG93OiAwIDAgMCAycHggd2hpdGUsIDAgMCAxMHB4IHJnYmEoMCwgMCwgMCwgMC4zNSk7CiAgYm9yZGVyOiA1cHggc29saWQgI2I0YjRiNDsKICBib3JkZXItcmFkaXVzOiAxMHB4OwogIHRyYW5zaXRpb246IG9wYWNpdHkgMC4yNXM7CiAgY3Vyc29yOiBtb3ZlOwogIG9wYWNpdHk6IDA7CiAgcG9pbnRlci1ldmVudHM6IG5vbmU7CiAgYm94LXNpemluZzogYm9yZGVyLWJveDsKICB3aWR0aDogMCAhaW1wb3J0YW50OwogIGhlaWdodDogMCAhaW1wb3J0YW50Owp9CgouZ2FsbGVyeS12aXogLmltYWdlLW1hcCBkaXYucG9seWdvbi1lbGJvdy5ub24tcG9seWdvbiB7CiAgb3BhY2l0eTogMCAhaW1wb3J0YW50OwogIHBvaW50ZXItZXZlbnRzOiBub25lICFpbXBvcnRhbnQ7CiAgYm9yZGVyOiA1cHggc29saWQgZGFya2dyYXk7Cn0KCi5nYWxsZXJ5LXZpeiAuaW1hZ2UtbWFwLm1vZGUtZWRpdCBkaXYucG9seWdvbi1lbGJvdyB7CiAgb3BhY2l0eTogMTsKICBwb2ludGVyLWV2ZW50czogYWxsOwp9CgouZ2FsbGVyeS12aXogLmltYWdlLW1hcCBzdmcudHJhY2VyIHsKICBwb3NpdGlvbjogYWJzb2x1dGU7CiAgdG9wOiAwOwogIGxlZnQ6IDA7CiAgd2lkdGg6IDEwMCU7CiAgaGVpZ2h0OiAxMDAlOwogIHotaW5kZXg6IDIwMDE7CiAgcG9pbnRlci1ldmVudHM6IG5vbmU7Cn0KCi5nYWxsZXJ5LXZpeiAubW91c2UtbGluZSB7CiAgc3Ryb2tlOiB3aGl0ZTsKICBzdHJva2Utd2lkdGg6IDI7CiAgb3BhY2l0eTogMS4wOwp9CgouZ2FsbGVyeS12aXogLmltYWdlLW1hcC5tb2RlLWNyZWF0ZSB7CiAgY3Vyc29yOiBjcm9zc2hhaXI7Cn0K","base64");
+var template = _.template(Buffer("PGRpdiBjbGFzcz0iZ2FsbGVyeS12aXoiPgogICAgPGRpdiBjbGFzcz0icm93Ij4KICAgICAgICA8ZGl2IGNsYXNzPSJnYWxsZXJ5LWNvbnRhaW5lciI+CiAgICAgICAgICAgIDwlIF8uZWFjaChpbWFnZXMsIGZ1bmN0aW9uKGkpIHsgJT4gIDxkaXYgY2xhc3M9ImdhbGxlcnktdGh1bWJuYWlsIj48aW1nIHNyYz0iPCU9IGkgJT4iPjwvZGl2PiA8JSB9KTsgJT4KICAgICAgICA8L2Rpdj4KICAgIDwvZGl2PgoKICAgIDxkaXYgY2xhc3M9InJvdyI+CiAgICAgICAgPGRpdiBjbGFzcz0iaW1hZ2UtY29udGFpbmVyIj4KCiAgICAgICAgPC9kaXY+CiAgICA8L2Rpdj4KPC9kaXY+Cg==","base64"));
+
+
+/*
+ * Extend the base visualization object
+ */
+var Visualization = LightningVisualization.extend({
+
+    currentImage: 0,
+
+    init: function() {
+        this.$el = $(this.selector).first();
+        this.render();
+    },
+
+    css: css,
+
+    render: function() {
+        var markup = template({        
+            images: this.images,
+            currentImage: this.currentImage
+        });
+
+        this.$el.html(markup);
+        var self = this;
+
+        this.$el.find('.gallery-thumbnail').unbind().click(function() {
+            self.setImage(self.$el.find('.gallery-thumbnail').index(this));
+        });
+
+        this.imageViz = new ImageViz(this.selector + ' .image-container', [], [this.images[0]], {width: this.$el.width() || 400});    
+
+        this.imageViz.on('image:loaded', function() {
+            self.emit('image:loaded');
+        });
+
+    },
+
+    formatData: function(data) {
+        return data;
+    },
+
+    addImage: function(image) {
+        this.images.push(image);
+        this.$el.find('.gallery-container').append('<div class="gallery-thumbnail"><img src="' + imageData + '_small" /></div>');
+    },
+
+    setImage: function(index) {
+        this.imageViz.setImage(this.images[index]);
+    },
+
+    updateData: function(formattedData) {
+        this.images = formattedData;
+        this.render();
+    },
+
+    appendData: function(formattedData) {
+        if(_.isArray(formattedData)) {
+            _.each(formattedData, function(image) {
+                this.addImage(image);        
+            });
+        } else {
+            this.addImage(formattedData);
+        }
+
+    }
+
+});
+
+
+module.exports = Visualization;
+
+}).call(this,require("buffer").Buffer)
+},{"buffer":1,"lightning-image":155,"lightning-visualization":66,"lodash":336}],71:[function(require,module,exports){
+
+var ForceEdgeBundling = function(){
+        var data_nodes = {},        // {'nodeid':{'x':,'y':},..}
+            data_edges = [],        // [{'source':'nodeid1', 'target':'nodeid2'},..]
+            compatibility_list_for_edge = [],
+            subdivision_points_for_edge = [],
+            K = 0.1,                // global bundling constant controling edge stiffness
+            S_initial = 0.1,        // init. distance to move points
+            P_initial = 1,          // init. subdivision number
+            P_rate    = 2,          // subdivision rate increase
+            C = 4,                  // number of cycles to perform
+            I_initial = 90,         // init. number of iterations for cycle
+            I_rate = 0.333333,     // rate at which iteration number decreases i.e. 2/3
+            compatibility_threshold = 0.6,
+            invers_quadratic_mode  = false,
+            eps = 1e-6;
+             
+
+        /*** Geometry Helper Methods ***/
+        function vector_dot_product(p, q){
+            return p.x * q.x + p.y * q.y;
+        }
+
+        function edge_as_vector(P){
+            return {'x': data_nodes[P.target].x - data_nodes[P.source].x,
+                    'y': data_nodes[P.target].y - data_nodes[P.source].y}
+        }
+
+        function edge_length(e){
+            return Math.sqrt(Math.pow(data_nodes[e.source].x-data_nodes[e.target].x, 2) +
+                             Math.pow(data_nodes[e.source].y-data_nodes[e.target].y, 2));
+        }
+
+        function custom_edge_length(e){
+            return Math.sqrt(Math.pow(e.source.x - e.target.x, 2) + Math.pow(e.source.y - e.target.y, 2));
+        }
+
+        function edge_midpoint(e){
+            var middle_x = (data_nodes[e.source].x + data_nodes[e.target].x) / 2.0;
+            var middle_y = (data_nodes[e.source].y + data_nodes[e.target].y) / 2.0;
+            return {'x': middle_x, 'y': middle_y};
+        }
+
+        function compute_divided_edge_length(e_idx){
+            var length = 0;
+            for(var i = 1; i < subdivision_points_for_edge[e_idx].length; i++){
+                var segment_length = euclidean_distance(subdivision_points_for_edge[e_idx][i],
+                                                        subdivision_points_for_edge[e_idx][i-1]);
+                length += segment_length;
+            }
+            return length;
+        }
+
+        function euclidean_distance(p, q){
+            return Math.sqrt(Math.pow(p.x-q.x, 2) + Math.pow(p.y-q.y, 2));
+        }
+
+        function project_point_on_line(p, Q)
+        {   
+            var L = Math.sqrt((Q.target.x - Q.source.x) * (Q.target.x - Q.source.x) + (Q.target.y - Q.source.y) * (Q.target.y - Q.source.y));
+            var r = ((Q.source.y - p.y) * (Q.source.y - Q.target.y) - (Q.source.x - p.x) * (Q.target.x - Q.source.x)) / (L * L);
+            
+            return  {'x':(Q.source.x + r * (Q.target.x - Q.source.x)), 'y':(Q.source.y + r * (Q.target.y - Q.source.y))};
+        }
+
+        /*** ********************** ***/
+
+        /*** Initialization Methods ***/
+        function initialize_edge_subdivisions()
+        {
+            for(var i = 0; i < data_edges.length; i++)
+             if(P_initial == 1)
+                subdivision_points_for_edge[i] = []; //0 subdivisions
+             else{
+                subdivision_points_for_edge[i] = [];
+                subdivision_points_for_edge[i].push(data_nodes[data_edges[i].source]);
+                subdivision_points_for_edge[i].push(data_nodes[data_edges[i].target]);
+            }
+        }
+
+        function initialize_compatibility_lists()
+        {
+            for(var i = 0; i < data_edges.length; i++)
+                compatibility_list_for_edge[i] = []; //0 compatible edges.
+        }
+
+        function filter_self_loops(edgelist){
+            var filtered_edge_list = [];
+            for(var e=0; e < edgelist.length; e++){
+                if(data_nodes[edgelist[e].source].x != data_nodes[edgelist[e].target].x  &&
+                   data_nodes[edgelist[e].source].y != data_nodes[edgelist[e].target].y ){ //or smaller than eps
+                    filtered_edge_list.push(edgelist[e]);
+
+                }
+            }
+
+            return filtered_edge_list;
+        }
+        /*** ********************** ***/
+
+        /*** Force Calculation Methods ***/
+        function apply_spring_force(e_idx, i, kP){
+
+            var prev = subdivision_points_for_edge[e_idx][i-1];
+            var next = subdivision_points_for_edge[e_idx][i+1];
+            var crnt = subdivision_points_for_edge[e_idx][i];
+
+            var x = prev.x - crnt.x + next.x - crnt.x;
+            var y = prev.y - crnt.y + next.y - crnt.y;
+            
+            x *= kP;
+            y *= kP;
+            
+            return {'x' : x, 'y' : y};
+        }
+
+        function apply_electrostatic_force(e_idx, i , S){
+            var sum_of_forces         = { 'x' : 0, 'y' : 0};
+            var compatible_edges_list = compatibility_list_for_edge[e_idx];
+            
+            window.sbd = subdivision_points_for_edge;
+            for(var oe = 0; oe < compatible_edges_list.length; oe++){
+                var force = {'x': subdivision_points_for_edge[compatible_edges_list[oe]][i].x - subdivision_points_for_edge[e_idx][i].x,
+                             'y': subdivision_points_for_edge[compatible_edges_list[oe]][i].y - subdivision_points_for_edge[e_idx][i].y};
+
+                
+                if((Math.abs(force.x) > eps)||(Math.abs(force.y) > eps)){
+                
+                var diff = ( 1 / Math.pow(custom_edge_length({'source':subdivision_points_for_edge[compatible_edges_list[oe]][i],
+                                                              'target':subdivision_points_for_edge[e_idx][i]}),1));
+                
+                sum_of_forces.x += force.x*diff;
+                sum_of_forces.y += force.y*diff;
+                }
+            } 
+            return sum_of_forces;
+        }
+
+
+        function apply_resulting_forces_on_subdivision_points(e_idx, P, S){
+            var kP = K/(edge_length(data_edges[e_idx])*(P+1)); // kP=K/|P|(number of segments), where |P| is the initial length of edge P.
+                        // (length * (num of sub division pts - 1))
+            var resulting_forces_for_subdivision_points = [{'x':0, 'y':0}];
+            for(var i = 1; i < P+1; i++){ // exclude initial end points of the edge 0 and P+1
+                var resulting_force     = {'x' : 0, 'y' : 0};
+                
+                spring_force            = apply_spring_force(e_idx, i , kP);
+                electrostatic_force     = apply_electrostatic_force(e_idx, i, S);
+                
+                resulting_force.x   = S*(spring_force.x + electrostatic_force.x);
+                resulting_force.y   = S*(spring_force.y + electrostatic_force.y);
+
+                resulting_forces_for_subdivision_points.push(resulting_force);
+            }
+            resulting_forces_for_subdivision_points.push({'x':0, 'y':0});
+            return resulting_forces_for_subdivision_points;
+        }
+        /*** ********************** ***/
+
+        /*** Edge Division Calculation Methods ***/
+        function update_edge_divisions(P){
+            for(var e_idx=0; e_idx < data_edges.length; e_idx++){
+
+                if( P == 1 ){
+                    subdivision_points_for_edge[e_idx].push(data_nodes[data_edges[e_idx].source]); // source
+                    subdivision_points_for_edge[e_idx].push(edge_midpoint(data_edges[e_idx])); // mid point
+                    subdivision_points_for_edge[e_idx].push(data_nodes[data_edges[e_idx].target]); // target
+                }else{
+
+                    var divided_edge_length = compute_divided_edge_length(e_idx);
+                    var segment_length      = divided_edge_length / (P+1);
+                    var current_segment_length = segment_length;
+                    var new_subdivision_points = [];
+                    new_subdivision_points.push(data_nodes[data_edges[e_idx].source]); //source
+
+                    for(var i = 1; i < subdivision_points_for_edge[e_idx].length; i++){
+                        var old_segment_length = euclidean_distance(subdivision_points_for_edge[e_idx][i], subdivision_points_for_edge[e_idx][i-1]);
+
+                        while(old_segment_length > current_segment_length){
+                            var percent_position = current_segment_length / old_segment_length;
+                            var new_subdivision_point_x = subdivision_points_for_edge[e_idx][i-1].x;
+                            var new_subdivision_point_y = subdivision_points_for_edge[e_idx][i-1].y;
+
+                            new_subdivision_point_x += percent_position*(subdivision_points_for_edge[e_idx][i].x - subdivision_points_for_edge[e_idx][i-1].x);
+                            new_subdivision_point_y += percent_position*(subdivision_points_for_edge[e_idx][i].y - subdivision_points_for_edge[e_idx][i-1].y);
+                            new_subdivision_points.push( {'x':new_subdivision_point_x, 
+                                                          'y':new_subdivision_point_y });
+                            
+                            old_segment_length     -= current_segment_length;
+                            current_segment_length  = segment_length;
+                        }
+                        current_segment_length -= old_segment_length;
+                    }
+                    new_subdivision_points.push(data_nodes[data_edges[e_idx].target]); //target
+                    subdivision_points_for_edge[e_idx] = new_subdivision_points;
+                }
+            }
+        }
+        /*** ********************** ***/
+
+        /*** Edge compatibility measures ***/
+        function angle_compatibility(P, Q){
+            var result = Math.abs(vector_dot_product(edge_as_vector(P),edge_as_vector(Q))/(edge_length(P)*edge_length(Q)));
+            return result;
+        }
+
+        function scale_compatibility(P, Q){
+            var lavg = (edge_length(P) + edge_length(Q))/2.0;
+            var result = 2.0/(lavg/Math.min(edge_length(P),edge_length(Q)) + Math.max(edge_length(P), edge_length(Q))/lavg);
+            return result;
+        }
+
+        function position_compatibility(P, Q){
+            var lavg = (edge_length(P) + edge_length(Q))/2.0;
+            var midP = {'x':(data_nodes[P.source].x + data_nodes[P.target].x)/2.0,
+                        'y':(data_nodes[P.source].y + data_nodes[P.target].y)/2.0};
+            var midQ = {'x':(data_nodes[Q.source].x + data_nodes[Q.target].x)/2.0,
+                        'y':(data_nodes[Q.source].y + data_nodes[Q.target].y)/2.0};
+            var result = lavg/(lavg + euclidean_distance(midP, midQ));
+            return result;
+        }
+
+        function edge_visibility(P, Q){
+            var I0 = project_point_on_line(data_nodes[Q.source], {'source':data_nodes[P.source],
+                                                                  'target':data_nodes[P.target]});
+            var I1 = project_point_on_line(data_nodes[Q.target], {'source':data_nodes[P.source], 
+                                                                  'target':data_nodes[P.target]}); //send acutal edge points positions
+            var midI = {'x':(I0.x + I1.x)/2.0, 
+                        'y':(I0.y + I1.y)/2.0};
+            var midP = {'x':(data_nodes[P.source].x + data_nodes[P.target].x)/2.0, 
+                        'y':(data_nodes[P.source].y + data_nodes[P.target].y)/2.0};
+            var result = Math.max(0, 1 - 2 * euclidean_distance(midP,midI)/euclidean_distance(I0,I1));
+            return result;
+        }
+
+        function visibility_compatibility(P, Q){
+            return Math.min(edge_visibility(P,Q), edge_visibility(Q,P));
+        }
+
+        function compatibility_score(P, Q){
+            var result = (angle_compatibility(P,Q) * scale_compatibility(P,Q) * 
+                          position_compatibility(P,Q) * visibility_compatibility(P,Q));
+
+            return result;
+        }
+
+        function are_compatible(P, Q){
+            //console.log('compatibility ' + P.source +' - '+ P.target + ' and ' + Q.source +' '+ Q.target);
+            return (compatibility_score(P,Q) >= compatibility_threshold);
+        }
+
+        function compute_compatibility_lists()
+        {
+            for(e = 0; e < data_edges.length - 1; e++){
+                for( oe = e + 1 ; oe < data_edges.length; oe++){ // don't want any duplicates
+                    if(e == oe)
+                        continue;
+                    else{
+                        if(are_compatible(data_edges[e],data_edges[oe])){
+                            compatibility_list_for_edge[e].push(oe);
+                            compatibility_list_for_edge[oe].push(e);
+                        }
+                    }
+                }
+            }
+        }
+
+        /*** ************************ ***/
+
+        /*** Main Bundling Loop Methods ***/ 
+        var forcebundle = function(){
+            var S = S_initial;
+            var I = I_initial;
+            var P = P_initial;
+            
+            initialize_edge_subdivisions();
+            initialize_compatibility_lists();
+            update_edge_divisions(P);
+            compute_compatibility_lists();
+            for(var cycle=0; cycle < C; cycle++){
+                for (var iteration = 0; iteration < I; iteration++){
+                    var forces = [];
+                    for(var edge = 0; edge < data_edges.length; edge++){
+                        forces[edge] = apply_resulting_forces_on_subdivision_points(edge, P, S);
+                    }
+                    for(var e = 0; e < data_edges.length; e++){
+                        for(var i=0; i < P + 1;i++){
+                            subdivision_points_for_edge[e][i].x += forces[e][i].x;
+                            subdivision_points_for_edge[e][i].y += forces[e][i].y;
+                        }
+                    }
+                }
+                //prepare for next cycle
+                S = S / 2;
+                P = P * 2;
+                I = I_rate * I;
+                
+                update_edge_divisions(P);
+            }
+            return subdivision_points_for_edge;
+        }
+        /*** ************************ ***/
+
+
+        /*** Getters/Setters Methods ***/ 
+        forcebundle.nodes = function(nl){
+            if(arguments.length == 0){
+                return data_nodes;
+            }
+            else{
+                data_nodes = nl;
+            }
+            return forcebundle;
+        }
+
+        forcebundle.edges = function(ll){
+            if(arguments.length == 0){
+                return data_edges;
+            }
+            else{
+                data_edges = filter_self_loops(ll); //remove edges to from to the same point
+            }
+            return forcebundle;
+        }
+
+        forcebundle.bundling_stiffness = function(k){
+            if(arguments.length == 0){
+                return K;
+            }
+            else{
+                K = k;
+            }
+            return forcebundle;
+        }
+
+        forcebundle.step_size = function(step){
+            if(arguments.length == 0){
+                return S_initial;
+            }
+            else{
+                S_initial = step;
+            }
+            return forcebundle;
+        }
+
+        forcebundle.cycles = function(c){
+            if(arguments.length == 0){
+                return C;
+            }
+            else{
+                C = c;
+            }
+            return forcebundle;
+        }
+
+        forcebundle.iterations = function(i){
+            if(arguments.length == 0){
+                return I_initial;
+            }
+            else{
+                I_initial = i;
+            }
+            return forcebundle;
+        }
+
+        forcebundle.iterations_rate = function(i){
+            if(arguments.length == 0){
+                return I_rate;
+            }
+            else{
+                I_rate = i;
+            }
+            return forcebundle;
+        }
+
+        forcebundle.subdivision_points_seed = function(p){
+            if(arguments.length == 0){
+                return P;
+            }
+            else{
+                P = p;
+            }
+            return forcebundle;
+        }
+
+        forcebundle.subdivision_rate = function(r){
+            if(arguments.length == 0){
+                return P_rate;
+            }
+            else{
+                P_rate = r;
+            }
+            return forcebundle;
+        }
+
+        forcebundle.compatibility_threshold = function(t){
+            if(arguments.length == 0){
+                return compatibility_threshold;
+            }
+            else{
+                compatibility_threshold = t;
+            }
+            return forcebundle;
+        }
+
+        /*** ************************ ***/
+
+    return forcebundle;
+}
+
+
+module.exports = ForceEdgeBundling;
+},{}],72:[function(require,module,exports){
+arguments[4][6][0].apply(exports,arguments)
+},{"./src":96,"dup":6}],73:[function(require,module,exports){
+arguments[4][9][0].apply(exports,arguments)
+},{"dup":9}],74:[function(require,module,exports){
+arguments[4][10][0].apply(exports,arguments)
+},{"color":75,"colorbrewer":81,"d3-color":82,"d3-scale":83,"dup":10,"lodash":84,"superagent":85}],75:[function(require,module,exports){
+arguments[4][11][0].apply(exports,arguments)
+},{"color-convert":77,"color-string":78,"dup":11}],76:[function(require,module,exports){
+arguments[4][12][0].apply(exports,arguments)
+},{"dup":12}],77:[function(require,module,exports){
+arguments[4][13][0].apply(exports,arguments)
+},{"./conversions":76,"dup":13}],78:[function(require,module,exports){
+arguments[4][14][0].apply(exports,arguments)
+},{"color-name":79,"dup":14}],79:[function(require,module,exports){
+arguments[4][15][0].apply(exports,arguments)
+},{"dup":15}],80:[function(require,module,exports){
+arguments[4][7][0].apply(exports,arguments)
+},{"dup":7}],81:[function(require,module,exports){
+arguments[4][8][0].apply(exports,arguments)
+},{"./colorbrewer.js":80,"dup":8}],82:[function(require,module,exports){
+arguments[4][16][0].apply(exports,arguments)
+},{"dup":16}],83:[function(require,module,exports){
+arguments[4][17][0].apply(exports,arguments)
+},{"dup":17}],84:[function(require,module,exports){
+arguments[4][18][0].apply(exports,arguments)
+},{"dup":18}],85:[function(require,module,exports){
+arguments[4][19][0].apply(exports,arguments)
+},{"dup":19,"emitter":86,"reduce":87}],86:[function(require,module,exports){
+arguments[4][20][0].apply(exports,arguments)
+},{"dup":20}],87:[function(require,module,exports){
+arguments[4][21][0].apply(exports,arguments)
+},{"dup":21}],88:[function(require,module,exports){
+arguments[4][6][0].apply(exports,arguments)
+},{"./src":95,"dup":6}],89:[function(require,module,exports){
+arguments[4][24][0].apply(exports,arguments)
+},{"./src":90,"dup":24}],90:[function(require,module,exports){
+arguments[4][25][0].apply(exports,arguments)
+},{"dup":25}],91:[function(require,module,exports){
+arguments[4][41][0].apply(exports,arguments)
+},{"dup":41,"events":5,"inherits":92,"insert-css":93,"lodash":336,"qwery":94}],92:[function(require,module,exports){
+arguments[4][42][0].apply(exports,arguments)
+},{"dup":42}],93:[function(require,module,exports){
+arguments[4][43][0].apply(exports,arguments)
+},{"dup":43}],94:[function(require,module,exports){
+arguments[4][44][0].apply(exports,arguments)
+},{"dup":44}],95:[function(require,module,exports){
 (function (Buffer){
 var LightningVisualization = require('lightning-visualization');
 var d3 = require('d3');
@@ -30112,648 +30748,7 @@ var Visualization = LightningVisualization.extend({
 module.exports = Visualization;
 
 }).call(this,require("buffer").Buffer)
-},{"buffer":1,"d3":49,"d3-multiaxis-zoom":65,"lightning-client-utils":50,"lightning-visualization":67,"lodash":344}],72:[function(require,module,exports){
-'use strict';
-var d3 = require('d3');
-var Graph = require('lightning-graph')
-var _ = require('lodash');
-var utils = require('lightning-client-utils');
-
-
-var Visualization = Graph.extend({
-
-    getDefaultStyles: function() {
-        return {
-            color: '#68a1e5',
-            stroke: 'white',
-            size: 8
-        }
-    },
-
-    formatData: function(data) {
-        var retColor = utils.getColorFromData(data);
-        var retSize = data.size || [];
-        var retName = data.name || [];
-        var styles = this.styles
-
-        var s, c, k
-
-        data.nodes = data.nodes.map(function (d,i) {
-            d = []
-            d.i = i
-            d.n = retName[i]
-            s = retSize.length > 1 ? retSize[i] : retSize[0]
-            c = retColor.length > 1 ? retColor[i] : retColor[0]
-            d.c = c ? c : styles.color
-            d.s = s ? s : styles.size
-            d.k = c ? c.darker(0.75) : styles.stroke
-            d.l = (data.labels || []).length > i ? data.labels[i] : null;
-            return d;
-        });
-
-        data.links = data.links.map(function (d) {
-            d.source = d[0];
-            d.target = d[1];
-            d.value = d[2];
-            return d;
-        });
-
-        var force = d3.layout.force()
-            .size([this.width, this.height])
-            .charge(-120)
-            .linkDistance(30)    
-            .nodes(data.nodes)
-            .links(data.links)
-
-        force.start();
-        for (var i = data.nodes.length * data.nodes.length; i > 0; --i) {
-            force.tick();
-        } 
-        force.stop();
-
-        return data;
-    },
-
-    getSource: function(l) {
-        return l.source.i
-    },
-
-    getTarget: function(l) {
-        return l.target.i
-    },
-
-    setScales: function() {
-        this.x.range([0, this.height])
-        this.y.range([this.height, 0])
-    },
-
-    getLine: function(link) {
-        var self = this;
-        var start = self.data.nodes[link.source.i]
-        var end = self.data.nodes[link.target.i]
-        return [[self.x(start.x), self.y(start.y)], [self.x(end.x), self.y(end.y)]]
-    }
-
-});
-
-
-module.exports = Visualization;
-
-},{"d3":49,"lightning-client-utils":50,"lightning-graph":64,"lodash":344}],73:[function(require,module,exports){
-arguments[4][6][0].apply(exports,arguments)
-},{"./src":78,"dup":6}],74:[function(require,module,exports){
-arguments[4][41][0].apply(exports,arguments)
-},{"dup":41,"events":5,"inherits":75,"insert-css":76,"lodash":344,"qwery":77}],75:[function(require,module,exports){
-arguments[4][42][0].apply(exports,arguments)
-},{"dup":42}],76:[function(require,module,exports){
-arguments[4][43][0].apply(exports,arguments)
-},{"dup":43}],77:[function(require,module,exports){
-arguments[4][44][0].apply(exports,arguments)
-},{"dup":44}],78:[function(require,module,exports){
-(function (Buffer){
-'use strict';
-
-var LightningVisualization = require('lightning-visualization');
-var ImageViz = require('lightning-image');
-var _ = require('lodash');
-
-
-var css = Buffer("LmdhbGxlcnktdml6IGltZyB7CiAgd2lkdGg6IDEwMCU7CiAgZGlzcGxheTogYmxvY2s7Cn0KCi5nYWxsZXJ5LXZpeiAuZ2FsbGVyeS10aHVtYm5haWwgewogIGN1cnNvcjogcG9pbnRlcjsKICBkaXNwbGF5OiBpbmxpbmUtYmxvY2s7CiAgbWF4LXdpZHRoOiAxMCU7Cn0KCi5nYWxsZXJ5LXZpeiAuZ2FsbGVyeS10aHVtYm5haWw6bm90KDpmaXJzdC1jaGlsZCkgewogIG1hcmdpbi1sZWZ0OiAxMHB4Owp9CgouZ2FsbGVyeS12aXogLmxlYWZsZXQtY29udGFpbmVyIGltZy5sZWFmbGV0LWltYWdlLWxheWVyIHsKICBtYXgtd2lkdGg6IG5vbmUgIWltcG9ydGFudDsKfQoKLmdhbGxlcnktdml6IC5pbWFnZS1tYXAgLm92ZXJsYXkgewogIHBvc2l0aW9uOiBhYnNvbHV0ZTsKICB0b3A6IDA7CiAgbGVmdDogMDsKICBwb2ludGVyLWV2ZW50czogbm9uZTsKICBib3gtc2hhZG93OiBpbnNldCAtMTAwcHggMCAxMDBweCAtMTAwcHggcmdiYSgwLCAwLCAwLCAwLjI1KTsKICB3aWR0aDogMTAwJTsKICBoZWlnaHQ6IDEwMCU7CiAgei1pbmRleDogMjAwMTsKfQoKLmdhbGxlcnktdml6IC5pbWFnZS1tYXAgZyBwYXRoIHsKICB0cmFuc2l0aW9uOiBhbGwgMC4yNXM7CiAgc3Ryb2tlLXdpZHRoOiA0cHg7CiAgc3Ryb2tlLW9wYWNpdHk6IDE7CiAgc3Ryb2tlOiB3aGl0ZTsKICBwb3NpdGlvbjogYWJzb2x1dGU7CiAgei1pbmRleDogMTAwMTsKICBmaWxsOiB3aGl0ZTsKICBmaWxsLW9wYWNpdHk6IC42OwogIC13ZWJraXQtZmlsdGVyOiBub25lOwp9CgouZ2FsbGVyeS12aXogLmltYWdlLW1hcC5tb2RlLWRlbGV0ZSBwYXRoIHsKICBjdXJzb3I6IG5vLWRyb3A7Cn0KCi5nYWxsZXJ5LXZpeiAuaW1hZ2UtbWFwLm1vZGUtZGVsZXRlIHBhdGg6aG92ZXIgewogIGZpbGw6ICM0ZDRkNGQgIWltcG9ydGFudDsKfQoKLmdhbGxlcnktdml6IC5pbWFnZS1tYXAgZGl2LnBvbHlnb24tZWxib3cgewogIC13ZWJraXQtdHJhbnNpdGlvbjogb3BhY2l0eSAwLjI1czsKICBib3gtc2hhZG93OiAwIDAgMCAycHggd2hpdGUsIDAgMCAxMHB4IHJnYmEoMCwgMCwgMCwgMC4zNSk7CiAgYm9yZGVyOiA1cHggc29saWQgI2I0YjRiNDsKICBib3JkZXItcmFkaXVzOiAxMHB4OwogIHRyYW5zaXRpb246IG9wYWNpdHkgMC4yNXM7CiAgY3Vyc29yOiBtb3ZlOwogIG9wYWNpdHk6IDA7CiAgcG9pbnRlci1ldmVudHM6IG5vbmU7CiAgYm94LXNpemluZzogYm9yZGVyLWJveDsKICB3aWR0aDogMCAhaW1wb3J0YW50OwogIGhlaWdodDogMCAhaW1wb3J0YW50Owp9CgouZ2FsbGVyeS12aXogLmltYWdlLW1hcCBkaXYucG9seWdvbi1lbGJvdy5ub24tcG9seWdvbiB7CiAgb3BhY2l0eTogMCAhaW1wb3J0YW50OwogIHBvaW50ZXItZXZlbnRzOiBub25lICFpbXBvcnRhbnQ7CiAgYm9yZGVyOiA1cHggc29saWQgZGFya2dyYXk7Cn0KCi5nYWxsZXJ5LXZpeiAuaW1hZ2UtbWFwLm1vZGUtZWRpdCBkaXYucG9seWdvbi1lbGJvdyB7CiAgb3BhY2l0eTogMTsKICBwb2ludGVyLWV2ZW50czogYWxsOwp9CgouZ2FsbGVyeS12aXogLmltYWdlLW1hcCBzdmcudHJhY2VyIHsKICBwb3NpdGlvbjogYWJzb2x1dGU7CiAgdG9wOiAwOwogIGxlZnQ6IDA7CiAgd2lkdGg6IDEwMCU7CiAgaGVpZ2h0OiAxMDAlOwogIHotaW5kZXg6IDIwMDE7CiAgcG9pbnRlci1ldmVudHM6IG5vbmU7Cn0KCi5nYWxsZXJ5LXZpeiAubW91c2UtbGluZSB7CiAgc3Ryb2tlOiB3aGl0ZTsKICBzdHJva2Utd2lkdGg6IDI7CiAgb3BhY2l0eTogMS4wOwp9CgouZ2FsbGVyeS12aXogLmltYWdlLW1hcC5tb2RlLWNyZWF0ZSB7CiAgY3Vyc29yOiBjcm9zc2hhaXI7Cn0K","base64");
-var template = _.template(Buffer("PGRpdiBjbGFzcz0iZ2FsbGVyeS12aXoiPgogICAgPGRpdiBjbGFzcz0icm93Ij4KICAgICAgICA8ZGl2IGNsYXNzPSJnYWxsZXJ5LWNvbnRhaW5lciI+CiAgICAgICAgICAgIDwlIF8uZWFjaChpbWFnZXMsIGZ1bmN0aW9uKGkpIHsgJT4gIDxkaXYgY2xhc3M9ImdhbGxlcnktdGh1bWJuYWlsIj48aW1nIHNyYz0iPCU9IGkgJT4iPjwvZGl2PiA8JSB9KTsgJT4KICAgICAgICA8L2Rpdj4KICAgIDwvZGl2PgoKICAgIDxkaXYgY2xhc3M9InJvdyI+CiAgICAgICAgPGRpdiBjbGFzcz0iaW1hZ2UtY29udGFpbmVyIj4KCiAgICAgICAgPC9kaXY+CiAgICA8L2Rpdj4KPC9kaXY+Cg==","base64"));
-
-
-/*
- * Extend the base visualization object
- */
-var Visualization = LightningVisualization.extend({
-
-    currentImage: 0,
-
-    init: function() {
-        this.$el = $(this.selector).first();
-        this.render();
-    },
-
-    css: css,
-
-    render: function() {
-        var markup = template({        
-            images: this.images,
-            currentImage: this.currentImage
-        });
-
-        this.$el.html(markup);
-        var self = this;
-
-        this.$el.find('.gallery-thumbnail').unbind().click(function() {
-            self.setImage(self.$el.find('.gallery-thumbnail').index(this));
-        });
-
-        this.imageViz = new ImageViz(this.selector + ' .image-container', [], [this.images[0]], {width: this.$el.width() || 400});    
-
-        this.imageViz.on('image:loaded', function() {
-            self.emit('image:loaded');
-        });
-
-    },
-
-    formatData: function(data) {
-        return data;
-    },
-
-    addImage: function(image) {
-        this.images.push(image);
-        this.$el.find('.gallery-container').append('<div class="gallery-thumbnail"><img src="' + imageData + '_small" /></div>');
-    },
-
-    setImage: function(index) {
-        this.imageViz.setImage(this.images[index]);
-    },
-
-    updateData: function(formattedData) {
-        this.images = formattedData;
-        this.render();
-    },
-
-    appendData: function(formattedData) {
-        if(_.isArray(formattedData)) {
-            _.each(formattedData, function(image) {
-                this.addImage(image);        
-            });
-        } else {
-            this.addImage(formattedData);
-        }
-
-    }
-
-});
-
-
-module.exports = Visualization;
-
-}).call(this,require("buffer").Buffer)
-},{"buffer":1,"lightning-image":163,"lightning-visualization":74,"lodash":344}],79:[function(require,module,exports){
-
-var ForceEdgeBundling = function(){
-        var data_nodes = {},        // {'nodeid':{'x':,'y':},..}
-            data_edges = [],        // [{'source':'nodeid1', 'target':'nodeid2'},..]
-            compatibility_list_for_edge = [],
-            subdivision_points_for_edge = [],
-            K = 0.1,                // global bundling constant controling edge stiffness
-            S_initial = 0.1,        // init. distance to move points
-            P_initial = 1,          // init. subdivision number
-            P_rate    = 2,          // subdivision rate increase
-            C = 4,                  // number of cycles to perform
-            I_initial = 90,         // init. number of iterations for cycle
-            I_rate = 0.333333,     // rate at which iteration number decreases i.e. 2/3
-            compatibility_threshold = 0.6,
-            invers_quadratic_mode  = false,
-            eps = 1e-6;
-             
-
-        /*** Geometry Helper Methods ***/
-        function vector_dot_product(p, q){
-            return p.x * q.x + p.y * q.y;
-        }
-
-        function edge_as_vector(P){
-            return {'x': data_nodes[P.target].x - data_nodes[P.source].x,
-                    'y': data_nodes[P.target].y - data_nodes[P.source].y}
-        }
-
-        function edge_length(e){
-            return Math.sqrt(Math.pow(data_nodes[e.source].x-data_nodes[e.target].x, 2) +
-                             Math.pow(data_nodes[e.source].y-data_nodes[e.target].y, 2));
-        }
-
-        function custom_edge_length(e){
-            return Math.sqrt(Math.pow(e.source.x - e.target.x, 2) + Math.pow(e.source.y - e.target.y, 2));
-        }
-
-        function edge_midpoint(e){
-            var middle_x = (data_nodes[e.source].x + data_nodes[e.target].x) / 2.0;
-            var middle_y = (data_nodes[e.source].y + data_nodes[e.target].y) / 2.0;
-            return {'x': middle_x, 'y': middle_y};
-        }
-
-        function compute_divided_edge_length(e_idx){
-            var length = 0;
-            for(var i = 1; i < subdivision_points_for_edge[e_idx].length; i++){
-                var segment_length = euclidean_distance(subdivision_points_for_edge[e_idx][i],
-                                                        subdivision_points_for_edge[e_idx][i-1]);
-                length += segment_length;
-            }
-            return length;
-        }
-
-        function euclidean_distance(p, q){
-            return Math.sqrt(Math.pow(p.x-q.x, 2) + Math.pow(p.y-q.y, 2));
-        }
-
-        function project_point_on_line(p, Q)
-        {   
-            var L = Math.sqrt((Q.target.x - Q.source.x) * (Q.target.x - Q.source.x) + (Q.target.y - Q.source.y) * (Q.target.y - Q.source.y));
-            var r = ((Q.source.y - p.y) * (Q.source.y - Q.target.y) - (Q.source.x - p.x) * (Q.target.x - Q.source.x)) / (L * L);
-            
-            return  {'x':(Q.source.x + r * (Q.target.x - Q.source.x)), 'y':(Q.source.y + r * (Q.target.y - Q.source.y))};
-        }
-
-        /*** ********************** ***/
-
-        /*** Initialization Methods ***/
-        function initialize_edge_subdivisions()
-        {
-            for(var i = 0; i < data_edges.length; i++)
-             if(P_initial == 1)
-                subdivision_points_for_edge[i] = []; //0 subdivisions
-             else{
-                subdivision_points_for_edge[i] = [];
-                subdivision_points_for_edge[i].push(data_nodes[data_edges[i].source]);
-                subdivision_points_for_edge[i].push(data_nodes[data_edges[i].target]);
-            }
-        }
-
-        function initialize_compatibility_lists()
-        {
-            for(var i = 0; i < data_edges.length; i++)
-                compatibility_list_for_edge[i] = []; //0 compatible edges.
-        }
-
-        function filter_self_loops(edgelist){
-            var filtered_edge_list = [];
-            for(var e=0; e < edgelist.length; e++){
-                if(data_nodes[edgelist[e].source].x != data_nodes[edgelist[e].target].x  &&
-                   data_nodes[edgelist[e].source].y != data_nodes[edgelist[e].target].y ){ //or smaller than eps
-                    filtered_edge_list.push(edgelist[e]);
-
-                }
-            }
-
-            return filtered_edge_list;
-        }
-        /*** ********************** ***/
-
-        /*** Force Calculation Methods ***/
-        function apply_spring_force(e_idx, i, kP){
-
-            var prev = subdivision_points_for_edge[e_idx][i-1];
-            var next = subdivision_points_for_edge[e_idx][i+1];
-            var crnt = subdivision_points_for_edge[e_idx][i];
-
-            var x = prev.x - crnt.x + next.x - crnt.x;
-            var y = prev.y - crnt.y + next.y - crnt.y;
-            
-            x *= kP;
-            y *= kP;
-            
-            return {'x' : x, 'y' : y};
-        }
-
-        function apply_electrostatic_force(e_idx, i , S){
-            var sum_of_forces         = { 'x' : 0, 'y' : 0};
-            var compatible_edges_list = compatibility_list_for_edge[e_idx];
-            
-            window.sbd = subdivision_points_for_edge;
-            for(var oe = 0; oe < compatible_edges_list.length; oe++){
-                var force = {'x': subdivision_points_for_edge[compatible_edges_list[oe]][i].x - subdivision_points_for_edge[e_idx][i].x,
-                             'y': subdivision_points_for_edge[compatible_edges_list[oe]][i].y - subdivision_points_for_edge[e_idx][i].y};
-
-                
-                if((Math.abs(force.x) > eps)||(Math.abs(force.y) > eps)){
-                
-                var diff = ( 1 / Math.pow(custom_edge_length({'source':subdivision_points_for_edge[compatible_edges_list[oe]][i],
-                                                              'target':subdivision_points_for_edge[e_idx][i]}),1));
-                
-                sum_of_forces.x += force.x*diff;
-                sum_of_forces.y += force.y*diff;
-                }
-            } 
-            return sum_of_forces;
-        }
-
-
-        function apply_resulting_forces_on_subdivision_points(e_idx, P, S){
-            var kP = K/(edge_length(data_edges[e_idx])*(P+1)); // kP=K/|P|(number of segments), where |P| is the initial length of edge P.
-                        // (length * (num of sub division pts - 1))
-            var resulting_forces_for_subdivision_points = [{'x':0, 'y':0}];
-            for(var i = 1; i < P+1; i++){ // exclude initial end points of the edge 0 and P+1
-                var resulting_force     = {'x' : 0, 'y' : 0};
-                
-                spring_force            = apply_spring_force(e_idx, i , kP);
-                electrostatic_force     = apply_electrostatic_force(e_idx, i, S);
-                
-                resulting_force.x   = S*(spring_force.x + electrostatic_force.x);
-                resulting_force.y   = S*(spring_force.y + electrostatic_force.y);
-
-                resulting_forces_for_subdivision_points.push(resulting_force);
-            }
-            resulting_forces_for_subdivision_points.push({'x':0, 'y':0});
-            return resulting_forces_for_subdivision_points;
-        }
-        /*** ********************** ***/
-
-        /*** Edge Division Calculation Methods ***/
-        function update_edge_divisions(P){
-            for(var e_idx=0; e_idx < data_edges.length; e_idx++){
-
-                if( P == 1 ){
-                    subdivision_points_for_edge[e_idx].push(data_nodes[data_edges[e_idx].source]); // source
-                    subdivision_points_for_edge[e_idx].push(edge_midpoint(data_edges[e_idx])); // mid point
-                    subdivision_points_for_edge[e_idx].push(data_nodes[data_edges[e_idx].target]); // target
-                }else{
-
-                    var divided_edge_length = compute_divided_edge_length(e_idx);
-                    var segment_length      = divided_edge_length / (P+1);
-                    var current_segment_length = segment_length;
-                    var new_subdivision_points = [];
-                    new_subdivision_points.push(data_nodes[data_edges[e_idx].source]); //source
-
-                    for(var i = 1; i < subdivision_points_for_edge[e_idx].length; i++){
-                        var old_segment_length = euclidean_distance(subdivision_points_for_edge[e_idx][i], subdivision_points_for_edge[e_idx][i-1]);
-
-                        while(old_segment_length > current_segment_length){
-                            var percent_position = current_segment_length / old_segment_length;
-                            var new_subdivision_point_x = subdivision_points_for_edge[e_idx][i-1].x;
-                            var new_subdivision_point_y = subdivision_points_for_edge[e_idx][i-1].y;
-
-                            new_subdivision_point_x += percent_position*(subdivision_points_for_edge[e_idx][i].x - subdivision_points_for_edge[e_idx][i-1].x);
-                            new_subdivision_point_y += percent_position*(subdivision_points_for_edge[e_idx][i].y - subdivision_points_for_edge[e_idx][i-1].y);
-                            new_subdivision_points.push( {'x':new_subdivision_point_x, 
-                                                          'y':new_subdivision_point_y });
-                            
-                            old_segment_length     -= current_segment_length;
-                            current_segment_length  = segment_length;
-                        }
-                        current_segment_length -= old_segment_length;
-                    }
-                    new_subdivision_points.push(data_nodes[data_edges[e_idx].target]); //target
-                    subdivision_points_for_edge[e_idx] = new_subdivision_points;
-                }
-            }
-        }
-        /*** ********************** ***/
-
-        /*** Edge compatibility measures ***/
-        function angle_compatibility(P, Q){
-            var result = Math.abs(vector_dot_product(edge_as_vector(P),edge_as_vector(Q))/(edge_length(P)*edge_length(Q)));
-            return result;
-        }
-
-        function scale_compatibility(P, Q){
-            var lavg = (edge_length(P) + edge_length(Q))/2.0;
-            var result = 2.0/(lavg/Math.min(edge_length(P),edge_length(Q)) + Math.max(edge_length(P), edge_length(Q))/lavg);
-            return result;
-        }
-
-        function position_compatibility(P, Q){
-            var lavg = (edge_length(P) + edge_length(Q))/2.0;
-            var midP = {'x':(data_nodes[P.source].x + data_nodes[P.target].x)/2.0,
-                        'y':(data_nodes[P.source].y + data_nodes[P.target].y)/2.0};
-            var midQ = {'x':(data_nodes[Q.source].x + data_nodes[Q.target].x)/2.0,
-                        'y':(data_nodes[Q.source].y + data_nodes[Q.target].y)/2.0};
-            var result = lavg/(lavg + euclidean_distance(midP, midQ));
-            return result;
-        }
-
-        function edge_visibility(P, Q){
-            var I0 = project_point_on_line(data_nodes[Q.source], {'source':data_nodes[P.source],
-                                                                  'target':data_nodes[P.target]});
-            var I1 = project_point_on_line(data_nodes[Q.target], {'source':data_nodes[P.source], 
-                                                                  'target':data_nodes[P.target]}); //send acutal edge points positions
-            var midI = {'x':(I0.x + I1.x)/2.0, 
-                        'y':(I0.y + I1.y)/2.0};
-            var midP = {'x':(data_nodes[P.source].x + data_nodes[P.target].x)/2.0, 
-                        'y':(data_nodes[P.source].y + data_nodes[P.target].y)/2.0};
-            var result = Math.max(0, 1 - 2 * euclidean_distance(midP,midI)/euclidean_distance(I0,I1));
-            return result;
-        }
-
-        function visibility_compatibility(P, Q){
-            return Math.min(edge_visibility(P,Q), edge_visibility(Q,P));
-        }
-
-        function compatibility_score(P, Q){
-            var result = (angle_compatibility(P,Q) * scale_compatibility(P,Q) * 
-                          position_compatibility(P,Q) * visibility_compatibility(P,Q));
-
-            return result;
-        }
-
-        function are_compatible(P, Q){
-            //console.log('compatibility ' + P.source +' - '+ P.target + ' and ' + Q.source +' '+ Q.target);
-            return (compatibility_score(P,Q) >= compatibility_threshold);
-        }
-
-        function compute_compatibility_lists()
-        {
-            for(e = 0; e < data_edges.length - 1; e++){
-                for( oe = e + 1 ; oe < data_edges.length; oe++){ // don't want any duplicates
-                    if(e == oe)
-                        continue;
-                    else{
-                        if(are_compatible(data_edges[e],data_edges[oe])){
-                            compatibility_list_for_edge[e].push(oe);
-                            compatibility_list_for_edge[oe].push(e);
-                        }
-                    }
-                }
-            }
-        }
-
-        /*** ************************ ***/
-
-        /*** Main Bundling Loop Methods ***/ 
-        var forcebundle = function(){
-            var S = S_initial;
-            var I = I_initial;
-            var P = P_initial;
-            
-            initialize_edge_subdivisions();
-            initialize_compatibility_lists();
-            update_edge_divisions(P);
-            compute_compatibility_lists();
-            for(var cycle=0; cycle < C; cycle++){
-                for (var iteration = 0; iteration < I; iteration++){
-                    var forces = [];
-                    for(var edge = 0; edge < data_edges.length; edge++){
-                        forces[edge] = apply_resulting_forces_on_subdivision_points(edge, P, S);
-                    }
-                    for(var e = 0; e < data_edges.length; e++){
-                        for(var i=0; i < P + 1;i++){
-                            subdivision_points_for_edge[e][i].x += forces[e][i].x;
-                            subdivision_points_for_edge[e][i].y += forces[e][i].y;
-                        }
-                    }
-                }
-                //prepare for next cycle
-                S = S / 2;
-                P = P * 2;
-                I = I_rate * I;
-                
-                update_edge_divisions(P);
-            }
-            return subdivision_points_for_edge;
-        }
-        /*** ************************ ***/
-
-
-        /*** Getters/Setters Methods ***/ 
-        forcebundle.nodes = function(nl){
-            if(arguments.length == 0){
-                return data_nodes;
-            }
-            else{
-                data_nodes = nl;
-            }
-            return forcebundle;
-        }
-
-        forcebundle.edges = function(ll){
-            if(arguments.length == 0){
-                return data_edges;
-            }
-            else{
-                data_edges = filter_self_loops(ll); //remove edges to from to the same point
-            }
-            return forcebundle;
-        }
-
-        forcebundle.bundling_stiffness = function(k){
-            if(arguments.length == 0){
-                return K;
-            }
-            else{
-                K = k;
-            }
-            return forcebundle;
-        }
-
-        forcebundle.step_size = function(step){
-            if(arguments.length == 0){
-                return S_initial;
-            }
-            else{
-                S_initial = step;
-            }
-            return forcebundle;
-        }
-
-        forcebundle.cycles = function(c){
-            if(arguments.length == 0){
-                return C;
-            }
-            else{
-                C = c;
-            }
-            return forcebundle;
-        }
-
-        forcebundle.iterations = function(i){
-            if(arguments.length == 0){
-                return I_initial;
-            }
-            else{
-                I_initial = i;
-            }
-            return forcebundle;
-        }
-
-        forcebundle.iterations_rate = function(i){
-            if(arguments.length == 0){
-                return I_rate;
-            }
-            else{
-                I_rate = i;
-            }
-            return forcebundle;
-        }
-
-        forcebundle.subdivision_points_seed = function(p){
-            if(arguments.length == 0){
-                return P;
-            }
-            else{
-                P = p;
-            }
-            return forcebundle;
-        }
-
-        forcebundle.subdivision_rate = function(r){
-            if(arguments.length == 0){
-                return P_rate;
-            }
-            else{
-                P_rate = r;
-            }
-            return forcebundle;
-        }
-
-        forcebundle.compatibility_threshold = function(t){
-            if(arguments.length == 0){
-                return compatibility_threshold;
-            }
-            else{
-                compatibility_threshold = t;
-            }
-            return forcebundle;
-        }
-
-        /*** ************************ ***/
-
-    return forcebundle;
-}
-
-
-module.exports = ForceEdgeBundling;
-},{}],80:[function(require,module,exports){
-arguments[4][6][0].apply(exports,arguments)
-},{"./src":104,"dup":6}],81:[function(require,module,exports){
-arguments[4][9][0].apply(exports,arguments)
-},{"dup":9}],82:[function(require,module,exports){
-arguments[4][10][0].apply(exports,arguments)
-},{"color":83,"colorbrewer":89,"d3-color":90,"d3-scale":91,"dup":10,"lodash":92,"superagent":93}],83:[function(require,module,exports){
-arguments[4][11][0].apply(exports,arguments)
-},{"color-convert":85,"color-string":86,"dup":11}],84:[function(require,module,exports){
-arguments[4][12][0].apply(exports,arguments)
-},{"dup":12}],85:[function(require,module,exports){
-arguments[4][13][0].apply(exports,arguments)
-},{"./conversions":84,"dup":13}],86:[function(require,module,exports){
-arguments[4][14][0].apply(exports,arguments)
-},{"color-name":87,"dup":14}],87:[function(require,module,exports){
-arguments[4][15][0].apply(exports,arguments)
-},{"dup":15}],88:[function(require,module,exports){
-arguments[4][7][0].apply(exports,arguments)
-},{"dup":7}],89:[function(require,module,exports){
-arguments[4][8][0].apply(exports,arguments)
-},{"./colorbrewer.js":88,"dup":8}],90:[function(require,module,exports){
-arguments[4][16][0].apply(exports,arguments)
-},{"dup":16}],91:[function(require,module,exports){
-arguments[4][17][0].apply(exports,arguments)
-},{"dup":17}],92:[function(require,module,exports){
-arguments[4][18][0].apply(exports,arguments)
-},{"dup":18}],93:[function(require,module,exports){
-arguments[4][19][0].apply(exports,arguments)
-},{"dup":19,"emitter":94,"reduce":95}],94:[function(require,module,exports){
-arguments[4][20][0].apply(exports,arguments)
-},{"dup":20}],95:[function(require,module,exports){
-arguments[4][21][0].apply(exports,arguments)
-},{"dup":21}],96:[function(require,module,exports){
-arguments[4][6][0].apply(exports,arguments)
-},{"./src":103,"dup":6}],97:[function(require,module,exports){
-arguments[4][24][0].apply(exports,arguments)
-},{"./src":98,"dup":24}],98:[function(require,module,exports){
-arguments[4][25][0].apply(exports,arguments)
-},{"dup":25}],99:[function(require,module,exports){
-arguments[4][41][0].apply(exports,arguments)
-},{"dup":41,"events":5,"inherits":100,"insert-css":101,"lodash":344,"qwery":102}],100:[function(require,module,exports){
-arguments[4][42][0].apply(exports,arguments)
-},{"dup":42}],101:[function(require,module,exports){
-arguments[4][43][0].apply(exports,arguments)
-},{"dup":43}],102:[function(require,module,exports){
-arguments[4][44][0].apply(exports,arguments)
-},{"dup":44}],103:[function(require,module,exports){
-arguments[4][71][0].apply(exports,arguments)
-},{"buffer":1,"d3":81,"d3-multiaxis-zoom":97,"dup":71,"lightning-client-utils":82,"lightning-visualization":99,"lodash":344}],104:[function(require,module,exports){
+},{"buffer":1,"d3":73,"d3-multiaxis-zoom":89,"lightning-client-utils":74,"lightning-visualization":91,"lodash":336}],96:[function(require,module,exports){
 'use strict';
 var Graph = require('lightning-graph');
 var d3 = require('d3');
@@ -30829,55 +30824,55 @@ var Visualization = Graph.extend({
 
 module.exports = Visualization;
 
-},{"../deps/force-edge-bundling":79,"d3":81,"lightning-client-utils":82,"lightning-graph":96,"lodash":344}],105:[function(require,module,exports){
+},{"../deps/force-edge-bundling":71,"d3":73,"lightning-client-utils":74,"lightning-graph":88,"lodash":336}],97:[function(require,module,exports){
 arguments[4][6][0].apply(exports,arguments)
-},{"./src":127,"dup":6}],106:[function(require,module,exports){
+},{"./src":119,"dup":6}],98:[function(require,module,exports){
 arguments[4][24][0].apply(exports,arguments)
-},{"./src":107,"dup":24}],107:[function(require,module,exports){
+},{"./src":99,"dup":24}],99:[function(require,module,exports){
 arguments[4][25][0].apply(exports,arguments)
-},{"dup":25}],108:[function(require,module,exports){
+},{"dup":25}],100:[function(require,module,exports){
 arguments[4][9][0].apply(exports,arguments)
-},{"dup":9}],109:[function(require,module,exports){
+},{"dup":9}],101:[function(require,module,exports){
 arguments[4][10][0].apply(exports,arguments)
-},{"color":110,"colorbrewer":116,"d3-color":117,"d3-scale":118,"dup":10,"lodash":119,"superagent":120}],110:[function(require,module,exports){
+},{"color":102,"colorbrewer":108,"d3-color":109,"d3-scale":110,"dup":10,"lodash":111,"superagent":112}],102:[function(require,module,exports){
 arguments[4][11][0].apply(exports,arguments)
-},{"color-convert":112,"color-string":113,"dup":11}],111:[function(require,module,exports){
+},{"color-convert":104,"color-string":105,"dup":11}],103:[function(require,module,exports){
 arguments[4][12][0].apply(exports,arguments)
-},{"dup":12}],112:[function(require,module,exports){
+},{"dup":12}],104:[function(require,module,exports){
 arguments[4][13][0].apply(exports,arguments)
-},{"./conversions":111,"dup":13}],113:[function(require,module,exports){
+},{"./conversions":103,"dup":13}],105:[function(require,module,exports){
 arguments[4][14][0].apply(exports,arguments)
-},{"color-name":114,"dup":14}],114:[function(require,module,exports){
+},{"color-name":106,"dup":14}],106:[function(require,module,exports){
 arguments[4][15][0].apply(exports,arguments)
-},{"dup":15}],115:[function(require,module,exports){
+},{"dup":15}],107:[function(require,module,exports){
 arguments[4][7][0].apply(exports,arguments)
-},{"dup":7}],116:[function(require,module,exports){
+},{"dup":7}],108:[function(require,module,exports){
 arguments[4][8][0].apply(exports,arguments)
-},{"./colorbrewer.js":115,"dup":8}],117:[function(require,module,exports){
+},{"./colorbrewer.js":107,"dup":8}],109:[function(require,module,exports){
 arguments[4][16][0].apply(exports,arguments)
-},{"dup":16}],118:[function(require,module,exports){
+},{"dup":16}],110:[function(require,module,exports){
 arguments[4][17][0].apply(exports,arguments)
-},{"dup":17}],119:[function(require,module,exports){
+},{"dup":17}],111:[function(require,module,exports){
 arguments[4][18][0].apply(exports,arguments)
-},{"dup":18}],120:[function(require,module,exports){
+},{"dup":18}],112:[function(require,module,exports){
 arguments[4][19][0].apply(exports,arguments)
-},{"dup":19,"emitter":121,"reduce":122}],121:[function(require,module,exports){
+},{"dup":19,"emitter":113,"reduce":114}],113:[function(require,module,exports){
 arguments[4][20][0].apply(exports,arguments)
-},{"dup":20}],122:[function(require,module,exports){
+},{"dup":20}],114:[function(require,module,exports){
 arguments[4][21][0].apply(exports,arguments)
-},{"dup":21}],123:[function(require,module,exports){
+},{"dup":21}],115:[function(require,module,exports){
 arguments[4][41][0].apply(exports,arguments)
-},{"dup":41,"events":5,"inherits":124,"insert-css":125,"lodash":344,"qwery":126}],124:[function(require,module,exports){
+},{"dup":41,"events":5,"inherits":116,"insert-css":117,"lodash":336,"qwery":118}],116:[function(require,module,exports){
 arguments[4][42][0].apply(exports,arguments)
-},{"dup":42}],125:[function(require,module,exports){
+},{"dup":42}],117:[function(require,module,exports){
 arguments[4][43][0].apply(exports,arguments)
-},{"dup":43}],126:[function(require,module,exports){
+},{"dup":43}],118:[function(require,module,exports){
 arguments[4][44][0].apply(exports,arguments)
-},{"dup":44}],127:[function(require,module,exports){
-arguments[4][71][0].apply(exports,arguments)
-},{"buffer":1,"d3":108,"d3-multiaxis-zoom":106,"dup":71,"lightning-client-utils":109,"lightning-visualization":123,"lodash":344}],128:[function(require,module,exports){
+},{"dup":44}],119:[function(require,module,exports){
+arguments[4][95][0].apply(exports,arguments)
+},{"buffer":1,"d3":100,"d3-multiaxis-zoom":98,"dup":95,"lightning-client-utils":101,"lightning-visualization":115,"lodash":336}],120:[function(require,module,exports){
 arguments[4][6][0].apply(exports,arguments)
-},{"./src":162,"dup":6}],129:[function(require,module,exports){
+},{"./src":154,"dup":6}],121:[function(require,module,exports){
 /**
 * geoJSON validation according to the GeoJSON spefication Version 1
 * @module geoJSONValidation
@@ -31762,7 +31757,7 @@ arguments[4][6][0].apply(exports,arguments)
 
 })(typeof exports === 'undefined'? this['GJV']={}: exports);
 
-},{}],130:[function(require,module,exports){
+},{}],122:[function(require,module,exports){
 /*!
  * jQuery JavaScript Library v2.1.4
  * http://jquery.com/
@@ -40974,7 +40969,7 @@ return jQuery;
 
 }));
 
-},{}],131:[function(require,module,exports){
+},{}],123:[function(require,module,exports){
 "use strict";
 
 var $math = Math;
@@ -41274,7 +41269,7 @@ ConcaveHull.prototype = {
 };
 
 module.exports = ConcaveHull;
-},{}],132:[function(require,module,exports){
+},{}],124:[function(require,module,exports){
 "use strict";
 var d3 = require('d3');
 var ClipperLib = require('js-clipper');
@@ -42865,7 +42860,7 @@ module.exports = function(L) {
 };
 
 
-},{"./Hull":133,"./Memory":134,"./Options":135,"./Utilities":136,"d3":138,"js-clipper":140}],133:[function(require,module,exports){
+},{"./Hull":125,"./Memory":126,"./Options":127,"./Utilities":128,"d3":130,"js-clipper":132}],125:[function(require,module,exports){
 
 "use strict";
 
@@ -42958,7 +42953,7 @@ Hull.prototype = {
 
 
 module.exports = Hull;
-},{"./ConcaveHull":131,"graham_scan":139}],134:[function(require,module,exports){
+},{"./ConcaveHull":123,"graham_scan":131}],126:[function(require,module,exports){
 
 
 "use strict";
@@ -43098,7 +43093,7 @@ Memory.prototype = {
 };
 
 module.exports = Memory;
-},{}],135:[function(require,module,exports){
+},{}],127:[function(require,module,exports){
 
 
 "use strict";
@@ -43387,7 +43382,7 @@ Options.prototype = {
 
 
 module.exports = Options;
-},{}],136:[function(require,module,exports){
+},{}],128:[function(require,module,exports){
 
 
 "use strict";
@@ -43456,7 +43451,7 @@ module.exports = {
     }
 
 };
-},{}],137:[function(require,module,exports){
+},{}],129:[function(require,module,exports){
 
 
 
@@ -43465,9 +43460,9 @@ module.exports = function(L) {
 };
 
 
-},{"./components/FreeDraw":132}],138:[function(require,module,exports){
+},{"./components/FreeDraw":124}],130:[function(require,module,exports){
 arguments[4][9][0].apply(exports,arguments)
-},{"dup":9}],139:[function(require,module,exports){
+},{"dup":9}],131:[function(require,module,exports){
 /**
  * Graham's Scan Convex Hull Algorithm
  * @desc An implementation of the Graham's Scan Convex Hull algorithm in Javascript.
@@ -43630,7 +43625,7 @@ if (typeof module !== 'undefined') {
     module.exports = ConvexHullGrahamScan;
 }
 
-},{}],140:[function(require,module,exports){
+},{}],132:[function(require,module,exports){
 // rev 452
 /********************************************************************************
 *                                                                              *
@@ -50617,7 +50612,7 @@ ClipperLib.JS.PolyTreeToExPolygons = function (polytree)
 
 
 module.exports = ClipperLib;
-},{}],141:[function(require,module,exports){
+},{}],133:[function(require,module,exports){
 /*
  Leaflet, a JavaScript library for mobile-friendly interactive maps. http://leafletjs.com
  (c) 2010-2013, Vladimir Agafonkin
@@ -59798,7 +59793,7 @@ L.Map.include({
 
 
 }(window, document));
-},{}],142:[function(require,module,exports){
+},{}],134:[function(require,module,exports){
 
 var _ = require('lodash');
 var request = require('superagent');
@@ -60198,35 +60193,35 @@ var utils = {
 
 
 module.exports = utils;
-},{"color":143,"colorbrewer":149,"d3-color":150,"d3-scale":151,"lodash":152,"superagent":153}],143:[function(require,module,exports){
+},{"color":135,"colorbrewer":141,"d3-color":142,"d3-scale":143,"lodash":144,"superagent":145}],135:[function(require,module,exports){
 arguments[4][11][0].apply(exports,arguments)
-},{"color-convert":145,"color-string":146,"dup":11}],144:[function(require,module,exports){
+},{"color-convert":137,"color-string":138,"dup":11}],136:[function(require,module,exports){
 arguments[4][12][0].apply(exports,arguments)
-},{"dup":12}],145:[function(require,module,exports){
+},{"dup":12}],137:[function(require,module,exports){
 arguments[4][13][0].apply(exports,arguments)
-},{"./conversions":144,"dup":13}],146:[function(require,module,exports){
+},{"./conversions":136,"dup":13}],138:[function(require,module,exports){
 arguments[4][14][0].apply(exports,arguments)
-},{"color-name":147,"dup":14}],147:[function(require,module,exports){
+},{"color-name":139,"dup":14}],139:[function(require,module,exports){
 arguments[4][15][0].apply(exports,arguments)
-},{"dup":15}],148:[function(require,module,exports){
+},{"dup":15}],140:[function(require,module,exports){
 arguments[4][7][0].apply(exports,arguments)
-},{"dup":7}],149:[function(require,module,exports){
+},{"dup":7}],141:[function(require,module,exports){
 arguments[4][8][0].apply(exports,arguments)
-},{"./colorbrewer.js":148,"dup":8}],150:[function(require,module,exports){
+},{"./colorbrewer.js":140,"dup":8}],142:[function(require,module,exports){
 arguments[4][16][0].apply(exports,arguments)
-},{"dup":16}],151:[function(require,module,exports){
+},{"dup":16}],143:[function(require,module,exports){
 arguments[4][17][0].apply(exports,arguments)
-},{"dup":17}],152:[function(require,module,exports){
+},{"dup":17}],144:[function(require,module,exports){
 arguments[4][18][0].apply(exports,arguments)
-},{"dup":18}],153:[function(require,module,exports){
+},{"dup":18}],145:[function(require,module,exports){
 arguments[4][19][0].apply(exports,arguments)
-},{"dup":19,"emitter":154,"reduce":155}],154:[function(require,module,exports){
+},{"dup":19,"emitter":146,"reduce":147}],146:[function(require,module,exports){
 arguments[4][20][0].apply(exports,arguments)
-},{"dup":20}],155:[function(require,module,exports){
+},{"dup":20}],147:[function(require,module,exports){
 arguments[4][21][0].apply(exports,arguments)
-},{"dup":21}],156:[function(require,module,exports){
+},{"dup":21}],148:[function(require,module,exports){
 arguments[4][6][0].apply(exports,arguments)
-},{"./src":157,"dup":6}],157:[function(require,module,exports){
+},{"./src":149,"dup":6}],149:[function(require,module,exports){
 (function (Buffer){
 'use strict';
 
@@ -60327,15 +60322,15 @@ var Visualization = LightningVisualization.extend({
 module.exports = Visualization;
 
 }).call(this,require("buffer").Buffer)
-},{"buffer":1,"jquery":130,"leaflet":141,"lightning-client-utils":142,"lightning-visualization":158,"lodash":344}],158:[function(require,module,exports){
+},{"buffer":1,"jquery":122,"leaflet":133,"lightning-client-utils":134,"lightning-visualization":150,"lodash":336}],150:[function(require,module,exports){
 arguments[4][41][0].apply(exports,arguments)
-},{"dup":41,"events":5,"inherits":159,"insert-css":160,"lodash":344,"qwery":161}],159:[function(require,module,exports){
+},{"dup":41,"events":5,"inherits":151,"insert-css":152,"lodash":336,"qwery":153}],151:[function(require,module,exports){
 arguments[4][42][0].apply(exports,arguments)
-},{"dup":42}],160:[function(require,module,exports){
+},{"dup":42}],152:[function(require,module,exports){
 arguments[4][43][0].apply(exports,arguments)
-},{"dup":43}],161:[function(require,module,exports){
+},{"dup":43}],153:[function(require,module,exports){
 arguments[4][44][0].apply(exports,arguments)
-},{"dup":44}],162:[function(require,module,exports){
+},{"dup":44}],154:[function(require,module,exports){
 (function (Buffer){
 'use strict';
 
@@ -60647,97 +60642,97 @@ var Visualization = ImageViz.extend({
 module.exports = Visualization;
 
 }).call(this,require("buffer").Buffer)
-},{"buffer":1,"geojson-validation":129,"leaflet":141,"leaflet.freedraw-browserify":137,"lightning-client-utils":142,"lightning-image":156,"lodash":344}],163:[function(require,module,exports){
+},{"buffer":1,"geojson-validation":121,"leaflet":133,"leaflet.freedraw-browserify":129,"lightning-client-utils":134,"lightning-image":148,"lodash":336}],155:[function(require,module,exports){
 arguments[4][6][0].apply(exports,arguments)
-},{"./src":184,"dup":6}],164:[function(require,module,exports){
-arguments[4][130][0].apply(exports,arguments)
-},{"dup":130}],165:[function(require,module,exports){
-arguments[4][141][0].apply(exports,arguments)
-},{"dup":141}],166:[function(require,module,exports){
-arguments[4][142][0].apply(exports,arguments)
-},{"color":167,"colorbrewer":173,"d3-color":174,"d3-scale":175,"dup":142,"lodash":176,"superagent":177}],167:[function(require,module,exports){
+},{"./src":176,"dup":6}],156:[function(require,module,exports){
+arguments[4][122][0].apply(exports,arguments)
+},{"dup":122}],157:[function(require,module,exports){
+arguments[4][133][0].apply(exports,arguments)
+},{"dup":133}],158:[function(require,module,exports){
+arguments[4][134][0].apply(exports,arguments)
+},{"color":159,"colorbrewer":165,"d3-color":166,"d3-scale":167,"dup":134,"lodash":168,"superagent":169}],159:[function(require,module,exports){
 arguments[4][11][0].apply(exports,arguments)
-},{"color-convert":169,"color-string":170,"dup":11}],168:[function(require,module,exports){
+},{"color-convert":161,"color-string":162,"dup":11}],160:[function(require,module,exports){
 arguments[4][12][0].apply(exports,arguments)
-},{"dup":12}],169:[function(require,module,exports){
+},{"dup":12}],161:[function(require,module,exports){
 arguments[4][13][0].apply(exports,arguments)
-},{"./conversions":168,"dup":13}],170:[function(require,module,exports){
+},{"./conversions":160,"dup":13}],162:[function(require,module,exports){
 arguments[4][14][0].apply(exports,arguments)
-},{"color-name":171,"dup":14}],171:[function(require,module,exports){
+},{"color-name":163,"dup":14}],163:[function(require,module,exports){
 arguments[4][15][0].apply(exports,arguments)
-},{"dup":15}],172:[function(require,module,exports){
+},{"dup":15}],164:[function(require,module,exports){
 arguments[4][7][0].apply(exports,arguments)
-},{"dup":7}],173:[function(require,module,exports){
+},{"dup":7}],165:[function(require,module,exports){
 arguments[4][8][0].apply(exports,arguments)
-},{"./colorbrewer.js":172,"dup":8}],174:[function(require,module,exports){
+},{"./colorbrewer.js":164,"dup":8}],166:[function(require,module,exports){
 arguments[4][16][0].apply(exports,arguments)
-},{"dup":16}],175:[function(require,module,exports){
+},{"dup":16}],167:[function(require,module,exports){
 arguments[4][17][0].apply(exports,arguments)
-},{"dup":17}],176:[function(require,module,exports){
+},{"dup":17}],168:[function(require,module,exports){
 arguments[4][18][0].apply(exports,arguments)
-},{"dup":18}],177:[function(require,module,exports){
+},{"dup":18}],169:[function(require,module,exports){
 arguments[4][19][0].apply(exports,arguments)
-},{"dup":19,"emitter":178,"reduce":179}],178:[function(require,module,exports){
+},{"dup":19,"emitter":170,"reduce":171}],170:[function(require,module,exports){
 arguments[4][20][0].apply(exports,arguments)
-},{"dup":20}],179:[function(require,module,exports){
+},{"dup":20}],171:[function(require,module,exports){
 arguments[4][21][0].apply(exports,arguments)
-},{"dup":21}],180:[function(require,module,exports){
+},{"dup":21}],172:[function(require,module,exports){
 arguments[4][41][0].apply(exports,arguments)
-},{"dup":41,"events":5,"inherits":181,"insert-css":182,"lodash":344,"qwery":183}],181:[function(require,module,exports){
+},{"dup":41,"events":5,"inherits":173,"insert-css":174,"lodash":336,"qwery":175}],173:[function(require,module,exports){
 arguments[4][42][0].apply(exports,arguments)
-},{"dup":42}],182:[function(require,module,exports){
+},{"dup":42}],174:[function(require,module,exports){
 arguments[4][43][0].apply(exports,arguments)
-},{"dup":43}],183:[function(require,module,exports){
+},{"dup":43}],175:[function(require,module,exports){
 arguments[4][44][0].apply(exports,arguments)
-},{"dup":44}],184:[function(require,module,exports){
-arguments[4][157][0].apply(exports,arguments)
-},{"buffer":1,"dup":157,"jquery":164,"leaflet":165,"lightning-client-utils":166,"lightning-visualization":180,"lodash":344}],185:[function(require,module,exports){
+},{"dup":44}],176:[function(require,module,exports){
+arguments[4][149][0].apply(exports,arguments)
+},{"buffer":1,"dup":149,"jquery":156,"leaflet":157,"lightning-client-utils":158,"lightning-visualization":172,"lodash":336}],177:[function(require,module,exports){
 arguments[4][6][0].apply(exports,arguments)
-},{"./src":209,"dup":6}],186:[function(require,module,exports){
+},{"./src":201,"dup":6}],178:[function(require,module,exports){
 arguments[4][6][0].apply(exports,arguments)
-},{"./src":208,"dup":6}],187:[function(require,module,exports){
+},{"./src":200,"dup":6}],179:[function(require,module,exports){
 arguments[4][24][0].apply(exports,arguments)
-},{"./src":188,"dup":24}],188:[function(require,module,exports){
+},{"./src":180,"dup":24}],180:[function(require,module,exports){
 arguments[4][25][0].apply(exports,arguments)
-},{"dup":25}],189:[function(require,module,exports){
+},{"dup":25}],181:[function(require,module,exports){
 arguments[4][9][0].apply(exports,arguments)
-},{"dup":9}],190:[function(require,module,exports){
+},{"dup":9}],182:[function(require,module,exports){
 arguments[4][10][0].apply(exports,arguments)
-},{"color":191,"colorbrewer":197,"d3-color":198,"d3-scale":199,"dup":10,"lodash":200,"superagent":201}],191:[function(require,module,exports){
+},{"color":183,"colorbrewer":189,"d3-color":190,"d3-scale":191,"dup":10,"lodash":192,"superagent":193}],183:[function(require,module,exports){
 arguments[4][11][0].apply(exports,arguments)
-},{"color-convert":193,"color-string":194,"dup":11}],192:[function(require,module,exports){
+},{"color-convert":185,"color-string":186,"dup":11}],184:[function(require,module,exports){
 arguments[4][12][0].apply(exports,arguments)
-},{"dup":12}],193:[function(require,module,exports){
+},{"dup":12}],185:[function(require,module,exports){
 arguments[4][13][0].apply(exports,arguments)
-},{"./conversions":192,"dup":13}],194:[function(require,module,exports){
+},{"./conversions":184,"dup":13}],186:[function(require,module,exports){
 arguments[4][14][0].apply(exports,arguments)
-},{"color-name":195,"dup":14}],195:[function(require,module,exports){
+},{"color-name":187,"dup":14}],187:[function(require,module,exports){
 arguments[4][15][0].apply(exports,arguments)
-},{"dup":15}],196:[function(require,module,exports){
+},{"dup":15}],188:[function(require,module,exports){
 arguments[4][7][0].apply(exports,arguments)
-},{"dup":7}],197:[function(require,module,exports){
+},{"dup":7}],189:[function(require,module,exports){
 arguments[4][8][0].apply(exports,arguments)
-},{"./colorbrewer.js":196,"dup":8}],198:[function(require,module,exports){
+},{"./colorbrewer.js":188,"dup":8}],190:[function(require,module,exports){
 arguments[4][16][0].apply(exports,arguments)
-},{"dup":16}],199:[function(require,module,exports){
+},{"dup":16}],191:[function(require,module,exports){
 arguments[4][17][0].apply(exports,arguments)
-},{"dup":17}],200:[function(require,module,exports){
+},{"dup":17}],192:[function(require,module,exports){
 arguments[4][18][0].apply(exports,arguments)
-},{"dup":18}],201:[function(require,module,exports){
+},{"dup":18}],193:[function(require,module,exports){
 arguments[4][19][0].apply(exports,arguments)
-},{"dup":19,"emitter":202,"reduce":203}],202:[function(require,module,exports){
+},{"dup":19,"emitter":194,"reduce":195}],194:[function(require,module,exports){
 arguments[4][20][0].apply(exports,arguments)
-},{"dup":20}],203:[function(require,module,exports){
+},{"dup":20}],195:[function(require,module,exports){
 arguments[4][21][0].apply(exports,arguments)
-},{"dup":21}],204:[function(require,module,exports){
+},{"dup":21}],196:[function(require,module,exports){
 arguments[4][41][0].apply(exports,arguments)
-},{"dup":41,"events":5,"inherits":205,"insert-css":206,"lodash":344,"qwery":207}],205:[function(require,module,exports){
+},{"dup":41,"events":5,"inherits":197,"insert-css":198,"lodash":336,"qwery":199}],197:[function(require,module,exports){
 arguments[4][42][0].apply(exports,arguments)
-},{"dup":42}],206:[function(require,module,exports){
+},{"dup":42}],198:[function(require,module,exports){
 arguments[4][43][0].apply(exports,arguments)
-},{"dup":43}],207:[function(require,module,exports){
+},{"dup":43}],199:[function(require,module,exports){
 arguments[4][44][0].apply(exports,arguments)
-},{"dup":44}],208:[function(require,module,exports){
+},{"dup":44}],200:[function(require,module,exports){
 (function (Buffer){
 'use strict';
 var d3 = require('d3');
@@ -61062,7 +61057,7 @@ var Visualization = LightningVisualization.extend({
 module.exports = Visualization;
 
 }).call(this,require("buffer").Buffer)
-},{"buffer":1,"d3":189,"d3-multiaxis-zoom":187,"lightning-client-utils":190,"lightning-visualization":204,"lodash":344}],209:[function(require,module,exports){
+},{"buffer":1,"d3":181,"d3-multiaxis-zoom":179,"lightning-client-utils":182,"lightning-visualization":196,"lodash":336}],201:[function(require,module,exports){
 'use strict';
 var Line = require('lightning-line');
 var _ = require('lodash');
@@ -61110,59 +61105,59 @@ var Visualization = Line.extend({
 
 
 module.exports = Visualization;
-},{"lightning-line":186,"lodash":344}],210:[function(require,module,exports){
+},{"lightning-line":178,"lodash":336}],202:[function(require,module,exports){
 arguments[4][6][0].apply(exports,arguments)
-},{"./src":232,"dup":6}],211:[function(require,module,exports){
+},{"./src":224,"dup":6}],203:[function(require,module,exports){
 arguments[4][24][0].apply(exports,arguments)
-},{"./src":212,"dup":24}],212:[function(require,module,exports){
+},{"./src":204,"dup":24}],204:[function(require,module,exports){
 arguments[4][25][0].apply(exports,arguments)
-},{"dup":25}],213:[function(require,module,exports){
+},{"dup":25}],205:[function(require,module,exports){
 arguments[4][9][0].apply(exports,arguments)
-},{"dup":9}],214:[function(require,module,exports){
+},{"dup":9}],206:[function(require,module,exports){
 arguments[4][10][0].apply(exports,arguments)
-},{"color":215,"colorbrewer":221,"d3-color":222,"d3-scale":223,"dup":10,"lodash":224,"superagent":225}],215:[function(require,module,exports){
+},{"color":207,"colorbrewer":213,"d3-color":214,"d3-scale":215,"dup":10,"lodash":216,"superagent":217}],207:[function(require,module,exports){
 arguments[4][11][0].apply(exports,arguments)
-},{"color-convert":217,"color-string":218,"dup":11}],216:[function(require,module,exports){
+},{"color-convert":209,"color-string":210,"dup":11}],208:[function(require,module,exports){
 arguments[4][12][0].apply(exports,arguments)
-},{"dup":12}],217:[function(require,module,exports){
+},{"dup":12}],209:[function(require,module,exports){
 arguments[4][13][0].apply(exports,arguments)
-},{"./conversions":216,"dup":13}],218:[function(require,module,exports){
+},{"./conversions":208,"dup":13}],210:[function(require,module,exports){
 arguments[4][14][0].apply(exports,arguments)
-},{"color-name":219,"dup":14}],219:[function(require,module,exports){
+},{"color-name":211,"dup":14}],211:[function(require,module,exports){
 arguments[4][15][0].apply(exports,arguments)
-},{"dup":15}],220:[function(require,module,exports){
+},{"dup":15}],212:[function(require,module,exports){
 arguments[4][7][0].apply(exports,arguments)
-},{"dup":7}],221:[function(require,module,exports){
+},{"dup":7}],213:[function(require,module,exports){
 arguments[4][8][0].apply(exports,arguments)
-},{"./colorbrewer.js":220,"dup":8}],222:[function(require,module,exports){
+},{"./colorbrewer.js":212,"dup":8}],214:[function(require,module,exports){
 arguments[4][16][0].apply(exports,arguments)
-},{"dup":16}],223:[function(require,module,exports){
+},{"dup":16}],215:[function(require,module,exports){
 arguments[4][17][0].apply(exports,arguments)
-},{"dup":17}],224:[function(require,module,exports){
+},{"dup":17}],216:[function(require,module,exports){
 arguments[4][18][0].apply(exports,arguments)
-},{"dup":18}],225:[function(require,module,exports){
+},{"dup":18}],217:[function(require,module,exports){
 arguments[4][19][0].apply(exports,arguments)
-},{"dup":19,"emitter":226,"reduce":227}],226:[function(require,module,exports){
+},{"dup":19,"emitter":218,"reduce":219}],218:[function(require,module,exports){
 arguments[4][20][0].apply(exports,arguments)
-},{"dup":20}],227:[function(require,module,exports){
+},{"dup":20}],219:[function(require,module,exports){
 arguments[4][21][0].apply(exports,arguments)
-},{"dup":21}],228:[function(require,module,exports){
+},{"dup":21}],220:[function(require,module,exports){
 arguments[4][41][0].apply(exports,arguments)
-},{"dup":41,"events":5,"inherits":229,"insert-css":230,"lodash":344,"qwery":231}],229:[function(require,module,exports){
+},{"dup":41,"events":5,"inherits":221,"insert-css":222,"lodash":336,"qwery":223}],221:[function(require,module,exports){
 arguments[4][42][0].apply(exports,arguments)
-},{"dup":42}],230:[function(require,module,exports){
+},{"dup":42}],222:[function(require,module,exports){
 arguments[4][43][0].apply(exports,arguments)
-},{"dup":43}],231:[function(require,module,exports){
+},{"dup":43}],223:[function(require,module,exports){
 arguments[4][44][0].apply(exports,arguments)
-},{"dup":44}],232:[function(require,module,exports){
-arguments[4][208][0].apply(exports,arguments)
-},{"buffer":1,"d3":213,"d3-multiaxis-zoom":211,"dup":208,"lightning-client-utils":214,"lightning-visualization":228,"lodash":344}],233:[function(require,module,exports){
+},{"dup":44}],224:[function(require,module,exports){
+arguments[4][200][0].apply(exports,arguments)
+},{"buffer":1,"d3":205,"d3-multiaxis-zoom":203,"dup":200,"lightning-client-utils":206,"lightning-visualization":220,"lodash":336}],225:[function(require,module,exports){
 arguments[4][6][0].apply(exports,arguments)
-},{"./src":244,"dup":6}],234:[function(require,module,exports){
+},{"./src":236,"dup":6}],226:[function(require,module,exports){
 arguments[4][7][0].apply(exports,arguments)
-},{"dup":7}],235:[function(require,module,exports){
+},{"dup":7}],227:[function(require,module,exports){
 arguments[4][8][0].apply(exports,arguments)
-},{"./colorbrewer.js":234,"dup":8}],236:[function(require,module,exports){
+},{"./colorbrewer.js":226,"dup":8}],228:[function(require,module,exports){
 var d3 = require('d3');
 var topojson = require('topojson');
 
@@ -73333,9 +73328,9 @@ if ( window.jQuery ) {
 }
 
 module.exports = Datamap;
-},{"d3":237,"topojson":238}],237:[function(require,module,exports){
+},{"d3":229,"topojson":230}],229:[function(require,module,exports){
 arguments[4][9][0].apply(exports,arguments)
-},{"dup":9}],238:[function(require,module,exports){
+},{"dup":9}],230:[function(require,module,exports){
 !function() {
   var topojson = {
     version: "1.6.19",
@@ -73871,17 +73866,17 @@ arguments[4][9][0].apply(exports,arguments)
   else this.topojson = topojson;
 }();
 
-},{}],239:[function(require,module,exports){
-arguments[4][130][0].apply(exports,arguments)
-},{"dup":130}],240:[function(require,module,exports){
+},{}],231:[function(require,module,exports){
+arguments[4][122][0].apply(exports,arguments)
+},{"dup":122}],232:[function(require,module,exports){
 arguments[4][41][0].apply(exports,arguments)
-},{"dup":41,"events":5,"inherits":241,"insert-css":242,"lodash":344,"qwery":243}],241:[function(require,module,exports){
+},{"dup":41,"events":5,"inherits":233,"insert-css":234,"lodash":336,"qwery":235}],233:[function(require,module,exports){
 arguments[4][42][0].apply(exports,arguments)
-},{"dup":42}],242:[function(require,module,exports){
+},{"dup":42}],234:[function(require,module,exports){
 arguments[4][43][0].apply(exports,arguments)
-},{"dup":43}],243:[function(require,module,exports){
+},{"dup":43}],235:[function(require,module,exports){
 arguments[4][44][0].apply(exports,arguments)
-},{"dup":44}],244:[function(require,module,exports){
+},{"dup":44}],236:[function(require,module,exports){
 'use strict';
 var LightningVisualization = require('lightning-visualization');
 var Datamaps = require('datamaps-all-browserify');
@@ -73987,47 +73982,47 @@ var Visualization = LightningVisualization.extend({
 
 module.exports = Visualization;
 
-},{"colorbrewer":235,"datamaps-all-browserify":236,"jquery":239,"lightning-visualization":240,"lodash":344}],245:[function(require,module,exports){
+},{"colorbrewer":227,"datamaps-all-browserify":228,"jquery":231,"lightning-visualization":232,"lodash":336}],237:[function(require,module,exports){
 arguments[4][6][0].apply(exports,arguments)
-},{"./src":265,"dup":6}],246:[function(require,module,exports){
+},{"./src":257,"dup":6}],238:[function(require,module,exports){
 arguments[4][7][0].apply(exports,arguments)
-},{"dup":7}],247:[function(require,module,exports){
+},{"dup":7}],239:[function(require,module,exports){
 arguments[4][8][0].apply(exports,arguments)
-},{"./colorbrewer.js":246,"dup":8}],248:[function(require,module,exports){
+},{"./colorbrewer.js":238,"dup":8}],240:[function(require,module,exports){
 arguments[4][9][0].apply(exports,arguments)
-},{"dup":9}],249:[function(require,module,exports){
+},{"dup":9}],241:[function(require,module,exports){
 arguments[4][10][0].apply(exports,arguments)
-},{"color":250,"colorbrewer":247,"d3-color":255,"d3-scale":256,"dup":10,"lodash":257,"superagent":258}],250:[function(require,module,exports){
+},{"color":242,"colorbrewer":239,"d3-color":247,"d3-scale":248,"dup":10,"lodash":249,"superagent":250}],242:[function(require,module,exports){
 arguments[4][11][0].apply(exports,arguments)
-},{"color-convert":252,"color-string":253,"dup":11}],251:[function(require,module,exports){
+},{"color-convert":244,"color-string":245,"dup":11}],243:[function(require,module,exports){
 arguments[4][12][0].apply(exports,arguments)
-},{"dup":12}],252:[function(require,module,exports){
+},{"dup":12}],244:[function(require,module,exports){
 arguments[4][13][0].apply(exports,arguments)
-},{"./conversions":251,"dup":13}],253:[function(require,module,exports){
+},{"./conversions":243,"dup":13}],245:[function(require,module,exports){
 arguments[4][14][0].apply(exports,arguments)
-},{"color-name":254,"dup":14}],254:[function(require,module,exports){
+},{"color-name":246,"dup":14}],246:[function(require,module,exports){
 arguments[4][15][0].apply(exports,arguments)
-},{"dup":15}],255:[function(require,module,exports){
+},{"dup":15}],247:[function(require,module,exports){
 arguments[4][16][0].apply(exports,arguments)
-},{"dup":16}],256:[function(require,module,exports){
+},{"dup":16}],248:[function(require,module,exports){
 arguments[4][17][0].apply(exports,arguments)
-},{"dup":17}],257:[function(require,module,exports){
+},{"dup":17}],249:[function(require,module,exports){
 arguments[4][18][0].apply(exports,arguments)
-},{"dup":18}],258:[function(require,module,exports){
+},{"dup":18}],250:[function(require,module,exports){
 arguments[4][19][0].apply(exports,arguments)
-},{"dup":19,"emitter":259,"reduce":260}],259:[function(require,module,exports){
+},{"dup":19,"emitter":251,"reduce":252}],251:[function(require,module,exports){
 arguments[4][20][0].apply(exports,arguments)
-},{"dup":20}],260:[function(require,module,exports){
+},{"dup":20}],252:[function(require,module,exports){
 arguments[4][21][0].apply(exports,arguments)
-},{"dup":21}],261:[function(require,module,exports){
+},{"dup":21}],253:[function(require,module,exports){
 arguments[4][41][0].apply(exports,arguments)
-},{"dup":41,"events":5,"inherits":262,"insert-css":263,"lodash":344,"qwery":264}],262:[function(require,module,exports){
+},{"dup":41,"events":5,"inherits":254,"insert-css":255,"lodash":336,"qwery":256}],254:[function(require,module,exports){
 arguments[4][42][0].apply(exports,arguments)
-},{"dup":42}],263:[function(require,module,exports){
+},{"dup":42}],255:[function(require,module,exports){
 arguments[4][43][0].apply(exports,arguments)
-},{"dup":43}],264:[function(require,module,exports){
+},{"dup":43}],256:[function(require,module,exports){
 arguments[4][44][0].apply(exports,arguments)
-},{"dup":44}],265:[function(require,module,exports){
+},{"dup":44}],257:[function(require,module,exports){
 (function (Buffer){
 'use strict';
 var d3 = require('d3');
@@ -74406,45 +74401,45 @@ var Visualization = LightningVisualization.extend({
 module.exports = Visualization;
 
 }).call(this,require("buffer").Buffer)
-},{"buffer":1,"colorbrewer":247,"d3":248,"lightning-client-utils":249,"lightning-visualization":261,"lodash":344}],266:[function(require,module,exports){
+},{"buffer":1,"colorbrewer":239,"d3":240,"lightning-client-utils":241,"lightning-visualization":253,"lodash":336}],258:[function(require,module,exports){
 arguments[4][6][0].apply(exports,arguments)
-},{"./src":287,"dup":6}],267:[function(require,module,exports){
+},{"./src":279,"dup":6}],259:[function(require,module,exports){
 arguments[4][16][0].apply(exports,arguments)
-},{"dup":16}],268:[function(require,module,exports){
-arguments[4][142][0].apply(exports,arguments)
-},{"color":269,"colorbrewer":275,"d3-color":267,"d3-scale":276,"dup":142,"lodash":277,"superagent":278}],269:[function(require,module,exports){
+},{"dup":16}],260:[function(require,module,exports){
+arguments[4][134][0].apply(exports,arguments)
+},{"color":261,"colorbrewer":267,"d3-color":259,"d3-scale":268,"dup":134,"lodash":269,"superagent":270}],261:[function(require,module,exports){
 arguments[4][11][0].apply(exports,arguments)
-},{"color-convert":271,"color-string":272,"dup":11}],270:[function(require,module,exports){
+},{"color-convert":263,"color-string":264,"dup":11}],262:[function(require,module,exports){
 arguments[4][12][0].apply(exports,arguments)
-},{"dup":12}],271:[function(require,module,exports){
+},{"dup":12}],263:[function(require,module,exports){
 arguments[4][13][0].apply(exports,arguments)
-},{"./conversions":270,"dup":13}],272:[function(require,module,exports){
+},{"./conversions":262,"dup":13}],264:[function(require,module,exports){
 arguments[4][14][0].apply(exports,arguments)
-},{"color-name":273,"dup":14}],273:[function(require,module,exports){
+},{"color-name":265,"dup":14}],265:[function(require,module,exports){
 arguments[4][15][0].apply(exports,arguments)
-},{"dup":15}],274:[function(require,module,exports){
+},{"dup":15}],266:[function(require,module,exports){
 arguments[4][7][0].apply(exports,arguments)
-},{"dup":7}],275:[function(require,module,exports){
+},{"dup":7}],267:[function(require,module,exports){
 arguments[4][8][0].apply(exports,arguments)
-},{"./colorbrewer.js":274,"dup":8}],276:[function(require,module,exports){
+},{"./colorbrewer.js":266,"dup":8}],268:[function(require,module,exports){
 arguments[4][17][0].apply(exports,arguments)
-},{"dup":17}],277:[function(require,module,exports){
+},{"dup":17}],269:[function(require,module,exports){
 arguments[4][18][0].apply(exports,arguments)
-},{"dup":18}],278:[function(require,module,exports){
+},{"dup":18}],270:[function(require,module,exports){
 arguments[4][19][0].apply(exports,arguments)
-},{"dup":19,"emitter":279,"reduce":280}],279:[function(require,module,exports){
+},{"dup":19,"emitter":271,"reduce":272}],271:[function(require,module,exports){
 arguments[4][20][0].apply(exports,arguments)
-},{"dup":20}],280:[function(require,module,exports){
+},{"dup":20}],272:[function(require,module,exports){
 arguments[4][21][0].apply(exports,arguments)
-},{"dup":21}],281:[function(require,module,exports){
+},{"dup":21}],273:[function(require,module,exports){
 arguments[4][41][0].apply(exports,arguments)
-},{"dup":41,"events":5,"inherits":282,"insert-css":283,"lodash":344,"qwery":284}],282:[function(require,module,exports){
+},{"dup":41,"events":5,"inherits":274,"insert-css":275,"lodash":336,"qwery":276}],274:[function(require,module,exports){
 arguments[4][42][0].apply(exports,arguments)
-},{"dup":42}],283:[function(require,module,exports){
+},{"dup":42}],275:[function(require,module,exports){
 arguments[4][43][0].apply(exports,arguments)
-},{"dup":43}],284:[function(require,module,exports){
+},{"dup":43}],276:[function(require,module,exports){
 arguments[4][44][0].apply(exports,arguments)
-},{"dup":44}],285:[function(require,module,exports){
+},{"dup":44}],277:[function(require,module,exports){
 
 
 /**
@@ -74749,7 +74744,7 @@ module.exports = function(THREE) {
     };
 
 };
-},{}],286:[function(require,module,exports){
+},{}],278:[function(require,module,exports){
 // threejs.org/license
 'use strict';var THREE={REVISION:"70"};"object"===typeof module&&(module.exports=THREE);void 0===Math.sign&&(Math.sign=function(a){return 0>a?-1:0<a?1:0});THREE.MOUSE={LEFT:0,MIDDLE:1,RIGHT:2};THREE.CullFaceNone=0;THREE.CullFaceBack=1;THREE.CullFaceFront=2;THREE.CullFaceFrontBack=3;THREE.FrontFaceDirectionCW=0;THREE.FrontFaceDirectionCCW=1;THREE.BasicShadowMap=0;THREE.PCFShadowMap=1;THREE.PCFSoftShadowMap=2;THREE.FrontSide=0;THREE.BackSide=1;THREE.DoubleSide=2;THREE.NoShading=0;
 THREE.FlatShading=1;THREE.SmoothShading=2;THREE.NoColors=0;THREE.FaceColors=1;THREE.VertexColors=2;THREE.NoBlending=0;THREE.NormalBlending=1;THREE.AdditiveBlending=2;THREE.SubtractiveBlending=3;THREE.MultiplyBlending=4;THREE.CustomBlending=5;THREE.AddEquation=100;THREE.SubtractEquation=101;THREE.ReverseSubtractEquation=102;THREE.MinEquation=103;THREE.MaxEquation=104;THREE.ZeroFactor=200;THREE.OneFactor=201;THREE.SrcColorFactor=202;THREE.OneMinusSrcColorFactor=203;THREE.SrcAlphaFactor=204;
@@ -75572,7 +75567,7 @@ THREE.MorphBlendMesh.prototype.getAnimationDuration=function(a){var b=-1;if(a=th
 THREE.MorphBlendMesh.prototype.update=function(a){for(var b=0,c=this.animationsList.length;b<c;b++){var d=this.animationsList[b];if(d.active){var e=d.duration/d.length;d.time+=d.direction*a;if(d.mirroredLoop){if(d.time>d.duration||0>d.time)d.direction*=-1,d.time>d.duration&&(d.time=d.duration,d.directionBackwards=!0),0>d.time&&(d.time=0,d.directionBackwards=!1)}else d.time%=d.duration,0>d.time&&(d.time+=d.duration);var f=d.startFrame+THREE.Math.clamp(Math.floor(d.time/e),0,d.length-1),g=d.weight;
 f!==d.currentFrame&&(this.morphTargetInfluences[d.lastFrame]=0,this.morphTargetInfluences[d.currentFrame]=1*g,this.morphTargetInfluences[f]=0,d.lastFrame=d.currentFrame,d.currentFrame=f);e=d.time%e/e;d.directionBackwards&&(e=1-e);this.morphTargetInfluences[d.currentFrame]=e*g;this.morphTargetInfluences[d.lastFrame]=(1-e)*g}}};module.exports=THREE;
 
-},{}],287:[function(require,module,exports){
+},{}],279:[function(require,module,exports){
 'use strict';
 
 var LightningVisualization = require('lightning-visualization');
@@ -75832,53 +75827,53 @@ var Scatter3 = LightningVisualization.extend({
 
 module.exports = Scatter3;
 
-},{"d3-color":267,"lightning-client-utils":268,"lightning-visualization":281,"lodash":344,"three-fly-controls":285,"three.js":286}],288:[function(require,module,exports){
+},{"d3-color":259,"lightning-client-utils":260,"lightning-visualization":273,"lodash":336,"three-fly-controls":277,"three.js":278}],280:[function(require,module,exports){
 arguments[4][6][0].apply(exports,arguments)
-},{"./src":312,"dup":6}],289:[function(require,module,exports){
+},{"./src":304,"dup":6}],281:[function(require,module,exports){
 arguments[4][6][0].apply(exports,arguments)
-},{"./src":311,"dup":6}],290:[function(require,module,exports){
+},{"./src":303,"dup":6}],282:[function(require,module,exports){
 arguments[4][24][0].apply(exports,arguments)
-},{"./src":291,"dup":24}],291:[function(require,module,exports){
+},{"./src":283,"dup":24}],283:[function(require,module,exports){
 arguments[4][25][0].apply(exports,arguments)
-},{"dup":25}],292:[function(require,module,exports){
+},{"dup":25}],284:[function(require,module,exports){
 arguments[4][9][0].apply(exports,arguments)
-},{"dup":9}],293:[function(require,module,exports){
+},{"dup":9}],285:[function(require,module,exports){
 arguments[4][10][0].apply(exports,arguments)
-},{"color":294,"colorbrewer":300,"d3-color":301,"d3-scale":302,"dup":10,"lodash":303,"superagent":304}],294:[function(require,module,exports){
+},{"color":286,"colorbrewer":292,"d3-color":293,"d3-scale":294,"dup":10,"lodash":295,"superagent":296}],286:[function(require,module,exports){
 arguments[4][11][0].apply(exports,arguments)
-},{"color-convert":296,"color-string":297,"dup":11}],295:[function(require,module,exports){
+},{"color-convert":288,"color-string":289,"dup":11}],287:[function(require,module,exports){
 arguments[4][12][0].apply(exports,arguments)
-},{"dup":12}],296:[function(require,module,exports){
+},{"dup":12}],288:[function(require,module,exports){
 arguments[4][13][0].apply(exports,arguments)
-},{"./conversions":295,"dup":13}],297:[function(require,module,exports){
+},{"./conversions":287,"dup":13}],289:[function(require,module,exports){
 arguments[4][14][0].apply(exports,arguments)
-},{"color-name":298,"dup":14}],298:[function(require,module,exports){
+},{"color-name":290,"dup":14}],290:[function(require,module,exports){
 arguments[4][15][0].apply(exports,arguments)
-},{"dup":15}],299:[function(require,module,exports){
+},{"dup":15}],291:[function(require,module,exports){
 arguments[4][7][0].apply(exports,arguments)
-},{"dup":7}],300:[function(require,module,exports){
+},{"dup":7}],292:[function(require,module,exports){
 arguments[4][8][0].apply(exports,arguments)
-},{"./colorbrewer.js":299,"dup":8}],301:[function(require,module,exports){
+},{"./colorbrewer.js":291,"dup":8}],293:[function(require,module,exports){
 arguments[4][16][0].apply(exports,arguments)
-},{"dup":16}],302:[function(require,module,exports){
+},{"dup":16}],294:[function(require,module,exports){
 arguments[4][17][0].apply(exports,arguments)
-},{"dup":17}],303:[function(require,module,exports){
+},{"dup":17}],295:[function(require,module,exports){
 arguments[4][18][0].apply(exports,arguments)
-},{"dup":18}],304:[function(require,module,exports){
+},{"dup":18}],296:[function(require,module,exports){
 arguments[4][19][0].apply(exports,arguments)
-},{"dup":19,"emitter":305,"reduce":306}],305:[function(require,module,exports){
+},{"dup":19,"emitter":297,"reduce":298}],297:[function(require,module,exports){
 arguments[4][20][0].apply(exports,arguments)
-},{"dup":20}],306:[function(require,module,exports){
+},{"dup":20}],298:[function(require,module,exports){
 arguments[4][21][0].apply(exports,arguments)
-},{"dup":21}],307:[function(require,module,exports){
+},{"dup":21}],299:[function(require,module,exports){
 arguments[4][41][0].apply(exports,arguments)
-},{"dup":41,"events":5,"inherits":308,"insert-css":309,"lodash":344,"qwery":310}],308:[function(require,module,exports){
+},{"dup":41,"events":5,"inherits":300,"insert-css":301,"lodash":336,"qwery":302}],300:[function(require,module,exports){
 arguments[4][42][0].apply(exports,arguments)
-},{"dup":42}],309:[function(require,module,exports){
+},{"dup":42}],301:[function(require,module,exports){
 arguments[4][43][0].apply(exports,arguments)
-},{"dup":43}],310:[function(require,module,exports){
+},{"dup":43}],302:[function(require,module,exports){
 arguments[4][44][0].apply(exports,arguments)
-},{"dup":44}],311:[function(require,module,exports){
+},{"dup":44}],303:[function(require,module,exports){
 (function (Buffer){
 'use strict';
 var d3 = require('d3');
@@ -76382,7 +76377,7 @@ var Visualization = LightningVisualization.extend({
 module.exports = Visualization;
 
 }).call(this,require("buffer").Buffer)
-},{"buffer":1,"d3":292,"d3-multiaxis-zoom":290,"lightning-client-utils":293,"lightning-visualization":307,"lodash":344}],312:[function(require,module,exports){
+},{"buffer":1,"d3":284,"d3-multiaxis-zoom":282,"lightning-client-utils":285,"lightning-visualization":299,"lodash":336}],304:[function(require,module,exports){
 'use strict';
 var Scatter = require('lightning-scatter');
 var _ = require('lodash');
@@ -76418,67 +76413,67 @@ var Visualization = Scatter.extend({
 
 module.exports = Visualization;
 
-},{"lightning-scatter":289,"lodash":344}],313:[function(require,module,exports){
+},{"lightning-scatter":281,"lodash":336}],305:[function(require,module,exports){
 arguments[4][6][0].apply(exports,arguments)
-},{"./src":335,"dup":6}],314:[function(require,module,exports){
+},{"./src":327,"dup":6}],306:[function(require,module,exports){
 arguments[4][24][0].apply(exports,arguments)
-},{"./src":315,"dup":24}],315:[function(require,module,exports){
+},{"./src":307,"dup":24}],307:[function(require,module,exports){
 arguments[4][25][0].apply(exports,arguments)
-},{"dup":25}],316:[function(require,module,exports){
+},{"dup":25}],308:[function(require,module,exports){
 arguments[4][9][0].apply(exports,arguments)
-},{"dup":9}],317:[function(require,module,exports){
+},{"dup":9}],309:[function(require,module,exports){
 arguments[4][10][0].apply(exports,arguments)
-},{"color":318,"colorbrewer":324,"d3-color":325,"d3-scale":326,"dup":10,"lodash":327,"superagent":328}],318:[function(require,module,exports){
+},{"color":310,"colorbrewer":316,"d3-color":317,"d3-scale":318,"dup":10,"lodash":319,"superagent":320}],310:[function(require,module,exports){
 arguments[4][11][0].apply(exports,arguments)
-},{"color-convert":320,"color-string":321,"dup":11}],319:[function(require,module,exports){
+},{"color-convert":312,"color-string":313,"dup":11}],311:[function(require,module,exports){
 arguments[4][12][0].apply(exports,arguments)
-},{"dup":12}],320:[function(require,module,exports){
+},{"dup":12}],312:[function(require,module,exports){
 arguments[4][13][0].apply(exports,arguments)
-},{"./conversions":319,"dup":13}],321:[function(require,module,exports){
+},{"./conversions":311,"dup":13}],313:[function(require,module,exports){
 arguments[4][14][0].apply(exports,arguments)
-},{"color-name":322,"dup":14}],322:[function(require,module,exports){
+},{"color-name":314,"dup":14}],314:[function(require,module,exports){
 arguments[4][15][0].apply(exports,arguments)
-},{"dup":15}],323:[function(require,module,exports){
+},{"dup":15}],315:[function(require,module,exports){
 arguments[4][7][0].apply(exports,arguments)
-},{"dup":7}],324:[function(require,module,exports){
+},{"dup":7}],316:[function(require,module,exports){
 arguments[4][8][0].apply(exports,arguments)
-},{"./colorbrewer.js":323,"dup":8}],325:[function(require,module,exports){
+},{"./colorbrewer.js":315,"dup":8}],317:[function(require,module,exports){
 arguments[4][16][0].apply(exports,arguments)
-},{"dup":16}],326:[function(require,module,exports){
+},{"dup":16}],318:[function(require,module,exports){
 arguments[4][17][0].apply(exports,arguments)
-},{"dup":17}],327:[function(require,module,exports){
+},{"dup":17}],319:[function(require,module,exports){
 arguments[4][18][0].apply(exports,arguments)
-},{"dup":18}],328:[function(require,module,exports){
+},{"dup":18}],320:[function(require,module,exports){
 arguments[4][19][0].apply(exports,arguments)
-},{"dup":19,"emitter":329,"reduce":330}],329:[function(require,module,exports){
+},{"dup":19,"emitter":321,"reduce":322}],321:[function(require,module,exports){
 arguments[4][20][0].apply(exports,arguments)
-},{"dup":20}],330:[function(require,module,exports){
+},{"dup":20}],322:[function(require,module,exports){
 arguments[4][21][0].apply(exports,arguments)
-},{"dup":21}],331:[function(require,module,exports){
+},{"dup":21}],323:[function(require,module,exports){
 arguments[4][41][0].apply(exports,arguments)
-},{"dup":41,"events":5,"inherits":332,"insert-css":333,"lodash":344,"qwery":334}],332:[function(require,module,exports){
+},{"dup":41,"events":5,"inherits":324,"insert-css":325,"lodash":336,"qwery":326}],324:[function(require,module,exports){
 arguments[4][42][0].apply(exports,arguments)
-},{"dup":42}],333:[function(require,module,exports){
+},{"dup":42}],325:[function(require,module,exports){
 arguments[4][43][0].apply(exports,arguments)
-},{"dup":43}],334:[function(require,module,exports){
+},{"dup":43}],326:[function(require,module,exports){
 arguments[4][44][0].apply(exports,arguments)
-},{"dup":44}],335:[function(require,module,exports){
-arguments[4][311][0].apply(exports,arguments)
-},{"buffer":1,"d3":316,"d3-multiaxis-zoom":314,"dup":311,"lightning-client-utils":317,"lightning-visualization":331,"lodash":344}],336:[function(require,module,exports){
+},{"dup":44}],327:[function(require,module,exports){
+arguments[4][303][0].apply(exports,arguments)
+},{"buffer":1,"d3":308,"d3-multiaxis-zoom":306,"dup":303,"lightning-client-utils":309,"lightning-visualization":323,"lodash":336}],328:[function(require,module,exports){
 arguments[4][6][0].apply(exports,arguments)
-},{"./src":343,"dup":6}],337:[function(require,module,exports){
+},{"./src":335,"dup":6}],329:[function(require,module,exports){
 arguments[4][41][0].apply(exports,arguments)
-},{"dup":41,"events":5,"inherits":338,"insert-css":339,"lodash":344,"qwery":340}],338:[function(require,module,exports){
+},{"dup":41,"events":5,"inherits":330,"insert-css":331,"lodash":336,"qwery":332}],330:[function(require,module,exports){
 arguments[4][42][0].apply(exports,arguments)
-},{"dup":42}],339:[function(require,module,exports){
+},{"dup":42}],331:[function(require,module,exports){
 arguments[4][43][0].apply(exports,arguments)
-},{"dup":43}],340:[function(require,module,exports){
+},{"dup":43}],332:[function(require,module,exports){
 arguments[4][44][0].apply(exports,arguments)
-},{"dup":44}],341:[function(require,module,exports){
-arguments[4][285][0].apply(exports,arguments)
-},{"dup":285}],342:[function(require,module,exports){
-arguments[4][286][0].apply(exports,arguments)
-},{"dup":286}],343:[function(require,module,exports){
+},{"dup":44}],333:[function(require,module,exports){
+arguments[4][277][0].apply(exports,arguments)
+},{"dup":277}],334:[function(require,module,exports){
+arguments[4][278][0].apply(exports,arguments)
+},{"dup":278}],335:[function(require,module,exports){
 'use strict';
 
 var LightningVisualization = require('lightning-visualization');
@@ -76587,7 +76582,7 @@ var Visualization = LightningVisualization.extend({
 
 module.exports = Visualization;
 
-},{"lightning-visualization":337,"lodash":344,"three-fly-controls":341,"three.js":342}],344:[function(require,module,exports){
+},{"lightning-visualization":329,"lodash":336,"three-fly-controls":333,"three.js":334}],336:[function(require,module,exports){
 (function (global){
 /**
  * @license
@@ -88942,7 +88937,7 @@ module.exports = Visualization;
 }.call(this));
 
 }).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{}],345:[function(require,module,exports){
+},{}],337:[function(require,module,exports){
 
 var jQueryURL = '//ajax.googleapis.com/ajax/libs/jquery/1.11.0/jquery.min.js';
 
@@ -89011,5 +89006,5 @@ if(!window.$) {
 window.lightning = window.lightning || {};
 window.lightning.initVisualizations = init;
 
-},{"lightning-adjacency":6,"lightning-circle":23,"lightning-force":48,"lightning-gallery":73,"lightning-graph":105,"lightning-graph-bundled":80,"lightning-image":163,"lightning-image-poly":128,"lightning-line":210,"lightning-line-streaming":185,"lightning-map":233,"lightning-matrix":245,"lightning-scatter":313,"lightning-scatter-3":266,"lightning-scatter-streaming":288,"lightning-volume":336}]},{},[345]);
+},{"lightning-adjacency":6,"lightning-circle":23,"lightning-force":48,"lightning-gallery":65,"lightning-graph":97,"lightning-graph-bundled":72,"lightning-image":155,"lightning-image-poly":120,"lightning-line":202,"lightning-line-streaming":177,"lightning-map":225,"lightning-matrix":237,"lightning-scatter":305,"lightning-scatter-3":258,"lightning-scatter-streaming":280,"lightning-volume":328}]},{},[337]);
 ;window.define = window._define;window.require = window._require;
