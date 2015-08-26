@@ -59,24 +59,24 @@ class Visualization(object):
         url = self._format_url(url)
         return requests.put(url, data=json.dumps(payload), headers=headers, auth=self.auth)
 
-    def get_permalink(self):
+    def get_perma_link(self):
         return self.session.host + '/visualizations/' + str(self.id)
 
-    def get_publiclink(self):
-        return self.get_permalink() + '/public/'
+    def get_public_link(self):
+        return self.get_perma_link() + '/public/'
 
     def get_embed_link(self):
-        return self._format_url(self.get_permalink() + '/embed')
+        return self._format_url(self.get_perma_link() + '/embed')
 
     def get_html(self):
         r = requests.get(self.get_embed_link(), auth=self.auth)
         return r.text
 
     def open(self):
-        webbrowser.open(self.get_publiclink())
+        webbrowser.open(self.get_public_link())
 
     def delete(self):
-        url = self.get_permalink()
+        url = self.get_perma_link()
         return requests.delete(url)
 
     def on(self, event_name, handler):
