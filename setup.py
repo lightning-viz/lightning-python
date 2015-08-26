@@ -3,7 +3,7 @@
 """The setup and build script for the lightning-python library."""
 
 __author__ = 'github@mathisonian.com'
-__version__ = '1.0.8'
+__version__ = '1.1.0'
 
 # The base package metadata to be used by both distutils and setuptools
 METADATA = dict(
@@ -12,7 +12,7 @@ METADATA = dict(
     packages=['lightning', 'lightning.types', 'lightning.lib'],
     author='Matthew Conlen',
     author_email='github@mathisonian.com',
-    description='A Python client library for the Lightning data vizualization server',
+    description='A Python client library for the Lightning data visualization server',
     license='MIT',
     url='https://github.com/lightning-viz/lightning-python',
     keywords='lightning data data-viz',
