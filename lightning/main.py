@@ -70,9 +70,7 @@ class Lightning(object):
             from lightning.visualization import VisualizationLocal
             js = VisualizationLocal.load_embed()
             display(HTML("<script>" + js + "</script>"))
-            print('Running local mode, some functionality is limited.\n'
-                  'For the full power of Lightning, run your own server! \n'
-                  'See http://lightning-viz.org/documentation/#server')
+            print('Running local mode, some functionality limited without a server.\n')
             formatter.for_type(VisualizationLocal, lambda viz, kwds=kwargs: viz.get_html())
         else:
             formatter.for_type(Visualization, lambda viz, kwds=kwargs: viz.get_html())
