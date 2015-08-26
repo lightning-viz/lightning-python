@@ -29733,7 +29733,41 @@ var Visualization = Graph.extend({
     },
 
     setScales: function() {
-        this.x.range([0, this.width]).domain([0, this.height])
+
+        var self = this
+
+        var xDomain = d3.extent(self.data.nodes, function(d) {
+            return d.x;
+        });
+
+        var yDomain = d3.extent(self.data.nodes, function(d) {
+            return d.y;
+        });
+
+        var sizeMax = d3.max(self.data.nodes, function(d) {
+                return d.s;
+            });
+
+        if (sizeMax) {
+            var padding = sizeMax * 2
+        } else {
+            var padding = 8 * 2 + 10
+        }
+
+        var xRng = Math.abs(xDomain[1] - xDomain[0])
+        var yRng = Math.abs(yDomain[1] - yDomain[0])
+
+        xDomain[0] -= xRng * 0.025
+        xDomain[1] += xRng * 0.025
+        yDomain[0] -= yRng * 0.025
+        yDomain[1] += yRng * 0.025
+
+        var adjust = (xRng * (this.height/this.width)) / 2
+        
+        this.x.domain([xDomain[0] - adjust, xDomain[1] + adjust])
+        this.y.domain(yDomain)
+
+        this.x.range([0, this.width])
         this.y.range([this.height, 0])
     },
 
