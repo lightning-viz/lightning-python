@@ -343,7 +343,7 @@ class Circle(Base):
     _name = 'circle'
 
     @staticmethod
-    def clean(conn, group=None, labels=None):
+    def clean(conn, group=None, color=None, labels=None):
         """
         Create a circular graph from connectivity data.
 
@@ -358,7 +358,12 @@ class Circle(Base):
             or 3 elements (source, target, value).
 
         group : array-like, optional, (m,n) or (n,)
-            Hierarchical group assignments
+            Hierarchical group assignments, where m is
+            the number of groups
+
+        color : array-like, optional, singleton or (k,3)
+            Single rgb value or array to set colors of top-level group,
+            where k is the number of unique elements in the top-level group
 
         labels : array-like, optional, (n,)
             Array of text labels to label nodes
@@ -369,6 +374,7 @@ class Circle(Base):
         outdict = {'links': links, 'nodes': nodes}
 
         outdict = add_property(outdict, labels, 'labels')
+        outdict = add_property(outdict, color, 'color')
 
         if group is not None:
             if isinstance(group, ndarray):
