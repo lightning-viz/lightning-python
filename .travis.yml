@@ -9,4 +9,4 @@ install:
   - pip install -r requirements.txt
 
 script:
-  - py.test --host http://lightning-python-test.herokuapp.com
+  - py.test --host http://public.lightning-viz.org
