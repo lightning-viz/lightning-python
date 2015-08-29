@@ -63,7 +63,7 @@ class Base(Visualization, VisualizationLocal):
         if isinstance(x, str):
             return x
 
-        if isinstance(x, (int, long, float, complex)):
+        if isinstance(x, (int, float, complex)):
             return x
 
         try:
