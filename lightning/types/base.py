@@ -63,8 +63,11 @@ class Base(Visualization, VisualizationLocal):
         if isinstance(x, str):
             return x
 
+        if isinstance(x, (int, long, float, complex)):
+            return x
+
         try:
-            # Convert Numpy arrays to lists
+            # convert numpy arrays to lists
             return x.tolist()
 
         except Exception:
