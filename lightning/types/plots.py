@@ -5,10 +5,37 @@ from lightning.types.utils import array_to_lines, vecs_to_points, \
 
 
 @viztype
-class Generic(Base):
+class Plot(Base):
+
+    _name = 'plot'
+    _options = dict(Base._options, **{
+        'type': {'default': None},
+        }
+    )
 
     @staticmethod
-    def clean(data):
+    def clean(data=None):
+        """
+        Generic plotting function.
+
+        Provide arbitrary data and options objects as dictionaries,
+        and a plot type as a string. The data and options dictionary will be passed
+        directly to the plot, without any parsing or formatting,
+        so make sure it is of the appropriate for your visualization
+        (e.g. {"series": [1,2,3]} for a "line" visualization).
+
+        Most useful when providing data to custom visualizations, as opposed
+        to the included plot types (e.g. lightning.scatter, lightning.line, etc.)
+        which do automatic parsing and formatting.
+
+        Parameters
+        ----------
+        data : dict
+            Dictionary with data to plot
+
+        type : str
+            Name of plot (e.g. 'line' or 'scatter')
+        """
         return data
 
 

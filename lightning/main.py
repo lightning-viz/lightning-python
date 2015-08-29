@@ -195,33 +195,3 @@ class Lightning(object):
 
     def startup_message(self):
         print("Lightning initialized")
-
-    def plot(self, data=None, type=None):
-        """
-        Generic plotting function.
-
-        Provide an arbtirary data object as a dictionary, and a plot type as a string.
-        The data dictionary will be passed directly to the plot, without any parsing or formatting,
-        so make sure it is of the appropriate for your visualization
-        (e.g. {"series": [1,2,3]} for a "line" visualization).
-
-        Most useful when providing data to custom visualizations, as opposed to the included plot types
-        (e.g. lightning.scatter, lightning.line, etc.) which do automatic parsing and formatting.
-
-        Parameters
-        ----------
-        data : dict
-            Dictionary with data to plot
-
-        type : str
-            Name of plot (e.g. 'line' or 'scatter')
-        """
-
-        from .types.plots import Generic
-
-        if not hasattr(self, 'session'):
-            self.create_session()
-        
-        viz = Generic._baseplot(self.session, type, data)
-        self.session.visualizations.append(viz)
-        return viz

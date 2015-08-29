@@ -25,7 +25,15 @@ def viztype(VizType):
         else:
             if not hasattr(self, 'session'):
                 self.create_session()
-            viz = VizType._baseplot(self.session, VizType._name, *args, **kwargs)
+            if VizType._name == 'plot':
+                if 'type' not in kwargs:
+                    raise ValueError("Must specify a type for custom plots")
+                else:
+                    type = kwargs['type']
+                    del kwargs['type']
+                viz = VizType._baseplot(self.session, type, *args, **kwargs)
+            else:
+                viz = VizType._baseplot(self.session, VizType._name, *args, **kwargs)
             self.session.visualizations.append(viz)
             return viz
 
