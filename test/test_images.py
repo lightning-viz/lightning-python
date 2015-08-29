@@ -13,7 +13,7 @@ class TestLightningImages(object):
 
     def test_create_images(self, lgn):
 
-        img1 = random.rand(128, 256, 3)
+        img1 = random.rand(10, 10, 3)
         viz = lgn.image(img1)
 
         assert isinstance(viz, Visualization)
@@ -21,8 +21,8 @@ class TestLightningImages(object):
 
     def test_create_gallery(self, lgn):
 
-        img1 = random.rand(128, 256, 3)
-        img2 = random.rand(128, 256, 3)
+        img1 = random.rand(10, 10, 3)
+        img2 = random.rand(10, 10, 3)
         viz = lgn.gallery([img1, img2])
 
         assert isinstance(viz, Visualization)
