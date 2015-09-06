@@ -24,7 +24,8 @@ def check_property(prop, name, **kwargs):
         'size': check_size,
         'index': check_index,
         'coordinates': check_coordinates,
-        'colormap': check_colormap
+        'colormap': check_colormap,
+        'bins': check_bins
     }
 
     if name in checkers:
@@ -48,6 +49,9 @@ def check_coordinates(co, xy=None):
         co = map(lambda p: asarray(p)[:, ::-1].tolist(), co)
     return co
 
+
+def check_bins(b):
+    return b
 
 def check_color(c):
     """
