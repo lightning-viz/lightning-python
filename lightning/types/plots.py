@@ -595,3 +595,43 @@ class Map(Base):
         outdict = add_property(outdict, colormap, 'colormap')
 
         return outdict
+
+
+@viztype
+class Histogram(Base):
+
+    _name = 'histogram'
+    _options = dict(Base._options, **{
+        'zoom': {'default': True}
+        }
+    )
+
+    @staticmethod
+    def clean(values, bins=None):
+        """
+        Create a histogram.
+
+        .. image:: histogram.png
+
+        Parameters
+        ----------
+        values : list
+            Values to plot a histogram of
+
+        bins : number, optional
+            Number of bins to used in the histogram. If unspecified
+            will default to sqrt(len(values))
+        """
+
+        outdict = {'values': values}
+        outdict = add_property(outdict, bins, 'bins')
+
+        return outdict
+
+
+@viztype
+class Hist(Histogram):
+
+    _name = 'histogram'
+    _func = 'hist'
+
