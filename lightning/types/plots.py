@@ -623,8 +623,7 @@ class Histogram(Base):
             will default to sqrt(len(values))
         """
 
-        outdict = {'values': values}
-        outdict = add_property(outdict, bins, 'bins')
+        outdict = {'values': values, 'bins': bins}
 
         return outdict
 
