@@ -627,11 +627,3 @@ class Histogram(Base):
         outdict = add_property(outdict, bins, 'bins')
 
         return outdict
-
-
-@viztype
-class Hist(Histogram):
-
-    _name = 'histogram'
-    _func = 'hist'
-
