@@ -240,7 +240,7 @@ class Line(Base):
     )
 
     @staticmethod
-    def clean(series, index=None, color=None, group=None, size=None, xaxis=None, yaxis=None):
+    def clean(series, index=None, color=None, group=None, thickness=None, xaxis=None, yaxis=None):
         """
         Plot one-dimensional series data as lines.
 
@@ -261,7 +261,7 @@ class Line(Base):
         group : array-like, optional, singleton or (n,)
             Single integer or array to set line colors via group assignment
 
-        size : array-like, optional, singleton or (n,)
+        thickness : array-like, optional, singleton or (n,)
             Single size or array to set line thickness
 
         xaxis : str, optional, default = None
@@ -278,7 +278,7 @@ class Line(Base):
         outdict = {'series': series}
 
         outdict = add_property(outdict, color, 'color')
-        outdict = add_property(outdict, size, 'size')
+        outdict = add_property(outdict, thickness, 'thickness')
         outdict = add_property(outdict, group, 'group')
         outdict = add_property(outdict, index, 'index')
         outdict = add_property(outdict, xaxis, 'xaxis')

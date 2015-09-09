@@ -22,6 +22,7 @@ def check_property(prop, name, **kwargs):
         'color': check_color,
         'alpha': check_alpha,
         'size': check_size,
+        'thickness': check_thickness,
         'index': check_index,
         'coordinates': check_coordinates,
         'colormap': check_colormap,
@@ -96,6 +97,16 @@ def check_size(s):
 
     return s
 
+def check_thickness(s):
+    """
+    Check and parse thickness specs as either a single [s] or a list of [s,s,s,...]
+    """
+
+    s = check_1d(s, "thickness")
+    if any(map(lambda d: d <= 0, s)):
+        raise Exception('Thickness cannot be 0 or negative')
+
+    return s
 
 def check_index(i):
     """
