@@ -42,7 +42,7 @@ class TestLightningPlots(object):
 
         series = random.randn(5,100)
         s = random.rand(5) * 5 + 5
-        viz = lgn.line(series, size=s)
+        viz = lgn.line(series, thickness=s)
 
         assert isinstance(viz, Visualization)
         assert hasattr(viz, 'id')
