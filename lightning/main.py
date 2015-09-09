@@ -117,13 +117,14 @@ class Lightning(object):
         Enable a local mode.
 
         Data is handled locally and embedded via templates.
+        Does not require a running Lightning server.
         Useful for notebooks, and can be used offline.
         """
         self.local_enabled = True
 
     def disable_local(self):
         """
-        Disable local mode
+        Disable local mode.
         """
         self.local_enabled = False
 

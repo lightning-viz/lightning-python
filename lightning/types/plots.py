@@ -507,7 +507,7 @@ class GraphBundled(Base):
     @staticmethod
     def clean(x, y, conn, labels=None, values=None, color=None, group=None, colormap=None, size=None):
         """
-        Create a node-link graph with bundled edges from spatial points and their connectivity.
+        Create a bundled node-link graph from spatial points and their connectivity.
 
         .. image:: graphbundled.png
 

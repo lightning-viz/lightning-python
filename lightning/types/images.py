@@ -40,7 +40,7 @@ class ImagePoly(Base):
         """
         Display an array as an image with polygonal regions and region drawing.
 
-        .. image:: image.png
+        .. image:: image-poly.png
 
         Parameters
         ----------
