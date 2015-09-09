@@ -163,7 +163,7 @@ class Base(Visualization, VisualizationLocal):
         if 'images' in data and len(data) > 1:
             images = data['images']
             del data['images']
-            viz = cls._create(session, data=data, type=type, description=description)
+            viz = cls._create(session, data=data, type=type, options=options, description=description)
             first_image, remaining_images = images[0], images[1:]
             viz._append_image(first_image)
             for image in remaining_images:
