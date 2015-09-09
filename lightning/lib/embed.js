@@ -2087,7 +2087,7 @@ function isUndefined(arg) {
 // All source code is kept in the src directory
 module.exports = require('./src');
 
-},{"./src":22}],7:[function(require,module,exports){
+},{"./src":28}],7:[function(require,module,exports){
 // This product includes color specifications and designs developed by Cynthia Brewer (http://colorbrewer.org/).
 // JavaScript specs as packaged in the D3 library (d3js.org). Please see license at http://colorbrewer.org/export/LICENSE.txt
 !function() {
@@ -25197,6 +25197,662 @@ module.exports = function(arr, fn, initial){
   return curr;
 };
 },{}],22:[function(require,module,exports){
+arguments[4][6][0].apply(exports,arguments)
+},{"./src":27,"dup":6}],23:[function(require,module,exports){
+var _ = require('lodash');
+var insertCSS = require('insert-css');
+var inherits = require('inherits');
+var qwery = require('qwery');
+
+var LightningVisualization = function(selector, data, images, options) {
+
+    this.options = _.defaults(options || {}, this.getDefaultOptions());
+    this.styles = this.getDefaultStyles();
+    this.qwery = qwery;
+    this.el = qwery(selector)[0];
+    this.width = (this.options.width || this.el.offsetWidth);
+    this.height = (this.options.height || (this.getHeight ? this.getHeight() : this.width * 0.6));
+    
+    this.data = this.formatData(data || {});
+    this.images = images || [];
+
+    this.selector = selector;
+    this.init();
+};
+
+inherits(LightningVisualization, require('events').EventEmitter);
+
+LightningVisualization.prototype.getDefaultOptions = function() {
+    return {};
+}
+
+LightningVisualization.prototype.getDefaultStyles = function() {
+    return {};
+}
+
+LightningVisualization.prototype.init = function() {
+    console.warn('init not implemented');
+}
+
+/*
+ * Take the provided data and return it in whatever data format is needed
+ */
+LightningVisualization.prototype.formatData = function(data) {
+    console.warn('formatData not implemented');
+    return data;
+}
+
+/*
+ * Optional function, use this if you want to users to send updated data to this plot
+ */
+LightningVisualization.prototype.updateData = function(data) {
+    console.warn('updateData not implemented');
+}
+
+/*
+ * Optional function, use this if you want to enable streaming updates to this plot
+ */
+LightningVisualization.prototype.appendData = function(data) {
+    console.warn('appendData not implemented');
+}
+
+
+// Modified from backbone.js
+LightningVisualization.extend = function(protoProps, staticProps) {
+    var parent = this;
+    var child;
+
+    // Wrap these functions so that the user can assume
+    // the data has already been formatted by the time
+    // it gets here.
+    var wrapFuncs = ['appendData', 'updateData'];
+    _.each(wrapFuncs, function(d) {
+        if(protoProps[d]) {
+            var fn = protoProps[d];
+            protoProps[d] = function(data) {
+                var d = this.formatData(data);
+                return fn.call(this, d);
+            };
+        }
+    });
+
+    // The constructor function for the new subclass is either defined by you
+    // (the "constructor" property in your `extend` definition), or defaulted
+    // by us to simply call the parent constructor.
+    if (protoProps && _.has(protoProps, 'constructor')) {
+        child = protoProps.constructor;
+    } else {
+        child = function(){
+            if(this.css && !child._stylesInitialized) {
+                insertCSS(this.css);
+                child._stylesInitialized = true;
+            }
+            return parent.apply(this, arguments);
+        };
+        child._initializedStyles = false;
+    }
+
+    // Add static properties to the constructor function, if supplied.
+    _.extend(child, parent, staticProps);
+
+    // Set the prototype chain to inherit from `parent`, without calling
+    // `parent` constructor function.
+    var Surrogate = function(){ this.constructor = child; };
+    Surrogate.prototype = parent.prototype;
+    child.prototype = new Surrogate;
+
+    // Add prototype properties (instance properties) to the subclass,
+    // if supplied.
+    if (protoProps) _.extend(child.prototype, protoProps);
+
+    // Set a convenience property in case the parent's prototype is needed
+    // later.
+    child.__super__ = parent.prototype;
+
+    return child;
+};
+
+
+module.exports = LightningVisualization;
+
+
+},{"events":5,"inherits":24,"insert-css":25,"lodash":394,"qwery":26}],24:[function(require,module,exports){
+if (typeof Object.create === 'function') {
+  // implementation from standard node.js 'util' module
+  module.exports = function inherits(ctor, superCtor) {
+    ctor.super_ = superCtor
+    ctor.prototype = Object.create(superCtor.prototype, {
+      constructor: {
+        value: ctor,
+        enumerable: false,
+        writable: true,
+        configurable: true
+      }
+    });
+  };
+} else {
+  // old school shim for old browsers
+  module.exports = function inherits(ctor, superCtor) {
+    ctor.super_ = superCtor
+    var TempCtor = function () {}
+    TempCtor.prototype = superCtor.prototype
+    ctor.prototype = new TempCtor()
+    ctor.prototype.constructor = ctor
+  }
+}
+
+},{}],25:[function(require,module,exports){
+var inserted = {};
+
+module.exports = function (css, options) {
+    if (inserted[css]) return;
+    inserted[css] = true;
+    
+    var elem = document.createElement('style');
+    elem.setAttribute('type', 'text/css');
+
+    if ('textContent' in elem) {
+      elem.textContent = css;
+    } else {
+      elem.styleSheet.cssText = css;
+    }
+    
+    var head = document.getElementsByTagName('head')[0];
+    if (options && options.prepend) {
+        head.insertBefore(elem, head.childNodes[0]);
+    } else {
+        head.appendChild(elem);
+    }
+};
+
+},{}],26:[function(require,module,exports){
+/*!
+  * @preserve Qwery - A selector engine
+  * https://github.com/ded/qwery
+  * (c) Dustin Diaz 2014 | License MIT
+  */
+
+(function (name, context, definition) {
+  if (typeof module != 'undefined' && module.exports) module.exports = definition()
+  else if (typeof define == 'function' && define.amd) define(definition)
+  else context[name] = definition()
+})('qwery', this, function () {
+
+  var classOnly = /^\.([\w\-]+)$/
+    , doc = document
+    , win = window
+    , html = doc.documentElement
+    , nodeType = 'nodeType'
+  var isAncestor = 'compareDocumentPosition' in html ?
+    function (element, container) {
+      return (container.compareDocumentPosition(element) & 16) == 16
+    } :
+    function (element, container) {
+      container = container == doc || container == window ? html : container
+      return container !== element && container.contains(element)
+    }
+
+  function toArray(ar) {
+    return [].slice.call(ar, 0)
+  }
+
+  function isNode(el) {
+    var t
+    return el && typeof el === 'object' && (t = el.nodeType) && (t == 1 || t == 9)
+  }
+
+  function arrayLike(o) {
+    return (typeof o === 'object' && isFinite(o.length))
+  }
+
+  function flatten(ar) {
+    for (var r = [], i = 0, l = ar.length; i < l; ++i) arrayLike(ar[i]) ? (r = r.concat(ar[i])) : (r[r.length] = ar[i])
+    return r
+  }
+
+  function uniq(ar) {
+    var a = [], i, j
+    label:
+    for (i = 0; i < ar.length; i++) {
+      for (j = 0; j < a.length; j++) {
+        if (a[j] == ar[i]) {
+          continue label
+        }
+      }
+      a[a.length] = ar[i]
+    }
+    return a
+  }
+
+
+  function normalizeRoot(root) {
+    if (!root) return doc
+    if (typeof root == 'string') return qwery(root)[0]
+    if (!root[nodeType] && arrayLike(root)) return root[0]
+    return root
+  }
+
+  /**
+   * @param {string|Array.<Element>|Element|Node} selector
+   * @param {string|Array.<Element>|Element|Node=} opt_root
+   * @return {Array.<Element>}
+   */
+  function qwery(selector, opt_root) {
+    var m, root = normalizeRoot(opt_root)
+    if (!root || !selector) return []
+    if (selector === win || isNode(selector)) {
+      return !opt_root || (selector !== win && isNode(root) && isAncestor(selector, root)) ? [selector] : []
+    }
+    if (selector && arrayLike(selector)) return flatten(selector)
+
+
+    if (doc.getElementsByClassName && selector == 'string' && (m = selector.match(classOnly))) {
+      return toArray((root).getElementsByClassName(m[1]))
+    }
+    // using duck typing for 'a' window or 'a' document (not 'the' window || document)
+    if (selector && (selector.document || (selector.nodeType && selector.nodeType == 9))) {
+      return !opt_root ? [selector] : []
+    }
+    return toArray((root).querySelectorAll(selector))
+  }
+
+  qwery.uniq = uniq
+
+  return qwery
+}, this);
+
+},{}],27:[function(require,module,exports){
+(function (Buffer){
+'use strict';
+var d3 = require('d3');
+var _ = require('lodash');
+var utils = require('lightning-client-utils');
+var colorbrewer = require('colorbrewer');
+var LightningVisualization = require('lightning-visualization');
+
+var css = Buffer("QGltcG9ydCB1cmwoaHR0cDovL2ZvbnRzLmdvb2dsZWFwaXMuY29tL2Nzcz9mYW1pbHk9T3BlbitTYW5zKTsKCi5heGlzLWxhYmVsIHsKCWZpbGw6ICM5Mzk1OTg7CiAgICBmb250LWZhbWlseTogJ09wZW4gU2FucycsIHNhbnMtc2VyaWY7CiAgICBmb250LXdlaWdodDogbm9ybWFsOwogICAgY3Vyc29yOiBwb2ludGVyOwogICAgLXdlYmtpdC10b3VjaC1jYWxsb3V0OiBub25lOwogICAgLXdlYmtpdC11c2VyLXNlbGVjdDogbm9uZTsKICAgIC1tb3otdXNlci1zZWxlY3Q6IG5vbmU7CiAgICAtbXMtdXNlci1zZWxlY3Q6IG5vbmU7CiAgICB1c2VyLXNlbGVjdDogbm9uZTsKfQoKLnNlbGVjdGVkIHsKCWZpbGw6IGJsYWNrOwp9Cgouc2VsZWN0ZWQtc3RpY2t5IHsKCWZpbGw6IGJsYWNrOwp9","base64");
+
+var Visualization = LightningVisualization.extend({
+
+    getDefaultStyles: function() {
+        return {
+            colormap: 'Purples'
+        }
+    },
+
+    getDefaultOptions: function() {
+        return {
+            numbers: false
+        }
+    },
+
+    init: function() {
+        this.margin = {left: 0, top: 0};
+        if (this.data.rowLabels) {
+            this.margin.left = 80;
+        }
+        if (this.data.columnLabels) {
+            this.margin.top = 80;
+        }
+        this.render();
+    },
+
+    css: css,
+
+    render: function() {
+        var width = this.width;
+        var height = this.height;
+        var margin = this.margin;
+        var data = this.data;
+        var options = this.options;
+        var selector = this.selector;
+        var self = this;
+
+        var nrow = data.nrow;
+        var ncol = data.ncol;
+
+        // automatically scale stroke width by number of cells
+        var strokeWidth = Math.max(1 - 0.00009 * nrow * ncol, 0.1);
+
+        // make a scale for fill coloring
+        var name = data.colormap ? data.colormap : this.styles.colormap;
+        this.makeScales(name);
+
+        // create container
+        var container = d3.select(selector)
+            .append('div')
+            .style('width', width)
+            .style('height', height)
+            .style('position', 'relative');
+
+        // automatically determine cell size to fill the grid
+        var size;
+        if (ncol > nrow) {
+            size = Math.min((height - margin.top) / nrow, (width - margin.left) / ncol)
+        } else {
+            size = (height - margin.top) / nrow
+        }
+        this.y = d3.scale.ordinal().rangeBands([0, (nrow * size)]).domain(d3.range(nrow));
+        this.x = d3.scale.ordinal().rangeBands([0, (ncol * size)]).domain(d3.range(ncol));
+
+        // sort rows (currently unusused)
+        this.sortRows('');
+
+        // adjust height and weight for canvas based on estimated size
+        height = nrow * self.y.rangeBand();
+        width = ncol * self.x.rangeBand();
+
+        // set up variables to toggle with keypresses
+        var clist = ['Purples', 'Blues', 'Greens', 'Oranges', 'Reds', 'Greys'];
+        var cindex = 0;
+        var scale = 0;
+
+        // create svg
+        var svg = container
+            .append('svg')
+            .attr('width', width + margin.left)
+            .attr('height', height + margin.top)
+            .style('position', 'absolute')
+            .on('dblclick', reset);
+
+        // create canvas
+        var canvas = container
+            .append('canvas')
+            .attr('width', width)
+            .attr('height', height)
+            .attr('id', 'canvas1')
+            .style('margin-left', margin.left + 'px')
+            .style('margin-top', margin.top + 'px');
+
+        var ctx = canvas
+            .node().getContext("2d");
+
+        // add keydown events
+        d3.select(selector).attr('tabindex', -1);
+        d3.select(selector).on('keydown', update);
+
+        // compute good font sizes for axis and cell labels
+        var axisfont = Math.min((size * 72 / 96) / 2, 14);
+        axisfont = Math.max(axisfont, 8);
+        var cellfont = (size * 72 / 96) / 2.5;
+
+        // draw the axis labels
+        if (data.columnLabels) {
+            svg.selectAll('.column-label')
+                .data(data.columnLabels)
+                .enter()
+                .append("text")
+                .attr("text-anchor", "start")
+                .attr("transform", function(d, i) {
+                    return "translate(" + (margin.left + self.x(i) + self.x.rangeBand() / 2) +
+                        "," +  margin.top * 0.9 + ")rotate(-50)"
+                })
+                .attr("class", "axis-label column-label")
+                .style("font-size", axisfont + "px")
+                .text(function(d) {return d})
+                .on('mouseover', highlight)
+                .on('mouseout', unhighlight)
+                .on('click', select)
+        }
+        if (data.rowLabels) {
+            svg.selectAll('.row-label')
+                .data(data.rowLabels)
+                .enter()
+                .append("text")
+                .attr("text-anchor", "end")
+                .attr("x", margin.left * 0.9)
+                .attr("y", function(d, i) {return margin.top + self.y(i) + self.y.rangeBand() / 2})
+                .attr("dy","0.35em")
+                .attr("class", "axis-label row-label")
+                .style("font-size", axisfont + "px")
+                .text(function(d) {return d})
+                .on('mouseover', highlight)
+                .on('mouseout', unhighlight)
+                .on('click', select)
+        }
+
+        // begin with nothing selected
+        var selectedx = [];
+        var selectedy = [];
+
+        // highlight row or column
+        function highlight() {
+            d3.select(this).classed('selected', true)
+        }
+
+        // unhighlight row or column
+        function unhighlight() {
+            d3.select(this).classed('selected', false)
+        }
+
+        // select row or column
+        function select() {
+            var el = d3.select(this);
+            var thislabel = el.node().__data__;
+            var indx = _.indexOf(data.columnLabels, thislabel);
+            var indy = _.indexOf(data.rowLabels, thislabel);
+            if (indx > -1) {
+                selectedx = getselected(selectedx, indx)
+            }
+            if (indy > -1) {
+                selectedy = getselected(selectedy, indy)
+            }
+            draw()
+        }
+
+        // get selected elements given current list
+        function getselected(current, target) {
+            if (_.indexOf(current, target) > -1) {
+                return []
+            } else {
+                return [target]
+            }
+        }
+
+        // reset selections
+        function reset() {
+            selectedx = [];
+            selectedy = [];
+            draw()
+        }
+
+        // draw the matrix
+        function draw() {
+
+            d3.selectAll('.row-label').classed('selected-sticky', function(d) {
+                if (selectedy.length > 0) {
+                    return (_.indexOf(data.rowLabels, d) == selectedy)
+                } else {
+                    return false
+                }
+            });
+
+            d3.selectAll('.column-label').classed('selected-sticky', function(d) {
+                if (selectedx.length > 0) {
+                    return (_.indexOf(data.columnLabels, d) == selectedx)
+                } else {
+                    return false
+                }
+            });
+
+          // clear canvas
+          ctx.clearRect(0, 0, width, height);
+          
+          _.forEach(data.entries, function(d) {
+
+            var opacity;
+            if (selectedx.length > 0 || selectedy.length > 0) {
+                if (selectedx.length > 0 && _.indexOf(selectedx, d.x) > -1) {
+                    opacity = 1.0
+                } else if (selectedy.length > 0 && _.indexOf(selectedy, d.y) > -1) {
+                    opacity = 1.0
+                } else {
+                    opacity = 0.2
+                }
+            } else {
+                opacity = 1.0
+            }
+
+            var fill = self.getColor(d, opacity);
+
+            ctx.beginPath();
+            ctx.fillStyle = fill;
+            ctx.strokeStyle = 'white';
+            ctx.lineWidth = strokeWidth;
+            ctx.rect(self.x(d.x), self.y(d.y), self.x.rangeBand(), self.y.rangeBand());
+            ctx.fill();
+            ctx.stroke();
+            ctx.closePath();
+
+            // draw numbers on cells
+            if (options.numbers) {
+                var str = self.formatLabel(d.z);
+                ctx.font = cellfont + "px monospace";
+                if (d.z <= self.data.zmin + (self.data.zmax - self.data.zmin) / 2) {
+                    if (opacity < 1.0) {
+                        ctx.fillStyle = utils.buildRGBA('black', opacity / 5);
+                    } else {
+                        ctx.fillStyle = utils.buildRGBA('black', opacity);
+                    }
+                } else {
+                    ctx.fillStyle = utils.buildRGBA('white', opacity);
+                }
+                ctx.textBaseline = 'middle'; 
+                ctx.textAlign = 'center'; 
+                ctx.fillText(str, self.x(d.x) + self.x.rangeBand() / 2,
+                    self.y(d.y) + self.y.rangeBand() / 2);
+            }
+
+          })
+        }
+
+        // update event for keypresses
+        function update() {
+            if (d3.event.keyCode == 38 || d3.event.keyCode == 40) {
+                d3.event.preventDefault();
+                if (d3.event.keyCode == 38) {
+                    scale = scale + 0.05;
+                    if (scale > 0.4) {
+                        scale = 0.4;
+                        return
+                    }
+                }
+                if (d3.event.keyCode == 40) {
+                    scale = scale - 0.05;
+                    if (scale < -2) {
+                        scale = -2;
+                        return
+                    }
+                }
+                var extent = self.data.zmax - self.data.zmin;
+                var domain = utils.linspace(self.data.zmin + extent * scale,
+                    self.data.zmax - extent * scale, self.data.distinct);
+                self.updateDomain(domain);
+                draw();
+            }
+            if (d3.event.keyCode == 37 || d3.event.keyCode == 39) {
+                d3.event.preventDefault();
+                if (d3.event.keyCode == 37) {
+                    cindex = cindex - 1;
+                    if (cindex < 0) {
+                        cindex = clist.length - 1
+                    }
+                }
+                if (d3.event.keyCode == 39) {
+                    cindex = cindex + 1;
+                    if (cindex > clist.length - 1) {
+                        cindex = 0
+                    }
+                }
+                self.updateRange(clist[cindex]);
+                draw();
+            }
+        }
+
+        draw();
+
+    },
+
+    sortRows: function(method) {},
+
+    makeScales: function(d) {
+        this.c = d3.scale.linear();
+        this.c.domain(utils.linspace(this.data.zmin, this.data.zmax, this.data.distinct));
+        var cmap
+        if (d == "Lightning") {
+            cmap = utils.getColors(this.data.distinct)
+        } else {
+            cmap = colorbrewer[d][this.data.distinct]
+        }
+        this.c.range(cmap)
+    },
+
+    updateRange: function(d) {
+        this.c.range(colorbrewer[d][this.data.distinct])
+    },
+
+    updateDomain: function(d) {
+        this.c.domain(d)
+    },
+
+    getColor: function(d, opacity) {
+        return utils.buildRGBA(this.c(d.z), opacity)
+    },
+
+    formatLabel: function(v) {
+        return parseFloat(d3.format(".2f")(v)).toString();
+    },
+
+    formatData: function(data) {
+        var entries = [];
+        _.each(data.matrix, function(d, i) {
+            _.each(d, function(e, j) {
+                var p = {};
+                p.x = j;
+                p.y = i;
+                p.z = e;
+                if (data.rowLabels) {
+                    p.r = data.rowLabels[i]
+                }
+                if (data.columnLabels) {
+                    p.c = data.columnLabels[j]
+                }
+                entries.push(p)
+            })
+        });
+
+        // get bounds on dimensions
+        var nrow = data.matrix.length;
+        var ncol = data.matrix[0].length;
+        var zmin = d3.min(entries, function(d) {
+            return d.z
+        });
+        var zmax = d3.max(entries, function(d) {
+            return d.z
+        });
+
+        // get number of distinct elements for colormap handling
+        var distinct = _.uniq(_.flatten(data.matrix)).length
+        if (distinct > 8) {
+            distinct = 8
+        }
+
+        return {entries: entries, nrow: nrow, ncol: ncol, colormap: data.colormap,
+                rowLabels: data.rowLabels, columnLabels: data.columnLabels, zmin: zmin, zmax: zmax, distinct: distinct}
+    },
+
+    updateData: function(formattedData) {
+        this.data = formattedData;
+        this.draw()
+    }
+
+});
+
+
+module.exports = Visualization;
+
+}).call(this,require("buffer").Buffer)
+},{"buffer":1,"colorbrewer":8,"d3":9,"lightning-client-utils":10,"lightning-visualization":23,"lodash":394}],28:[function(require,module,exports){
 'use strict';
 var Matrix = require('lightning-matrix');
 var d3 = require('d3');
@@ -25340,9 +25996,9 @@ var Visualization = Matrix.extend({
 
 module.exports = Visualization;
 
-},{"d3":9,"lightning-client-utils":10,"lightning-matrix":289,"lodash":388}],23:[function(require,module,exports){
+},{"d3":9,"lightning-client-utils":10,"lightning-matrix":22,"lodash":394}],29:[function(require,module,exports){
 arguments[4][6][0].apply(exports,arguments)
-},{"./src":47,"dup":6}],24:[function(require,module,exports){
+},{"./src":53,"dup":6}],30:[function(require,module,exports){
 var d3_multiaxis_zoom = require('./src');
  
 // export as a Node module, an AMD module or a global browser variable
@@ -25358,7 +26014,7 @@ if (typeof module !== 'undefined') {
     window.d3_multiaxis_zoom = d3_multiaxis_zoom;
 }
 
-},{"./src":25}],25:[function(require,module,exports){
+},{"./src":31}],31:[function(require,module,exports){
 
 
 var Plugin = function(d3) {
@@ -27834,300 +28490,45 @@ var d3_behavior_zoomDelta, d3_behavior_zoomWheel = "onwheel" in d3_document ? (d
 }
 
 module.exports = Plugin;
-},{}],26:[function(require,module,exports){
+},{}],32:[function(require,module,exports){
 arguments[4][9][0].apply(exports,arguments)
-},{"dup":9}],27:[function(require,module,exports){
+},{"dup":9}],33:[function(require,module,exports){
 arguments[4][10][0].apply(exports,arguments)
-},{"color":28,"colorbrewer":34,"d3-color":35,"d3-scale":36,"dup":10,"lodash":37,"superagent":38}],28:[function(require,module,exports){
+},{"color":34,"colorbrewer":40,"d3-color":41,"d3-scale":42,"dup":10,"lodash":43,"superagent":44}],34:[function(require,module,exports){
 arguments[4][11][0].apply(exports,arguments)
-},{"color-convert":30,"color-string":31,"dup":11}],29:[function(require,module,exports){
+},{"color-convert":36,"color-string":37,"dup":11}],35:[function(require,module,exports){
 arguments[4][12][0].apply(exports,arguments)
-},{"dup":12}],30:[function(require,module,exports){
+},{"dup":12}],36:[function(require,module,exports){
 arguments[4][13][0].apply(exports,arguments)
-},{"./conversions":29,"dup":13}],31:[function(require,module,exports){
+},{"./conversions":35,"dup":13}],37:[function(require,module,exports){
 arguments[4][14][0].apply(exports,arguments)
-},{"color-name":32,"dup":14}],32:[function(require,module,exports){
+},{"color-name":38,"dup":14}],38:[function(require,module,exports){
 arguments[4][15][0].apply(exports,arguments)
-},{"dup":15}],33:[function(require,module,exports){
+},{"dup":15}],39:[function(require,module,exports){
 arguments[4][7][0].apply(exports,arguments)
-},{"dup":7}],34:[function(require,module,exports){
+},{"dup":7}],40:[function(require,module,exports){
 arguments[4][8][0].apply(exports,arguments)
-},{"./colorbrewer.js":33,"dup":8}],35:[function(require,module,exports){
+},{"./colorbrewer.js":39,"dup":8}],41:[function(require,module,exports){
 arguments[4][16][0].apply(exports,arguments)
-},{"dup":16}],36:[function(require,module,exports){
+},{"dup":16}],42:[function(require,module,exports){
 arguments[4][17][0].apply(exports,arguments)
-},{"dup":17}],37:[function(require,module,exports){
+},{"dup":17}],43:[function(require,module,exports){
 arguments[4][18][0].apply(exports,arguments)
-},{"dup":18}],38:[function(require,module,exports){
+},{"dup":18}],44:[function(require,module,exports){
 arguments[4][19][0].apply(exports,arguments)
-},{"dup":19,"emitter":39,"reduce":40}],39:[function(require,module,exports){
+},{"dup":19,"emitter":45,"reduce":46}],45:[function(require,module,exports){
 arguments[4][20][0].apply(exports,arguments)
-},{"dup":20}],40:[function(require,module,exports){
+},{"dup":20}],46:[function(require,module,exports){
 arguments[4][21][0].apply(exports,arguments)
-},{"dup":21}],41:[function(require,module,exports){
-var _ = require('lodash');
-var insertCSS = require('insert-css');
-var inherits = require('inherits');
-var qwery = require('qwery');
-
-var LightningVisualization = function(selector, data, images, options) {
-
-    this.options = _.defaults(options || {}, this.getDefaultOptions());
-    this.styles = this.getDefaultStyles();
-    this.qwery = qwery;
-    this.el = qwery(selector)[0];
-    this.width = (this.options.width || this.el.offsetWidth);
-    this.height = (this.options.height || (this.getHeight ? this.getHeight() : this.width * 0.6));
-    
-    this.data = this.formatData(data || {});
-    this.images = images || [];
-
-    this.selector = selector;
-    this.init();
-};
-
-inherits(LightningVisualization, require('events').EventEmitter);
-
-LightningVisualization.prototype.getDefaultOptions = function() {
-    return {};
-}
-
-LightningVisualization.prototype.getDefaultStyles = function() {
-    return {};
-}
-
-LightningVisualization.prototype.init = function() {
-    console.warn('init not implemented');
-}
-
-/*
- * Take the provided data and return it in whatever data format is needed
- */
-LightningVisualization.prototype.formatData = function(data) {
-    console.warn('formatData not implemented');
-    return data;
-}
-
-/*
- * Optional function, use this if you want to users to send updated data to this plot
- */
-LightningVisualization.prototype.updateData = function(data) {
-    console.warn('updateData not implemented');
-}
-
-/*
- * Optional function, use this if you want to enable streaming updates to this plot
- */
-LightningVisualization.prototype.appendData = function(data) {
-    console.warn('appendData not implemented');
-}
-
-
-// Modified from backbone.js
-LightningVisualization.extend = function(protoProps, staticProps) {
-    var parent = this;
-    var child;
-
-    // Wrap these functions so that the user can assume
-    // the data has already been formatted by the time
-    // it gets here.
-    var wrapFuncs = ['appendData', 'updateData'];
-    _.each(wrapFuncs, function(d) {
-        if(protoProps[d]) {
-            var fn = protoProps[d];
-            protoProps[d] = function(data) {
-                var d = this.formatData(data);
-                return fn.call(this, d);
-            };
-        }
-    });
-
-    // The constructor function for the new subclass is either defined by you
-    // (the "constructor" property in your `extend` definition), or defaulted
-    // by us to simply call the parent constructor.
-    if (protoProps && _.has(protoProps, 'constructor')) {
-        child = protoProps.constructor;
-    } else {
-        child = function(){
-            if(this.css && !child._stylesInitialized) {
-                insertCSS(this.css);
-                child._stylesInitialized = true;
-            }
-            return parent.apply(this, arguments);
-        };
-        child._initializedStyles = false;
-    }
-
-    // Add static properties to the constructor function, if supplied.
-    _.extend(child, parent, staticProps);
-
-    // Set the prototype chain to inherit from `parent`, without calling
-    // `parent` constructor function.
-    var Surrogate = function(){ this.constructor = child; };
-    Surrogate.prototype = parent.prototype;
-    child.prototype = new Surrogate;
-
-    // Add prototype properties (instance properties) to the subclass,
-    // if supplied.
-    if (protoProps) _.extend(child.prototype, protoProps);
-
-    // Set a convenience property in case the parent's prototype is needed
-    // later.
-    child.__super__ = parent.prototype;
-
-    return child;
-};
-
-
-module.exports = LightningVisualization;
-
-
-},{"events":5,"inherits":42,"insert-css":43,"lodash":388,"qwery":44}],42:[function(require,module,exports){
-if (typeof Object.create === 'function') {
-  // implementation from standard node.js 'util' module
-  module.exports = function inherits(ctor, superCtor) {
-    ctor.super_ = superCtor
-    ctor.prototype = Object.create(superCtor.prototype, {
-      constructor: {
-        value: ctor,
-        enumerable: false,
-        writable: true,
-        configurable: true
-      }
-    });
-  };
-} else {
-  // old school shim for old browsers
-  module.exports = function inherits(ctor, superCtor) {
-    ctor.super_ = superCtor
-    var TempCtor = function () {}
-    TempCtor.prototype = superCtor.prototype
-    ctor.prototype = new TempCtor()
-    ctor.prototype.constructor = ctor
-  }
-}
-
-},{}],43:[function(require,module,exports){
-var inserted = {};
-
-module.exports = function (css, options) {
-    if (inserted[css]) return;
-    inserted[css] = true;
-    
-    var elem = document.createElement('style');
-    elem.setAttribute('type', 'text/css');
-
-    if ('textContent' in elem) {
-      elem.textContent = css;
-    } else {
-      elem.styleSheet.cssText = css;
-    }
-    
-    var head = document.getElementsByTagName('head')[0];
-    if (options && options.prepend) {
-        head.insertBefore(elem, head.childNodes[0]);
-    } else {
-        head.appendChild(elem);
-    }
-};
-
-},{}],44:[function(require,module,exports){
-/*!
-  * @preserve Qwery - A selector engine
-  * https://github.com/ded/qwery
-  * (c) Dustin Diaz 2014 | License MIT
-  */
-
-(function (name, context, definition) {
-  if (typeof module != 'undefined' && module.exports) module.exports = definition()
-  else if (typeof define == 'function' && define.amd) define(definition)
-  else context[name] = definition()
-})('qwery', this, function () {
-
-  var classOnly = /^\.([\w\-]+)$/
-    , doc = document
-    , win = window
-    , html = doc.documentElement
-    , nodeType = 'nodeType'
-  var isAncestor = 'compareDocumentPosition' in html ?
-    function (element, container) {
-      return (container.compareDocumentPosition(element) & 16) == 16
-    } :
-    function (element, container) {
-      container = container == doc || container == window ? html : container
-      return container !== element && container.contains(element)
-    }
-
-  function toArray(ar) {
-    return [].slice.call(ar, 0)
-  }
-
-  function isNode(el) {
-    var t
-    return el && typeof el === 'object' && (t = el.nodeType) && (t == 1 || t == 9)
-  }
-
-  function arrayLike(o) {
-    return (typeof o === 'object' && isFinite(o.length))
-  }
-
-  function flatten(ar) {
-    for (var r = [], i = 0, l = ar.length; i < l; ++i) arrayLike(ar[i]) ? (r = r.concat(ar[i])) : (r[r.length] = ar[i])
-    return r
-  }
-
-  function uniq(ar) {
-    var a = [], i, j
-    label:
-    for (i = 0; i < ar.length; i++) {
-      for (j = 0; j < a.length; j++) {
-        if (a[j] == ar[i]) {
-          continue label
-        }
-      }
-      a[a.length] = ar[i]
-    }
-    return a
-  }
-
-
-  function normalizeRoot(root) {
-    if (!root) return doc
-    if (typeof root == 'string') return qwery(root)[0]
-    if (!root[nodeType] && arrayLike(root)) return root[0]
-    return root
-  }
-
-  /**
-   * @param {string|Array.<Element>|Element|Node} selector
-   * @param {string|Array.<Element>|Element|Node=} opt_root
-   * @return {Array.<Element>}
-   */
-  function qwery(selector, opt_root) {
-    var m, root = normalizeRoot(opt_root)
-    if (!root || !selector) return []
-    if (selector === win || isNode(selector)) {
-      return !opt_root || (selector !== win && isNode(root) && isAncestor(selector, root)) ? [selector] : []
-    }
-    if (selector && arrayLike(selector)) return flatten(selector)
-
-
-    if (doc.getElementsByClassName && selector == 'string' && (m = selector.match(classOnly))) {
-      return toArray((root).getElementsByClassName(m[1]))
-    }
-    // using duck typing for 'a' window or 'a' document (not 'the' window || document)
-    if (selector && (selector.document || (selector.nodeType && selector.nodeType == 9))) {
-      return !opt_root ? [selector] : []
-    }
-    return toArray((root).querySelectorAll(selector))
-  }
-
-  qwery.uniq = uniq
-
-  return qwery
-}, this);
-
-},{}],45:[function(require,module,exports){
+},{"dup":21}],47:[function(require,module,exports){
+arguments[4][23][0].apply(exports,arguments)
+},{"dup":23,"events":5,"inherits":48,"insert-css":49,"lodash":394,"qwery":50}],48:[function(require,module,exports){
+arguments[4][24][0].apply(exports,arguments)
+},{"dup":24}],49:[function(require,module,exports){
+arguments[4][25][0].apply(exports,arguments)
+},{"dup":25}],50:[function(require,module,exports){
+arguments[4][26][0].apply(exports,arguments)
+},{"dup":26}],51:[function(require,module,exports){
 //     Underscore.js 1.3.3
 //     (c) 2009-2012 Jeremy Ashkenas, DocumentCloud Inc.
 //     Underscore is freely distributable under the MIT license.
@@ -29188,7 +29589,7 @@ module.exports = function (css, options) {
 
 }).call(this);
 
-},{}],46:[function(require,module,exports){
+},{}],52:[function(require,module,exports){
 /**
 * underscore.nest - v0.1.1 - 7/13/2012
 * http://github.com/iros/underscore.nest/
@@ -29303,7 +29704,7 @@ module.exports = function (css, options) {
 }(this));
 
 
-},{"underscore":45}],47:[function(require,module,exports){
+},{"underscore":51}],53:[function(require,module,exports){
 (function (Buffer){
 'use strict';
 
@@ -29648,53 +30049,53 @@ var Visualization = LightningVisualization.extend({
 module.exports = Visualization;
 
 }).call(this,require("buffer").Buffer)
-},{"buffer":1,"d3":26,"d3-multiaxis-zoom":24,"lightning-client-utils":27,"lightning-visualization":41,"lodash":388,"underscore.nest":46}],48:[function(require,module,exports){
+},{"buffer":1,"d3":32,"d3-multiaxis-zoom":30,"lightning-client-utils":33,"lightning-visualization":47,"lodash":394,"underscore.nest":52}],54:[function(require,module,exports){
 arguments[4][6][0].apply(exports,arguments)
-},{"./src":72,"dup":6}],49:[function(require,module,exports){
+},{"./src":78,"dup":6}],55:[function(require,module,exports){
 arguments[4][9][0].apply(exports,arguments)
-},{"dup":9}],50:[function(require,module,exports){
+},{"dup":9}],56:[function(require,module,exports){
 arguments[4][10][0].apply(exports,arguments)
-},{"color":51,"colorbrewer":57,"d3-color":58,"d3-scale":59,"dup":10,"lodash":60,"superagent":61}],51:[function(require,module,exports){
+},{"color":57,"colorbrewer":63,"d3-color":64,"d3-scale":65,"dup":10,"lodash":66,"superagent":67}],57:[function(require,module,exports){
 arguments[4][11][0].apply(exports,arguments)
-},{"color-convert":53,"color-string":54,"dup":11}],52:[function(require,module,exports){
+},{"color-convert":59,"color-string":60,"dup":11}],58:[function(require,module,exports){
 arguments[4][12][0].apply(exports,arguments)
-},{"dup":12}],53:[function(require,module,exports){
+},{"dup":12}],59:[function(require,module,exports){
 arguments[4][13][0].apply(exports,arguments)
-},{"./conversions":52,"dup":13}],54:[function(require,module,exports){
+},{"./conversions":58,"dup":13}],60:[function(require,module,exports){
 arguments[4][14][0].apply(exports,arguments)
-},{"color-name":55,"dup":14}],55:[function(require,module,exports){
+},{"color-name":61,"dup":14}],61:[function(require,module,exports){
 arguments[4][15][0].apply(exports,arguments)
-},{"dup":15}],56:[function(require,module,exports){
+},{"dup":15}],62:[function(require,module,exports){
 arguments[4][7][0].apply(exports,arguments)
-},{"dup":7}],57:[function(require,module,exports){
+},{"dup":7}],63:[function(require,module,exports){
 arguments[4][8][0].apply(exports,arguments)
-},{"./colorbrewer.js":56,"dup":8}],58:[function(require,module,exports){
+},{"./colorbrewer.js":62,"dup":8}],64:[function(require,module,exports){
 arguments[4][16][0].apply(exports,arguments)
-},{"dup":16}],59:[function(require,module,exports){
+},{"dup":16}],65:[function(require,module,exports){
 arguments[4][17][0].apply(exports,arguments)
-},{"dup":17}],60:[function(require,module,exports){
+},{"dup":17}],66:[function(require,module,exports){
 arguments[4][18][0].apply(exports,arguments)
-},{"dup":18}],61:[function(require,module,exports){
+},{"dup":18}],67:[function(require,module,exports){
 arguments[4][19][0].apply(exports,arguments)
-},{"dup":19,"emitter":62,"reduce":63}],62:[function(require,module,exports){
+},{"dup":19,"emitter":68,"reduce":69}],68:[function(require,module,exports){
 arguments[4][20][0].apply(exports,arguments)
-},{"dup":20}],63:[function(require,module,exports){
+},{"dup":20}],69:[function(require,module,exports){
 arguments[4][21][0].apply(exports,arguments)
-},{"dup":21}],64:[function(require,module,exports){
+},{"dup":21}],70:[function(require,module,exports){
 arguments[4][6][0].apply(exports,arguments)
-},{"./src":71,"dup":6}],65:[function(require,module,exports){
+},{"./src":77,"dup":6}],71:[function(require,module,exports){
+arguments[4][30][0].apply(exports,arguments)
+},{"./src":72,"dup":30}],72:[function(require,module,exports){
+arguments[4][31][0].apply(exports,arguments)
+},{"dup":31}],73:[function(require,module,exports){
+arguments[4][23][0].apply(exports,arguments)
+},{"dup":23,"events":5,"inherits":74,"insert-css":75,"lodash":394,"qwery":76}],74:[function(require,module,exports){
 arguments[4][24][0].apply(exports,arguments)
-},{"./src":66,"dup":24}],66:[function(require,module,exports){
+},{"dup":24}],75:[function(require,module,exports){
 arguments[4][25][0].apply(exports,arguments)
-},{"dup":25}],67:[function(require,module,exports){
-arguments[4][41][0].apply(exports,arguments)
-},{"dup":41,"events":5,"inherits":68,"insert-css":69,"lodash":388,"qwery":70}],68:[function(require,module,exports){
-arguments[4][42][0].apply(exports,arguments)
-},{"dup":42}],69:[function(require,module,exports){
-arguments[4][43][0].apply(exports,arguments)
-},{"dup":43}],70:[function(require,module,exports){
-arguments[4][44][0].apply(exports,arguments)
-},{"dup":44}],71:[function(require,module,exports){
+},{"dup":25}],76:[function(require,module,exports){
+arguments[4][26][0].apply(exports,arguments)
+},{"dup":26}],77:[function(require,module,exports){
 (function (Buffer){
 var LightningVisualization = require('lightning-visualization');
 var d3 = require('d3');
@@ -29735,7 +30136,6 @@ var Visualization = LightningVisualization.extend({
         var data = this.data;
         var width = this.width;
         var height = this.height;
-        var selector = this.selector;
         var options = this.options;
         var self = this;
 
@@ -29759,7 +30159,7 @@ var Visualization = LightningVisualization.extend({
             .y(self.y)
             .on('zoom', zoomed);
 
-        var container = d3.select(selector)
+        var container = d3.select(this.el)
             .append('div')
             .style('position', 'relative')
             .style('overflow', 'hidden')
@@ -29861,7 +30261,7 @@ var Visualization = LightningVisualization.extend({
             d3.selectAll('.brush')
                 .style('pointer-events', 'none')
 
-            d3.select(selector).on("keydown", function() {
+            d3.select(this.el).on("keydown", function() {
                 shiftKey = d3.event.shiftKey;
                 if (shiftKey) {
                     d3.selectAll('.brush').style('pointer-events', 'all')
@@ -29869,7 +30269,7 @@ var Visualization = LightningVisualization.extend({
                 }
             });
 
-            d3.select(selector).on("keyup", function() {
+            d3.select(this.el).on("keyup", function() {
                 if (shiftKey) {
                     d3.selectAll('.brush').style('pointer-events', 'none')
                     d3.selectAll('.brush .background').style('cursor', 'default')
@@ -29899,7 +30299,7 @@ var Visualization = LightningVisualization.extend({
         }
 
     
-        d3.select(selector).attr("tabindex", -1)
+        d3.select(this.el).attr("tabindex", -1)
 
         function redraw() {
             ctx.clearRect(0, 0, width, height);
@@ -30141,7 +30541,7 @@ var Visualization = LightningVisualization.extend({
 module.exports = Visualization;
 
 }).call(this,require("buffer").Buffer)
-},{"buffer":1,"d3":49,"d3-multiaxis-zoom":65,"lightning-client-utils":50,"lightning-visualization":67,"lodash":388}],72:[function(require,module,exports){
+},{"buffer":1,"d3":55,"d3-multiaxis-zoom":71,"lightning-client-utils":56,"lightning-visualization":73,"lodash":394}],78:[function(require,module,exports){
 'use strict';
 var d3 = require('d3');
 var Graph = require('lightning-graph')
@@ -30262,9 +30662,9 @@ var Visualization = Graph.extend({
 
 module.exports = Visualization;
 
-},{"d3":49,"lightning-client-utils":50,"lightning-graph":64,"lodash":388}],73:[function(require,module,exports){
+},{"d3":55,"lightning-client-utils":56,"lightning-graph":70,"lodash":394}],79:[function(require,module,exports){
 arguments[4][6][0].apply(exports,arguments)
-},{"./src":110,"dup":6}],74:[function(require,module,exports){
+},{"./src":116,"dup":6}],80:[function(require,module,exports){
 /*!
  * jQuery JavaScript Library v2.1.4
  * http://jquery.com/
@@ -39476,37 +39876,37 @@ return jQuery;
 
 }));
 
-},{}],75:[function(require,module,exports){
+},{}],81:[function(require,module,exports){
 arguments[4][10][0].apply(exports,arguments)
-},{"color":76,"colorbrewer":82,"d3-color":83,"d3-scale":84,"dup":10,"lodash":85,"superagent":86}],76:[function(require,module,exports){
+},{"color":82,"colorbrewer":88,"d3-color":89,"d3-scale":90,"dup":10,"lodash":91,"superagent":92}],82:[function(require,module,exports){
 arguments[4][11][0].apply(exports,arguments)
-},{"color-convert":78,"color-string":79,"dup":11}],77:[function(require,module,exports){
+},{"color-convert":84,"color-string":85,"dup":11}],83:[function(require,module,exports){
 arguments[4][12][0].apply(exports,arguments)
-},{"dup":12}],78:[function(require,module,exports){
+},{"dup":12}],84:[function(require,module,exports){
 arguments[4][13][0].apply(exports,arguments)
-},{"./conversions":77,"dup":13}],79:[function(require,module,exports){
+},{"./conversions":83,"dup":13}],85:[function(require,module,exports){
 arguments[4][14][0].apply(exports,arguments)
-},{"color-name":80,"dup":14}],80:[function(require,module,exports){
+},{"color-name":86,"dup":14}],86:[function(require,module,exports){
 arguments[4][15][0].apply(exports,arguments)
-},{"dup":15}],81:[function(require,module,exports){
+},{"dup":15}],87:[function(require,module,exports){
 arguments[4][7][0].apply(exports,arguments)
-},{"dup":7}],82:[function(require,module,exports){
+},{"dup":7}],88:[function(require,module,exports){
 arguments[4][8][0].apply(exports,arguments)
-},{"./colorbrewer.js":81,"dup":8}],83:[function(require,module,exports){
+},{"./colorbrewer.js":87,"dup":8}],89:[function(require,module,exports){
 arguments[4][16][0].apply(exports,arguments)
-},{"dup":16}],84:[function(require,module,exports){
+},{"dup":16}],90:[function(require,module,exports){
 arguments[4][17][0].apply(exports,arguments)
-},{"dup":17}],85:[function(require,module,exports){
+},{"dup":17}],91:[function(require,module,exports){
 arguments[4][18][0].apply(exports,arguments)
-},{"dup":18}],86:[function(require,module,exports){
+},{"dup":18}],92:[function(require,module,exports){
 arguments[4][19][0].apply(exports,arguments)
-},{"dup":19,"emitter":87,"reduce":88}],87:[function(require,module,exports){
+},{"dup":19,"emitter":93,"reduce":94}],93:[function(require,module,exports){
 arguments[4][20][0].apply(exports,arguments)
-},{"dup":20}],88:[function(require,module,exports){
+},{"dup":20}],94:[function(require,module,exports){
 arguments[4][21][0].apply(exports,arguments)
-},{"dup":21}],89:[function(require,module,exports){
+},{"dup":21}],95:[function(require,module,exports){
 arguments[4][6][0].apply(exports,arguments)
-},{"./src":105,"dup":6}],90:[function(require,module,exports){
+},{"./src":111,"dup":6}],96:[function(require,module,exports){
 /*
  Leaflet, a JavaScript library for mobile-friendly interactive maps. http://leafletjs.com
  (c) 2010-2013, Vladimir Agafonkin
@@ -48670,7 +49070,7 @@ L.Map.include({
 
 
 }(window, document));
-},{}],91:[function(require,module,exports){
+},{}],97:[function(require,module,exports){
 
 var _ = require('lodash');
 var request = require('superagent');
@@ -49070,33 +49470,33 @@ var utils = {
 
 
 module.exports = utils;
-},{"color":92,"colorbrewer":98,"d3-color":99,"d3-scale":100,"lodash":101,"superagent":102}],92:[function(require,module,exports){
+},{"color":98,"colorbrewer":104,"d3-color":105,"d3-scale":106,"lodash":107,"superagent":108}],98:[function(require,module,exports){
 arguments[4][11][0].apply(exports,arguments)
-},{"color-convert":94,"color-string":95,"dup":11}],93:[function(require,module,exports){
+},{"color-convert":100,"color-string":101,"dup":11}],99:[function(require,module,exports){
 arguments[4][12][0].apply(exports,arguments)
-},{"dup":12}],94:[function(require,module,exports){
+},{"dup":12}],100:[function(require,module,exports){
 arguments[4][13][0].apply(exports,arguments)
-},{"./conversions":93,"dup":13}],95:[function(require,module,exports){
+},{"./conversions":99,"dup":13}],101:[function(require,module,exports){
 arguments[4][14][0].apply(exports,arguments)
-},{"color-name":96,"dup":14}],96:[function(require,module,exports){
+},{"color-name":102,"dup":14}],102:[function(require,module,exports){
 arguments[4][15][0].apply(exports,arguments)
-},{"dup":15}],97:[function(require,module,exports){
+},{"dup":15}],103:[function(require,module,exports){
 arguments[4][7][0].apply(exports,arguments)
-},{"dup":7}],98:[function(require,module,exports){
+},{"dup":7}],104:[function(require,module,exports){
 arguments[4][8][0].apply(exports,arguments)
-},{"./colorbrewer.js":97,"dup":8}],99:[function(require,module,exports){
+},{"./colorbrewer.js":103,"dup":8}],105:[function(require,module,exports){
 arguments[4][16][0].apply(exports,arguments)
-},{"dup":16}],100:[function(require,module,exports){
+},{"dup":16}],106:[function(require,module,exports){
 arguments[4][17][0].apply(exports,arguments)
-},{"dup":17}],101:[function(require,module,exports){
+},{"dup":17}],107:[function(require,module,exports){
 arguments[4][18][0].apply(exports,arguments)
-},{"dup":18}],102:[function(require,module,exports){
+},{"dup":18}],108:[function(require,module,exports){
 arguments[4][19][0].apply(exports,arguments)
-},{"dup":19,"emitter":103,"reduce":104}],103:[function(require,module,exports){
+},{"dup":19,"emitter":109,"reduce":110}],109:[function(require,module,exports){
 arguments[4][20][0].apply(exports,arguments)
-},{"dup":20}],104:[function(require,module,exports){
+},{"dup":20}],110:[function(require,module,exports){
 arguments[4][21][0].apply(exports,arguments)
-},{"dup":21}],105:[function(require,module,exports){
+},{"dup":21}],111:[function(require,module,exports){
 (function (Buffer){
 'use strict';
 
@@ -49197,15 +49597,15 @@ var Visualization = LightningVisualization.extend({
 module.exports = Visualization;
 
 }).call(this,require("buffer").Buffer)
-},{"buffer":1,"jquery":74,"leaflet":90,"lightning-client-utils":91,"lightning-visualization":106,"lodash":388}],106:[function(require,module,exports){
-arguments[4][41][0].apply(exports,arguments)
-},{"dup":41,"events":5,"inherits":107,"insert-css":108,"lodash":388,"qwery":109}],107:[function(require,module,exports){
-arguments[4][42][0].apply(exports,arguments)
-},{"dup":42}],108:[function(require,module,exports){
-arguments[4][43][0].apply(exports,arguments)
-},{"dup":43}],109:[function(require,module,exports){
-arguments[4][44][0].apply(exports,arguments)
-},{"dup":44}],110:[function(require,module,exports){
+},{"buffer":1,"jquery":80,"leaflet":96,"lightning-client-utils":97,"lightning-visualization":112,"lodash":394}],112:[function(require,module,exports){
+arguments[4][23][0].apply(exports,arguments)
+},{"dup":23,"events":5,"inherits":113,"insert-css":114,"lodash":394,"qwery":115}],113:[function(require,module,exports){
+arguments[4][24][0].apply(exports,arguments)
+},{"dup":24}],114:[function(require,module,exports){
+arguments[4][25][0].apply(exports,arguments)
+},{"dup":25}],115:[function(require,module,exports){
+arguments[4][26][0].apply(exports,arguments)
+},{"dup":26}],116:[function(require,module,exports){
 (function (Buffer){
 'use strict';
 
@@ -49290,7 +49690,7 @@ var Visualization = LightningVisualization.extend({
 module.exports = Visualization;
 
 }).call(this,require("buffer").Buffer)
-},{"buffer":1,"jquery":74,"lightning-client-utils":75,"lightning-image":89,"lightning-visualization":106,"lodash":388}],111:[function(require,module,exports){
+},{"buffer":1,"jquery":80,"lightning-client-utils":81,"lightning-image":95,"lightning-visualization":112,"lodash":394}],117:[function(require,module,exports){
 
 var ForceEdgeBundling = function(){
         var data_nodes = {},        // {'nodeid':{'x':,'y':},..}
@@ -49703,55 +50103,55 @@ var ForceEdgeBundling = function(){
 
 
 module.exports = ForceEdgeBundling;
-},{}],112:[function(require,module,exports){
+},{}],118:[function(require,module,exports){
 arguments[4][6][0].apply(exports,arguments)
-},{"./src":136,"dup":6}],113:[function(require,module,exports){
+},{"./src":142,"dup":6}],119:[function(require,module,exports){
 arguments[4][9][0].apply(exports,arguments)
-},{"dup":9}],114:[function(require,module,exports){
+},{"dup":9}],120:[function(require,module,exports){
 arguments[4][10][0].apply(exports,arguments)
-},{"color":115,"colorbrewer":121,"d3-color":122,"d3-scale":123,"dup":10,"lodash":124,"superagent":125}],115:[function(require,module,exports){
+},{"color":121,"colorbrewer":127,"d3-color":128,"d3-scale":129,"dup":10,"lodash":130,"superagent":131}],121:[function(require,module,exports){
 arguments[4][11][0].apply(exports,arguments)
-},{"color-convert":117,"color-string":118,"dup":11}],116:[function(require,module,exports){
+},{"color-convert":123,"color-string":124,"dup":11}],122:[function(require,module,exports){
 arguments[4][12][0].apply(exports,arguments)
-},{"dup":12}],117:[function(require,module,exports){
+},{"dup":12}],123:[function(require,module,exports){
 arguments[4][13][0].apply(exports,arguments)
-},{"./conversions":116,"dup":13}],118:[function(require,module,exports){
+},{"./conversions":122,"dup":13}],124:[function(require,module,exports){
 arguments[4][14][0].apply(exports,arguments)
-},{"color-name":119,"dup":14}],119:[function(require,module,exports){
+},{"color-name":125,"dup":14}],125:[function(require,module,exports){
 arguments[4][15][0].apply(exports,arguments)
-},{"dup":15}],120:[function(require,module,exports){
+},{"dup":15}],126:[function(require,module,exports){
 arguments[4][7][0].apply(exports,arguments)
-},{"dup":7}],121:[function(require,module,exports){
+},{"dup":7}],127:[function(require,module,exports){
 arguments[4][8][0].apply(exports,arguments)
-},{"./colorbrewer.js":120,"dup":8}],122:[function(require,module,exports){
+},{"./colorbrewer.js":126,"dup":8}],128:[function(require,module,exports){
 arguments[4][16][0].apply(exports,arguments)
-},{"dup":16}],123:[function(require,module,exports){
+},{"dup":16}],129:[function(require,module,exports){
 arguments[4][17][0].apply(exports,arguments)
-},{"dup":17}],124:[function(require,module,exports){
+},{"dup":17}],130:[function(require,module,exports){
 arguments[4][18][0].apply(exports,arguments)
-},{"dup":18}],125:[function(require,module,exports){
+},{"dup":18}],131:[function(require,module,exports){
 arguments[4][19][0].apply(exports,arguments)
-},{"dup":19,"emitter":126,"reduce":127}],126:[function(require,module,exports){
+},{"dup":19,"emitter":132,"reduce":133}],132:[function(require,module,exports){
 arguments[4][20][0].apply(exports,arguments)
-},{"dup":20}],127:[function(require,module,exports){
+},{"dup":20}],133:[function(require,module,exports){
 arguments[4][21][0].apply(exports,arguments)
-},{"dup":21}],128:[function(require,module,exports){
+},{"dup":21}],134:[function(require,module,exports){
 arguments[4][6][0].apply(exports,arguments)
-},{"./src":135,"dup":6}],129:[function(require,module,exports){
+},{"./src":141,"dup":6}],135:[function(require,module,exports){
+arguments[4][30][0].apply(exports,arguments)
+},{"./src":136,"dup":30}],136:[function(require,module,exports){
+arguments[4][31][0].apply(exports,arguments)
+},{"dup":31}],137:[function(require,module,exports){
+arguments[4][23][0].apply(exports,arguments)
+},{"dup":23,"events":5,"inherits":138,"insert-css":139,"lodash":394,"qwery":140}],138:[function(require,module,exports){
 arguments[4][24][0].apply(exports,arguments)
-},{"./src":130,"dup":24}],130:[function(require,module,exports){
+},{"dup":24}],139:[function(require,module,exports){
 arguments[4][25][0].apply(exports,arguments)
-},{"dup":25}],131:[function(require,module,exports){
-arguments[4][41][0].apply(exports,arguments)
-},{"dup":41,"events":5,"inherits":132,"insert-css":133,"lodash":388,"qwery":134}],132:[function(require,module,exports){
-arguments[4][42][0].apply(exports,arguments)
-},{"dup":42}],133:[function(require,module,exports){
-arguments[4][43][0].apply(exports,arguments)
-},{"dup":43}],134:[function(require,module,exports){
-arguments[4][44][0].apply(exports,arguments)
-},{"dup":44}],135:[function(require,module,exports){
-arguments[4][71][0].apply(exports,arguments)
-},{"buffer":1,"d3":113,"d3-multiaxis-zoom":129,"dup":71,"lightning-client-utils":114,"lightning-visualization":131,"lodash":388}],136:[function(require,module,exports){
+},{"dup":25}],140:[function(require,module,exports){
+arguments[4][26][0].apply(exports,arguments)
+},{"dup":26}],141:[function(require,module,exports){
+arguments[4][77][0].apply(exports,arguments)
+},{"buffer":1,"d3":119,"d3-multiaxis-zoom":135,"dup":77,"lightning-client-utils":120,"lightning-visualization":137,"lodash":394}],142:[function(require,module,exports){
 'use strict';
 var Graph = require('lightning-graph');
 var d3 = require('d3');
@@ -49827,55 +50227,55 @@ var Visualization = Graph.extend({
 
 module.exports = Visualization;
 
-},{"../deps/force-edge-bundling":111,"d3":113,"lightning-client-utils":114,"lightning-graph":128,"lodash":388}],137:[function(require,module,exports){
+},{"../deps/force-edge-bundling":117,"d3":119,"lightning-client-utils":120,"lightning-graph":134,"lodash":394}],143:[function(require,module,exports){
 arguments[4][6][0].apply(exports,arguments)
-},{"./src":159,"dup":6}],138:[function(require,module,exports){
-arguments[4][24][0].apply(exports,arguments)
-},{"./src":139,"dup":24}],139:[function(require,module,exports){
-arguments[4][25][0].apply(exports,arguments)
-},{"dup":25}],140:[function(require,module,exports){
+},{"./src":165,"dup":6}],144:[function(require,module,exports){
+arguments[4][30][0].apply(exports,arguments)
+},{"./src":145,"dup":30}],145:[function(require,module,exports){
+arguments[4][31][0].apply(exports,arguments)
+},{"dup":31}],146:[function(require,module,exports){
 arguments[4][9][0].apply(exports,arguments)
-},{"dup":9}],141:[function(require,module,exports){
+},{"dup":9}],147:[function(require,module,exports){
 arguments[4][10][0].apply(exports,arguments)
-},{"color":142,"colorbrewer":148,"d3-color":149,"d3-scale":150,"dup":10,"lodash":151,"superagent":152}],142:[function(require,module,exports){
+},{"color":148,"colorbrewer":154,"d3-color":155,"d3-scale":156,"dup":10,"lodash":157,"superagent":158}],148:[function(require,module,exports){
 arguments[4][11][0].apply(exports,arguments)
-},{"color-convert":144,"color-string":145,"dup":11}],143:[function(require,module,exports){
+},{"color-convert":150,"color-string":151,"dup":11}],149:[function(require,module,exports){
 arguments[4][12][0].apply(exports,arguments)
-},{"dup":12}],144:[function(require,module,exports){
+},{"dup":12}],150:[function(require,module,exports){
 arguments[4][13][0].apply(exports,arguments)
-},{"./conversions":143,"dup":13}],145:[function(require,module,exports){
+},{"./conversions":149,"dup":13}],151:[function(require,module,exports){
 arguments[4][14][0].apply(exports,arguments)
-},{"color-name":146,"dup":14}],146:[function(require,module,exports){
+},{"color-name":152,"dup":14}],152:[function(require,module,exports){
 arguments[4][15][0].apply(exports,arguments)
-},{"dup":15}],147:[function(require,module,exports){
+},{"dup":15}],153:[function(require,module,exports){
 arguments[4][7][0].apply(exports,arguments)
-},{"dup":7}],148:[function(require,module,exports){
+},{"dup":7}],154:[function(require,module,exports){
 arguments[4][8][0].apply(exports,arguments)
-},{"./colorbrewer.js":147,"dup":8}],149:[function(require,module,exports){
+},{"./colorbrewer.js":153,"dup":8}],155:[function(require,module,exports){
 arguments[4][16][0].apply(exports,arguments)
-},{"dup":16}],150:[function(require,module,exports){
+},{"dup":16}],156:[function(require,module,exports){
 arguments[4][17][0].apply(exports,arguments)
-},{"dup":17}],151:[function(require,module,exports){
+},{"dup":17}],157:[function(require,module,exports){
 arguments[4][18][0].apply(exports,arguments)
-},{"dup":18}],152:[function(require,module,exports){
+},{"dup":18}],158:[function(require,module,exports){
 arguments[4][19][0].apply(exports,arguments)
-},{"dup":19,"emitter":153,"reduce":154}],153:[function(require,module,exports){
+},{"dup":19,"emitter":159,"reduce":160}],159:[function(require,module,exports){
 arguments[4][20][0].apply(exports,arguments)
-},{"dup":20}],154:[function(require,module,exports){
+},{"dup":20}],160:[function(require,module,exports){
 arguments[4][21][0].apply(exports,arguments)
-},{"dup":21}],155:[function(require,module,exports){
-arguments[4][41][0].apply(exports,arguments)
-},{"dup":41,"events":5,"inherits":156,"insert-css":157,"lodash":388,"qwery":158}],156:[function(require,module,exports){
-arguments[4][42][0].apply(exports,arguments)
-},{"dup":42}],157:[function(require,module,exports){
-arguments[4][43][0].apply(exports,arguments)
-},{"dup":43}],158:[function(require,module,exports){
-arguments[4][44][0].apply(exports,arguments)
-},{"dup":44}],159:[function(require,module,exports){
-arguments[4][71][0].apply(exports,arguments)
-},{"buffer":1,"d3":140,"d3-multiaxis-zoom":138,"dup":71,"lightning-client-utils":141,"lightning-visualization":155,"lodash":388}],160:[function(require,module,exports){
+},{"dup":21}],161:[function(require,module,exports){
+arguments[4][23][0].apply(exports,arguments)
+},{"dup":23,"events":5,"inherits":162,"insert-css":163,"lodash":394,"qwery":164}],162:[function(require,module,exports){
+arguments[4][24][0].apply(exports,arguments)
+},{"dup":24}],163:[function(require,module,exports){
+arguments[4][25][0].apply(exports,arguments)
+},{"dup":25}],164:[function(require,module,exports){
+arguments[4][26][0].apply(exports,arguments)
+},{"dup":26}],165:[function(require,module,exports){
+arguments[4][77][0].apply(exports,arguments)
+},{"buffer":1,"d3":146,"d3-multiaxis-zoom":144,"dup":77,"lightning-client-utils":147,"lightning-visualization":161,"lodash":394}],166:[function(require,module,exports){
 arguments[4][6][0].apply(exports,arguments)
-},{"./src":194,"dup":6}],161:[function(require,module,exports){
+},{"./src":200,"dup":6}],167:[function(require,module,exports){
 /**
 * geoJSON validation according to the GeoJSON spefication Version 1
 * @module geoJSONValidation
@@ -50760,9 +51160,9 @@ arguments[4][6][0].apply(exports,arguments)
 
 })(typeof exports === 'undefined'? this['GJV']={}: exports);
 
-},{}],162:[function(require,module,exports){
-arguments[4][74][0].apply(exports,arguments)
-},{"dup":74}],163:[function(require,module,exports){
+},{}],168:[function(require,module,exports){
+arguments[4][80][0].apply(exports,arguments)
+},{"dup":80}],169:[function(require,module,exports){
 "use strict";
 
 var $math = Math;
@@ -51062,7 +51462,7 @@ ConcaveHull.prototype = {
 };
 
 module.exports = ConcaveHull;
-},{}],164:[function(require,module,exports){
+},{}],170:[function(require,module,exports){
 "use strict";
 var d3 = require('d3');
 var ClipperLib = require('js-clipper');
@@ -52653,7 +53053,7 @@ module.exports = function(L) {
 };
 
 
-},{"./Hull":165,"./Memory":166,"./Options":167,"./Utilities":168,"d3":170,"js-clipper":172}],165:[function(require,module,exports){
+},{"./Hull":171,"./Memory":172,"./Options":173,"./Utilities":174,"d3":176,"js-clipper":178}],171:[function(require,module,exports){
 
 "use strict";
 
@@ -52746,7 +53146,7 @@ Hull.prototype = {
 
 
 module.exports = Hull;
-},{"./ConcaveHull":163,"graham_scan":171}],166:[function(require,module,exports){
+},{"./ConcaveHull":169,"graham_scan":177}],172:[function(require,module,exports){
 
 
 "use strict";
@@ -52886,7 +53286,7 @@ Memory.prototype = {
 };
 
 module.exports = Memory;
-},{}],167:[function(require,module,exports){
+},{}],173:[function(require,module,exports){
 
 
 "use strict";
@@ -53175,7 +53575,7 @@ Options.prototype = {
 
 
 module.exports = Options;
-},{}],168:[function(require,module,exports){
+},{}],174:[function(require,module,exports){
 
 
 "use strict";
@@ -53244,7 +53644,7 @@ module.exports = {
     }
 
 };
-},{}],169:[function(require,module,exports){
+},{}],175:[function(require,module,exports){
 
 
 
@@ -53253,9 +53653,9 @@ module.exports = function(L) {
 };
 
 
-},{"./components/FreeDraw":164}],170:[function(require,module,exports){
+},{"./components/FreeDraw":170}],176:[function(require,module,exports){
 arguments[4][9][0].apply(exports,arguments)
-},{"dup":9}],171:[function(require,module,exports){
+},{"dup":9}],177:[function(require,module,exports){
 /**
  * Graham's Scan Convex Hull Algorithm
  * @desc An implementation of the Graham's Scan Convex Hull algorithm in Javascript.
@@ -53418,7 +53818,7 @@ if (typeof module !== 'undefined') {
     module.exports = ConvexHullGrahamScan;
 }
 
-},{}],172:[function(require,module,exports){
+},{}],178:[function(require,module,exports){
 // rev 452
 /********************************************************************************
 *                                                                              *
@@ -60405,49 +60805,49 @@ ClipperLib.JS.PolyTreeToExPolygons = function (polytree)
 
 
 module.exports = ClipperLib;
-},{}],173:[function(require,module,exports){
-arguments[4][90][0].apply(exports,arguments)
-},{"dup":90}],174:[function(require,module,exports){
-arguments[4][91][0].apply(exports,arguments)
-},{"color":175,"colorbrewer":181,"d3-color":182,"d3-scale":183,"dup":91,"lodash":184,"superagent":185}],175:[function(require,module,exports){
+},{}],179:[function(require,module,exports){
+arguments[4][96][0].apply(exports,arguments)
+},{"dup":96}],180:[function(require,module,exports){
+arguments[4][97][0].apply(exports,arguments)
+},{"color":181,"colorbrewer":187,"d3-color":188,"d3-scale":189,"dup":97,"lodash":190,"superagent":191}],181:[function(require,module,exports){
 arguments[4][11][0].apply(exports,arguments)
-},{"color-convert":177,"color-string":178,"dup":11}],176:[function(require,module,exports){
+},{"color-convert":183,"color-string":184,"dup":11}],182:[function(require,module,exports){
 arguments[4][12][0].apply(exports,arguments)
-},{"dup":12}],177:[function(require,module,exports){
+},{"dup":12}],183:[function(require,module,exports){
 arguments[4][13][0].apply(exports,arguments)
-},{"./conversions":176,"dup":13}],178:[function(require,module,exports){
+},{"./conversions":182,"dup":13}],184:[function(require,module,exports){
 arguments[4][14][0].apply(exports,arguments)
-},{"color-name":179,"dup":14}],179:[function(require,module,exports){
+},{"color-name":185,"dup":14}],185:[function(require,module,exports){
 arguments[4][15][0].apply(exports,arguments)
-},{"dup":15}],180:[function(require,module,exports){
+},{"dup":15}],186:[function(require,module,exports){
 arguments[4][7][0].apply(exports,arguments)
-},{"dup":7}],181:[function(require,module,exports){
+},{"dup":7}],187:[function(require,module,exports){
 arguments[4][8][0].apply(exports,arguments)
-},{"./colorbrewer.js":180,"dup":8}],182:[function(require,module,exports){
+},{"./colorbrewer.js":186,"dup":8}],188:[function(require,module,exports){
 arguments[4][16][0].apply(exports,arguments)
-},{"dup":16}],183:[function(require,module,exports){
+},{"dup":16}],189:[function(require,module,exports){
 arguments[4][17][0].apply(exports,arguments)
-},{"dup":17}],184:[function(require,module,exports){
+},{"dup":17}],190:[function(require,module,exports){
 arguments[4][18][0].apply(exports,arguments)
-},{"dup":18}],185:[function(require,module,exports){
+},{"dup":18}],191:[function(require,module,exports){
 arguments[4][19][0].apply(exports,arguments)
-},{"dup":19,"emitter":186,"reduce":187}],186:[function(require,module,exports){
+},{"dup":19,"emitter":192,"reduce":193}],192:[function(require,module,exports){
 arguments[4][20][0].apply(exports,arguments)
-},{"dup":20}],187:[function(require,module,exports){
+},{"dup":20}],193:[function(require,module,exports){
 arguments[4][21][0].apply(exports,arguments)
-},{"dup":21}],188:[function(require,module,exports){
+},{"dup":21}],194:[function(require,module,exports){
 arguments[4][6][0].apply(exports,arguments)
-},{"./src":189,"dup":6}],189:[function(require,module,exports){
-arguments[4][105][0].apply(exports,arguments)
-},{"buffer":1,"dup":105,"jquery":162,"leaflet":173,"lightning-client-utils":174,"lightning-visualization":190,"lodash":388}],190:[function(require,module,exports){
-arguments[4][41][0].apply(exports,arguments)
-},{"dup":41,"events":5,"inherits":191,"insert-css":192,"lodash":388,"qwery":193}],191:[function(require,module,exports){
-arguments[4][42][0].apply(exports,arguments)
-},{"dup":42}],192:[function(require,module,exports){
-arguments[4][43][0].apply(exports,arguments)
-},{"dup":43}],193:[function(require,module,exports){
-arguments[4][44][0].apply(exports,arguments)
-},{"dup":44}],194:[function(require,module,exports){
+},{"./src":195,"dup":6}],195:[function(require,module,exports){
+arguments[4][111][0].apply(exports,arguments)
+},{"buffer":1,"dup":111,"jquery":168,"leaflet":179,"lightning-client-utils":180,"lightning-visualization":196,"lodash":394}],196:[function(require,module,exports){
+arguments[4][23][0].apply(exports,arguments)
+},{"dup":23,"events":5,"inherits":197,"insert-css":198,"lodash":394,"qwery":199}],197:[function(require,module,exports){
+arguments[4][24][0].apply(exports,arguments)
+},{"dup":24}],198:[function(require,module,exports){
+arguments[4][25][0].apply(exports,arguments)
+},{"dup":25}],199:[function(require,module,exports){
+arguments[4][26][0].apply(exports,arguments)
+},{"dup":26}],200:[function(require,module,exports){
 (function (Buffer){
 'use strict';
 
@@ -60759,97 +61159,97 @@ var Visualization = ImageViz.extend({
 module.exports = Visualization;
 
 }).call(this,require("buffer").Buffer)
-},{"buffer":1,"geojson-validation":161,"leaflet":173,"leaflet.freedraw-browserify":169,"lightning-client-utils":174,"lightning-image":188,"lodash":388}],195:[function(require,module,exports){
+},{"buffer":1,"geojson-validation":167,"leaflet":179,"leaflet.freedraw-browserify":175,"lightning-client-utils":180,"lightning-image":194,"lodash":394}],201:[function(require,module,exports){
 arguments[4][6][0].apply(exports,arguments)
-},{"./src":216,"dup":6}],196:[function(require,module,exports){
-arguments[4][74][0].apply(exports,arguments)
-},{"dup":74}],197:[function(require,module,exports){
-arguments[4][90][0].apply(exports,arguments)
-},{"dup":90}],198:[function(require,module,exports){
-arguments[4][91][0].apply(exports,arguments)
-},{"color":199,"colorbrewer":205,"d3-color":206,"d3-scale":207,"dup":91,"lodash":208,"superagent":209}],199:[function(require,module,exports){
+},{"./src":222,"dup":6}],202:[function(require,module,exports){
+arguments[4][80][0].apply(exports,arguments)
+},{"dup":80}],203:[function(require,module,exports){
+arguments[4][96][0].apply(exports,arguments)
+},{"dup":96}],204:[function(require,module,exports){
+arguments[4][97][0].apply(exports,arguments)
+},{"color":205,"colorbrewer":211,"d3-color":212,"d3-scale":213,"dup":97,"lodash":214,"superagent":215}],205:[function(require,module,exports){
 arguments[4][11][0].apply(exports,arguments)
-},{"color-convert":201,"color-string":202,"dup":11}],200:[function(require,module,exports){
+},{"color-convert":207,"color-string":208,"dup":11}],206:[function(require,module,exports){
 arguments[4][12][0].apply(exports,arguments)
-},{"dup":12}],201:[function(require,module,exports){
+},{"dup":12}],207:[function(require,module,exports){
 arguments[4][13][0].apply(exports,arguments)
-},{"./conversions":200,"dup":13}],202:[function(require,module,exports){
+},{"./conversions":206,"dup":13}],208:[function(require,module,exports){
 arguments[4][14][0].apply(exports,arguments)
-},{"color-name":203,"dup":14}],203:[function(require,module,exports){
+},{"color-name":209,"dup":14}],209:[function(require,module,exports){
 arguments[4][15][0].apply(exports,arguments)
-},{"dup":15}],204:[function(require,module,exports){
+},{"dup":15}],210:[function(require,module,exports){
 arguments[4][7][0].apply(exports,arguments)
-},{"dup":7}],205:[function(require,module,exports){
+},{"dup":7}],211:[function(require,module,exports){
 arguments[4][8][0].apply(exports,arguments)
-},{"./colorbrewer.js":204,"dup":8}],206:[function(require,module,exports){
+},{"./colorbrewer.js":210,"dup":8}],212:[function(require,module,exports){
 arguments[4][16][0].apply(exports,arguments)
-},{"dup":16}],207:[function(require,module,exports){
+},{"dup":16}],213:[function(require,module,exports){
 arguments[4][17][0].apply(exports,arguments)
-},{"dup":17}],208:[function(require,module,exports){
+},{"dup":17}],214:[function(require,module,exports){
 arguments[4][18][0].apply(exports,arguments)
-},{"dup":18}],209:[function(require,module,exports){
+},{"dup":18}],215:[function(require,module,exports){
 arguments[4][19][0].apply(exports,arguments)
-},{"dup":19,"emitter":210,"reduce":211}],210:[function(require,module,exports){
+},{"dup":19,"emitter":216,"reduce":217}],216:[function(require,module,exports){
 arguments[4][20][0].apply(exports,arguments)
-},{"dup":20}],211:[function(require,module,exports){
+},{"dup":20}],217:[function(require,module,exports){
 arguments[4][21][0].apply(exports,arguments)
-},{"dup":21}],212:[function(require,module,exports){
-arguments[4][41][0].apply(exports,arguments)
-},{"dup":41,"events":5,"inherits":213,"insert-css":214,"lodash":388,"qwery":215}],213:[function(require,module,exports){
-arguments[4][42][0].apply(exports,arguments)
-},{"dup":42}],214:[function(require,module,exports){
-arguments[4][43][0].apply(exports,arguments)
-},{"dup":43}],215:[function(require,module,exports){
-arguments[4][44][0].apply(exports,arguments)
-},{"dup":44}],216:[function(require,module,exports){
-arguments[4][105][0].apply(exports,arguments)
-},{"buffer":1,"dup":105,"jquery":196,"leaflet":197,"lightning-client-utils":198,"lightning-visualization":212,"lodash":388}],217:[function(require,module,exports){
-arguments[4][6][0].apply(exports,arguments)
-},{"./src":241,"dup":6}],218:[function(require,module,exports){
-arguments[4][6][0].apply(exports,arguments)
-},{"./src":240,"dup":6}],219:[function(require,module,exports){
+},{"dup":21}],218:[function(require,module,exports){
+arguments[4][23][0].apply(exports,arguments)
+},{"dup":23,"events":5,"inherits":219,"insert-css":220,"lodash":394,"qwery":221}],219:[function(require,module,exports){
 arguments[4][24][0].apply(exports,arguments)
-},{"./src":220,"dup":24}],220:[function(require,module,exports){
+},{"dup":24}],220:[function(require,module,exports){
 arguments[4][25][0].apply(exports,arguments)
 },{"dup":25}],221:[function(require,module,exports){
+arguments[4][26][0].apply(exports,arguments)
+},{"dup":26}],222:[function(require,module,exports){
+arguments[4][111][0].apply(exports,arguments)
+},{"buffer":1,"dup":111,"jquery":202,"leaflet":203,"lightning-client-utils":204,"lightning-visualization":218,"lodash":394}],223:[function(require,module,exports){
+arguments[4][6][0].apply(exports,arguments)
+},{"./src":247,"dup":6}],224:[function(require,module,exports){
+arguments[4][6][0].apply(exports,arguments)
+},{"./src":246,"dup":6}],225:[function(require,module,exports){
+arguments[4][30][0].apply(exports,arguments)
+},{"./src":226,"dup":30}],226:[function(require,module,exports){
+arguments[4][31][0].apply(exports,arguments)
+},{"dup":31}],227:[function(require,module,exports){
 arguments[4][9][0].apply(exports,arguments)
-},{"dup":9}],222:[function(require,module,exports){
+},{"dup":9}],228:[function(require,module,exports){
 arguments[4][10][0].apply(exports,arguments)
-},{"color":223,"colorbrewer":229,"d3-color":230,"d3-scale":231,"dup":10,"lodash":232,"superagent":233}],223:[function(require,module,exports){
+},{"color":229,"colorbrewer":235,"d3-color":236,"d3-scale":237,"dup":10,"lodash":238,"superagent":239}],229:[function(require,module,exports){
 arguments[4][11][0].apply(exports,arguments)
-},{"color-convert":225,"color-string":226,"dup":11}],224:[function(require,module,exports){
+},{"color-convert":231,"color-string":232,"dup":11}],230:[function(require,module,exports){
 arguments[4][12][0].apply(exports,arguments)
-},{"dup":12}],225:[function(require,module,exports){
+},{"dup":12}],231:[function(require,module,exports){
 arguments[4][13][0].apply(exports,arguments)
-},{"./conversions":224,"dup":13}],226:[function(require,module,exports){
+},{"./conversions":230,"dup":13}],232:[function(require,module,exports){
 arguments[4][14][0].apply(exports,arguments)
-},{"color-name":227,"dup":14}],227:[function(require,module,exports){
+},{"color-name":233,"dup":14}],233:[function(require,module,exports){
 arguments[4][15][0].apply(exports,arguments)
-},{"dup":15}],228:[function(require,module,exports){
+},{"dup":15}],234:[function(require,module,exports){
 arguments[4][7][0].apply(exports,arguments)
-},{"dup":7}],229:[function(require,module,exports){
+},{"dup":7}],235:[function(require,module,exports){
 arguments[4][8][0].apply(exports,arguments)
-},{"./colorbrewer.js":228,"dup":8}],230:[function(require,module,exports){
+},{"./colorbrewer.js":234,"dup":8}],236:[function(require,module,exports){
 arguments[4][16][0].apply(exports,arguments)
-},{"dup":16}],231:[function(require,module,exports){
+},{"dup":16}],237:[function(require,module,exports){
 arguments[4][17][0].apply(exports,arguments)
-},{"dup":17}],232:[function(require,module,exports){
+},{"dup":17}],238:[function(require,module,exports){
 arguments[4][18][0].apply(exports,arguments)
-},{"dup":18}],233:[function(require,module,exports){
+},{"dup":18}],239:[function(require,module,exports){
 arguments[4][19][0].apply(exports,arguments)
-},{"dup":19,"emitter":234,"reduce":235}],234:[function(require,module,exports){
+},{"dup":19,"emitter":240,"reduce":241}],240:[function(require,module,exports){
 arguments[4][20][0].apply(exports,arguments)
-},{"dup":20}],235:[function(require,module,exports){
+},{"dup":20}],241:[function(require,module,exports){
 arguments[4][21][0].apply(exports,arguments)
-},{"dup":21}],236:[function(require,module,exports){
-arguments[4][41][0].apply(exports,arguments)
-},{"dup":41,"events":5,"inherits":237,"insert-css":238,"lodash":388,"qwery":239}],237:[function(require,module,exports){
-arguments[4][42][0].apply(exports,arguments)
-},{"dup":42}],238:[function(require,module,exports){
-arguments[4][43][0].apply(exports,arguments)
-},{"dup":43}],239:[function(require,module,exports){
-arguments[4][44][0].apply(exports,arguments)
-},{"dup":44}],240:[function(require,module,exports){
+},{"dup":21}],242:[function(require,module,exports){
+arguments[4][23][0].apply(exports,arguments)
+},{"dup":23,"events":5,"inherits":243,"insert-css":244,"lodash":394,"qwery":245}],243:[function(require,module,exports){
+arguments[4][24][0].apply(exports,arguments)
+},{"dup":24}],244:[function(require,module,exports){
+arguments[4][25][0].apply(exports,arguments)
+},{"dup":25}],245:[function(require,module,exports){
+arguments[4][26][0].apply(exports,arguments)
+},{"dup":26}],246:[function(require,module,exports){
 (function (Buffer){
 'use strict';
 var d3 = require('d3');
@@ -61174,7 +61574,7 @@ var Visualization = LightningVisualization.extend({
 module.exports = Visualization;
 
 }).call(this,require("buffer").Buffer)
-},{"buffer":1,"d3":221,"d3-multiaxis-zoom":219,"lightning-client-utils":222,"lightning-visualization":236,"lodash":388}],241:[function(require,module,exports){
+},{"buffer":1,"d3":227,"d3-multiaxis-zoom":225,"lightning-client-utils":228,"lightning-visualization":242,"lodash":394}],247:[function(require,module,exports){
 'use strict';
 var Line = require('lightning-line');
 var _ = require('lodash');
@@ -61222,59 +61622,59 @@ var Visualization = Line.extend({
 
 
 module.exports = Visualization;
-},{"lightning-line":218,"lodash":388}],242:[function(require,module,exports){
+},{"lightning-line":224,"lodash":394}],248:[function(require,module,exports){
 arguments[4][6][0].apply(exports,arguments)
-},{"./src":264,"dup":6}],243:[function(require,module,exports){
-arguments[4][24][0].apply(exports,arguments)
-},{"./src":244,"dup":24}],244:[function(require,module,exports){
-arguments[4][25][0].apply(exports,arguments)
-},{"dup":25}],245:[function(require,module,exports){
+},{"./src":270,"dup":6}],249:[function(require,module,exports){
+arguments[4][30][0].apply(exports,arguments)
+},{"./src":250,"dup":30}],250:[function(require,module,exports){
+arguments[4][31][0].apply(exports,arguments)
+},{"dup":31}],251:[function(require,module,exports){
 arguments[4][9][0].apply(exports,arguments)
-},{"dup":9}],246:[function(require,module,exports){
+},{"dup":9}],252:[function(require,module,exports){
 arguments[4][10][0].apply(exports,arguments)
-},{"color":247,"colorbrewer":253,"d3-color":254,"d3-scale":255,"dup":10,"lodash":256,"superagent":257}],247:[function(require,module,exports){
+},{"color":253,"colorbrewer":259,"d3-color":260,"d3-scale":261,"dup":10,"lodash":262,"superagent":263}],253:[function(require,module,exports){
 arguments[4][11][0].apply(exports,arguments)
-},{"color-convert":249,"color-string":250,"dup":11}],248:[function(require,module,exports){
+},{"color-convert":255,"color-string":256,"dup":11}],254:[function(require,module,exports){
 arguments[4][12][0].apply(exports,arguments)
-},{"dup":12}],249:[function(require,module,exports){
+},{"dup":12}],255:[function(require,module,exports){
 arguments[4][13][0].apply(exports,arguments)
-},{"./conversions":248,"dup":13}],250:[function(require,module,exports){
+},{"./conversions":254,"dup":13}],256:[function(require,module,exports){
 arguments[4][14][0].apply(exports,arguments)
-},{"color-name":251,"dup":14}],251:[function(require,module,exports){
+},{"color-name":257,"dup":14}],257:[function(require,module,exports){
 arguments[4][15][0].apply(exports,arguments)
-},{"dup":15}],252:[function(require,module,exports){
+},{"dup":15}],258:[function(require,module,exports){
 arguments[4][7][0].apply(exports,arguments)
-},{"dup":7}],253:[function(require,module,exports){
+},{"dup":7}],259:[function(require,module,exports){
 arguments[4][8][0].apply(exports,arguments)
-},{"./colorbrewer.js":252,"dup":8}],254:[function(require,module,exports){
+},{"./colorbrewer.js":258,"dup":8}],260:[function(require,module,exports){
 arguments[4][16][0].apply(exports,arguments)
-},{"dup":16}],255:[function(require,module,exports){
+},{"dup":16}],261:[function(require,module,exports){
 arguments[4][17][0].apply(exports,arguments)
-},{"dup":17}],256:[function(require,module,exports){
+},{"dup":17}],262:[function(require,module,exports){
 arguments[4][18][0].apply(exports,arguments)
-},{"dup":18}],257:[function(require,module,exports){
+},{"dup":18}],263:[function(require,module,exports){
 arguments[4][19][0].apply(exports,arguments)
-},{"dup":19,"emitter":258,"reduce":259}],258:[function(require,module,exports){
+},{"dup":19,"emitter":264,"reduce":265}],264:[function(require,module,exports){
 arguments[4][20][0].apply(exports,arguments)
-},{"dup":20}],259:[function(require,module,exports){
+},{"dup":20}],265:[function(require,module,exports){
 arguments[4][21][0].apply(exports,arguments)
-},{"dup":21}],260:[function(require,module,exports){
-arguments[4][41][0].apply(exports,arguments)
-},{"dup":41,"events":5,"inherits":261,"insert-css":262,"lodash":388,"qwery":263}],261:[function(require,module,exports){
-arguments[4][42][0].apply(exports,arguments)
-},{"dup":42}],262:[function(require,module,exports){
-arguments[4][43][0].apply(exports,arguments)
-},{"dup":43}],263:[function(require,module,exports){
-arguments[4][44][0].apply(exports,arguments)
-},{"dup":44}],264:[function(require,module,exports){
-arguments[4][240][0].apply(exports,arguments)
-},{"buffer":1,"d3":245,"d3-multiaxis-zoom":243,"dup":240,"lightning-client-utils":246,"lightning-visualization":260,"lodash":388}],265:[function(require,module,exports){
+},{"dup":21}],266:[function(require,module,exports){
+arguments[4][23][0].apply(exports,arguments)
+},{"dup":23,"events":5,"inherits":267,"insert-css":268,"lodash":394,"qwery":269}],267:[function(require,module,exports){
+arguments[4][24][0].apply(exports,arguments)
+},{"dup":24}],268:[function(require,module,exports){
+arguments[4][25][0].apply(exports,arguments)
+},{"dup":25}],269:[function(require,module,exports){
+arguments[4][26][0].apply(exports,arguments)
+},{"dup":26}],270:[function(require,module,exports){
+arguments[4][246][0].apply(exports,arguments)
+},{"buffer":1,"d3":251,"d3-multiaxis-zoom":249,"dup":246,"lightning-client-utils":252,"lightning-visualization":266,"lodash":394}],271:[function(require,module,exports){
 arguments[4][6][0].apply(exports,arguments)
-},{"./src":288,"dup":6}],266:[function(require,module,exports){
+},{"./src":294,"dup":6}],272:[function(require,module,exports){
 arguments[4][7][0].apply(exports,arguments)
-},{"dup":7}],267:[function(require,module,exports){
+},{"dup":7}],273:[function(require,module,exports){
 arguments[4][8][0].apply(exports,arguments)
-},{"./colorbrewer.js":266,"dup":8}],268:[function(require,module,exports){
+},{"./colorbrewer.js":272,"dup":8}],274:[function(require,module,exports){
 var d3 = require('d3');
 var topojson = require('topojson');
 
@@ -73445,9 +73845,9 @@ if ( window.jQuery ) {
 }
 
 module.exports = Datamap;
-},{"d3":269,"topojson":270}],269:[function(require,module,exports){
+},{"d3":275,"topojson":276}],275:[function(require,module,exports){
 arguments[4][9][0].apply(exports,arguments)
-},{"dup":9}],270:[function(require,module,exports){
+},{"dup":9}],276:[function(require,module,exports){
 !function() {
   var topojson = {
     version: "1.6.19",
@@ -73983,41 +74383,41 @@ arguments[4][9][0].apply(exports,arguments)
   else this.topojson = topojson;
 }();
 
-},{}],271:[function(require,module,exports){
-arguments[4][74][0].apply(exports,arguments)
-},{"dup":74}],272:[function(require,module,exports){
+},{}],277:[function(require,module,exports){
+arguments[4][80][0].apply(exports,arguments)
+},{"dup":80}],278:[function(require,module,exports){
 arguments[4][10][0].apply(exports,arguments)
-},{"color":273,"colorbrewer":267,"d3-color":278,"d3-scale":279,"dup":10,"lodash":280,"superagent":281}],273:[function(require,module,exports){
+},{"color":279,"colorbrewer":273,"d3-color":284,"d3-scale":285,"dup":10,"lodash":286,"superagent":287}],279:[function(require,module,exports){
 arguments[4][11][0].apply(exports,arguments)
-},{"color-convert":275,"color-string":276,"dup":11}],274:[function(require,module,exports){
+},{"color-convert":281,"color-string":282,"dup":11}],280:[function(require,module,exports){
 arguments[4][12][0].apply(exports,arguments)
-},{"dup":12}],275:[function(require,module,exports){
+},{"dup":12}],281:[function(require,module,exports){
 arguments[4][13][0].apply(exports,arguments)
-},{"./conversions":274,"dup":13}],276:[function(require,module,exports){
+},{"./conversions":280,"dup":13}],282:[function(require,module,exports){
 arguments[4][14][0].apply(exports,arguments)
-},{"color-name":277,"dup":14}],277:[function(require,module,exports){
+},{"color-name":283,"dup":14}],283:[function(require,module,exports){
 arguments[4][15][0].apply(exports,arguments)
-},{"dup":15}],278:[function(require,module,exports){
+},{"dup":15}],284:[function(require,module,exports){
 arguments[4][16][0].apply(exports,arguments)
-},{"dup":16}],279:[function(require,module,exports){
+},{"dup":16}],285:[function(require,module,exports){
 arguments[4][17][0].apply(exports,arguments)
-},{"dup":17}],280:[function(require,module,exports){
+},{"dup":17}],286:[function(require,module,exports){
 arguments[4][18][0].apply(exports,arguments)
-},{"dup":18}],281:[function(require,module,exports){
+},{"dup":18}],287:[function(require,module,exports){
 arguments[4][19][0].apply(exports,arguments)
-},{"dup":19,"emitter":282,"reduce":283}],282:[function(require,module,exports){
+},{"dup":19,"emitter":288,"reduce":289}],288:[function(require,module,exports){
 arguments[4][20][0].apply(exports,arguments)
-},{"dup":20}],283:[function(require,module,exports){
+},{"dup":20}],289:[function(require,module,exports){
 arguments[4][21][0].apply(exports,arguments)
-},{"dup":21}],284:[function(require,module,exports){
-arguments[4][41][0].apply(exports,arguments)
-},{"dup":41,"events":5,"inherits":285,"insert-css":286,"lodash":388,"qwery":287}],285:[function(require,module,exports){
-arguments[4][42][0].apply(exports,arguments)
-},{"dup":42}],286:[function(require,module,exports){
-arguments[4][43][0].apply(exports,arguments)
-},{"dup":43}],287:[function(require,module,exports){
-arguments[4][44][0].apply(exports,arguments)
-},{"dup":44}],288:[function(require,module,exports){
+},{"dup":21}],290:[function(require,module,exports){
+arguments[4][23][0].apply(exports,arguments)
+},{"dup":23,"events":5,"inherits":291,"insert-css":292,"lodash":394,"qwery":293}],291:[function(require,module,exports){
+arguments[4][24][0].apply(exports,arguments)
+},{"dup":24}],292:[function(require,module,exports){
+arguments[4][25][0].apply(exports,arguments)
+},{"dup":25}],293:[function(require,module,exports){
+arguments[4][26][0].apply(exports,arguments)
+},{"dup":26}],294:[function(require,module,exports){
 'use strict';
 var LightningVisualization = require('lightning-visualization');
 var Datamaps = require('datamaps-all-browserify');
@@ -74134,47 +74534,47 @@ var Visualization = LightningVisualization.extend({
 
 module.exports = Visualization;
 
-},{"colorbrewer":267,"datamaps-all-browserify":268,"jquery":271,"lightning-client-utils":272,"lightning-visualization":284,"lodash":388}],289:[function(require,module,exports){
+},{"colorbrewer":273,"datamaps-all-browserify":274,"jquery":277,"lightning-client-utils":278,"lightning-visualization":290,"lodash":394}],295:[function(require,module,exports){
 arguments[4][6][0].apply(exports,arguments)
-},{"./src":309,"dup":6}],290:[function(require,module,exports){
+},{"./src":315,"dup":6}],296:[function(require,module,exports){
 arguments[4][7][0].apply(exports,arguments)
-},{"dup":7}],291:[function(require,module,exports){
+},{"dup":7}],297:[function(require,module,exports){
 arguments[4][8][0].apply(exports,arguments)
-},{"./colorbrewer.js":290,"dup":8}],292:[function(require,module,exports){
+},{"./colorbrewer.js":296,"dup":8}],298:[function(require,module,exports){
 arguments[4][9][0].apply(exports,arguments)
-},{"dup":9}],293:[function(require,module,exports){
+},{"dup":9}],299:[function(require,module,exports){
 arguments[4][10][0].apply(exports,arguments)
-},{"color":294,"colorbrewer":291,"d3-color":299,"d3-scale":300,"dup":10,"lodash":301,"superagent":302}],294:[function(require,module,exports){
+},{"color":300,"colorbrewer":297,"d3-color":305,"d3-scale":306,"dup":10,"lodash":307,"superagent":308}],300:[function(require,module,exports){
 arguments[4][11][0].apply(exports,arguments)
-},{"color-convert":296,"color-string":297,"dup":11}],295:[function(require,module,exports){
+},{"color-convert":302,"color-string":303,"dup":11}],301:[function(require,module,exports){
 arguments[4][12][0].apply(exports,arguments)
-},{"dup":12}],296:[function(require,module,exports){
+},{"dup":12}],302:[function(require,module,exports){
 arguments[4][13][0].apply(exports,arguments)
-},{"./conversions":295,"dup":13}],297:[function(require,module,exports){
+},{"./conversions":301,"dup":13}],303:[function(require,module,exports){
 arguments[4][14][0].apply(exports,arguments)
-},{"color-name":298,"dup":14}],298:[function(require,module,exports){
+},{"color-name":304,"dup":14}],304:[function(require,module,exports){
 arguments[4][15][0].apply(exports,arguments)
-},{"dup":15}],299:[function(require,module,exports){
+},{"dup":15}],305:[function(require,module,exports){
 arguments[4][16][0].apply(exports,arguments)
-},{"dup":16}],300:[function(require,module,exports){
+},{"dup":16}],306:[function(require,module,exports){
 arguments[4][17][0].apply(exports,arguments)
-},{"dup":17}],301:[function(require,module,exports){
+},{"dup":17}],307:[function(require,module,exports){
 arguments[4][18][0].apply(exports,arguments)
-},{"dup":18}],302:[function(require,module,exports){
+},{"dup":18}],308:[function(require,module,exports){
 arguments[4][19][0].apply(exports,arguments)
-},{"dup":19,"emitter":303,"reduce":304}],303:[function(require,module,exports){
+},{"dup":19,"emitter":309,"reduce":310}],309:[function(require,module,exports){
 arguments[4][20][0].apply(exports,arguments)
-},{"dup":20}],304:[function(require,module,exports){
+},{"dup":20}],310:[function(require,module,exports){
 arguments[4][21][0].apply(exports,arguments)
-},{"dup":21}],305:[function(require,module,exports){
-arguments[4][41][0].apply(exports,arguments)
-},{"dup":41,"events":5,"inherits":306,"insert-css":307,"lodash":388,"qwery":308}],306:[function(require,module,exports){
-arguments[4][42][0].apply(exports,arguments)
-},{"dup":42}],307:[function(require,module,exports){
-arguments[4][43][0].apply(exports,arguments)
-},{"dup":43}],308:[function(require,module,exports){
-arguments[4][44][0].apply(exports,arguments)
-},{"dup":44}],309:[function(require,module,exports){
+},{"dup":21}],311:[function(require,module,exports){
+arguments[4][23][0].apply(exports,arguments)
+},{"dup":23,"events":5,"inherits":312,"insert-css":313,"lodash":394,"qwery":314}],312:[function(require,module,exports){
+arguments[4][24][0].apply(exports,arguments)
+},{"dup":24}],313:[function(require,module,exports){
+arguments[4][25][0].apply(exports,arguments)
+},{"dup":25}],314:[function(require,module,exports){
+arguments[4][26][0].apply(exports,arguments)
+},{"dup":26}],315:[function(require,module,exports){
 (function (Buffer){
 'use strict';
 var d3 = require('d3');
@@ -74218,7 +74618,6 @@ var Visualization = LightningVisualization.extend({
         var margin = this.margin;
         var data = this.data;
         var options = this.options;
-        var selector = this.selector;
         var self = this;
 
         var nrow = data.nrow;
@@ -74232,7 +74631,7 @@ var Visualization = LightningVisualization.extend({
         this.makeScales(name);
 
         // create container
-        var container = d3.select(selector)
+        var container = d3.select(this.el)
             .append('div')
             .style('width', width)
             .style('height', height)
@@ -74281,8 +74680,8 @@ var Visualization = LightningVisualization.extend({
             .node().getContext("2d");
 
         // add keydown events
-        d3.select(selector).attr('tabindex', -1);
-        d3.select(selector).on('keydown', update);
+        d3.select(this.el).attr('tabindex', -1);
+        d3.select(this.el).on('keydown', update);
 
         // compute good font sizes for axis and cell labels
         var axisfont = Math.min((size * 72 / 96) / 2, 14);
@@ -74565,45 +74964,45 @@ var Visualization = LightningVisualization.extend({
 module.exports = Visualization;
 
 }).call(this,require("buffer").Buffer)
-},{"buffer":1,"colorbrewer":291,"d3":292,"lightning-client-utils":293,"lightning-visualization":305,"lodash":388}],310:[function(require,module,exports){
+},{"buffer":1,"colorbrewer":297,"d3":298,"lightning-client-utils":299,"lightning-visualization":311,"lodash":394}],316:[function(require,module,exports){
 arguments[4][6][0].apply(exports,arguments)
-},{"./src":331,"dup":6}],311:[function(require,module,exports){
+},{"./src":337,"dup":6}],317:[function(require,module,exports){
 arguments[4][16][0].apply(exports,arguments)
-},{"dup":16}],312:[function(require,module,exports){
+},{"dup":16}],318:[function(require,module,exports){
 arguments[4][10][0].apply(exports,arguments)
-},{"color":313,"colorbrewer":319,"d3-color":311,"d3-scale":320,"dup":10,"lodash":321,"superagent":322}],313:[function(require,module,exports){
+},{"color":319,"colorbrewer":325,"d3-color":317,"d3-scale":326,"dup":10,"lodash":327,"superagent":328}],319:[function(require,module,exports){
 arguments[4][11][0].apply(exports,arguments)
-},{"color-convert":315,"color-string":316,"dup":11}],314:[function(require,module,exports){
+},{"color-convert":321,"color-string":322,"dup":11}],320:[function(require,module,exports){
 arguments[4][12][0].apply(exports,arguments)
-},{"dup":12}],315:[function(require,module,exports){
+},{"dup":12}],321:[function(require,module,exports){
 arguments[4][13][0].apply(exports,arguments)
-},{"./conversions":314,"dup":13}],316:[function(require,module,exports){
+},{"./conversions":320,"dup":13}],322:[function(require,module,exports){
 arguments[4][14][0].apply(exports,arguments)
-},{"color-name":317,"dup":14}],317:[function(require,module,exports){
+},{"color-name":323,"dup":14}],323:[function(require,module,exports){
 arguments[4][15][0].apply(exports,arguments)
-},{"dup":15}],318:[function(require,module,exports){
+},{"dup":15}],324:[function(require,module,exports){
 arguments[4][7][0].apply(exports,arguments)
-},{"dup":7}],319:[function(require,module,exports){
+},{"dup":7}],325:[function(require,module,exports){
 arguments[4][8][0].apply(exports,arguments)
-},{"./colorbrewer.js":318,"dup":8}],320:[function(require,module,exports){
+},{"./colorbrewer.js":324,"dup":8}],326:[function(require,module,exports){
 arguments[4][17][0].apply(exports,arguments)
-},{"dup":17}],321:[function(require,module,exports){
+},{"dup":17}],327:[function(require,module,exports){
 arguments[4][18][0].apply(exports,arguments)
-},{"dup":18}],322:[function(require,module,exports){
+},{"dup":18}],328:[function(require,module,exports){
 arguments[4][19][0].apply(exports,arguments)
-},{"dup":19,"emitter":323,"reduce":324}],323:[function(require,module,exports){
+},{"dup":19,"emitter":329,"reduce":330}],329:[function(require,module,exports){
 arguments[4][20][0].apply(exports,arguments)
-},{"dup":20}],324:[function(require,module,exports){
+},{"dup":20}],330:[function(require,module,exports){
 arguments[4][21][0].apply(exports,arguments)
-},{"dup":21}],325:[function(require,module,exports){
-arguments[4][41][0].apply(exports,arguments)
-},{"dup":41,"events":5,"inherits":326,"insert-css":327,"lodash":388,"qwery":328}],326:[function(require,module,exports){
-arguments[4][42][0].apply(exports,arguments)
-},{"dup":42}],327:[function(require,module,exports){
-arguments[4][43][0].apply(exports,arguments)
-},{"dup":43}],328:[function(require,module,exports){
-arguments[4][44][0].apply(exports,arguments)
-},{"dup":44}],329:[function(require,module,exports){
+},{"dup":21}],331:[function(require,module,exports){
+arguments[4][23][0].apply(exports,arguments)
+},{"dup":23,"events":5,"inherits":332,"insert-css":333,"lodash":394,"qwery":334}],332:[function(require,module,exports){
+arguments[4][24][0].apply(exports,arguments)
+},{"dup":24}],333:[function(require,module,exports){
+arguments[4][25][0].apply(exports,arguments)
+},{"dup":25}],334:[function(require,module,exports){
+arguments[4][26][0].apply(exports,arguments)
+},{"dup":26}],335:[function(require,module,exports){
 
 
 /**
@@ -74908,7 +75307,7 @@ module.exports = function(THREE) {
     };
 
 };
-},{}],330:[function(require,module,exports){
+},{}],336:[function(require,module,exports){
 // threejs.org/license
 'use strict';var THREE={REVISION:"70"};"object"===typeof module&&(module.exports=THREE);void 0===Math.sign&&(Math.sign=function(a){return 0>a?-1:0<a?1:0});THREE.MOUSE={LEFT:0,MIDDLE:1,RIGHT:2};THREE.CullFaceNone=0;THREE.CullFaceBack=1;THREE.CullFaceFront=2;THREE.CullFaceFrontBack=3;THREE.FrontFaceDirectionCW=0;THREE.FrontFaceDirectionCCW=1;THREE.BasicShadowMap=0;THREE.PCFShadowMap=1;THREE.PCFSoftShadowMap=2;THREE.FrontSide=0;THREE.BackSide=1;THREE.DoubleSide=2;THREE.NoShading=0;
 THREE.FlatShading=1;THREE.SmoothShading=2;THREE.NoColors=0;THREE.FaceColors=1;THREE.VertexColors=2;THREE.NoBlending=0;THREE.NormalBlending=1;THREE.AdditiveBlending=2;THREE.SubtractiveBlending=3;THREE.MultiplyBlending=4;THREE.CustomBlending=5;THREE.AddEquation=100;THREE.SubtractEquation=101;THREE.ReverseSubtractEquation=102;THREE.MinEquation=103;THREE.MaxEquation=104;THREE.ZeroFactor=200;THREE.OneFactor=201;THREE.SrcColorFactor=202;THREE.OneMinusSrcColorFactor=203;THREE.SrcAlphaFactor=204;
@@ -75731,7 +76130,7 @@ THREE.MorphBlendMesh.prototype.getAnimationDuration=function(a){var b=-1;if(a=th
 THREE.MorphBlendMesh.prototype.update=function(a){for(var b=0,c=this.animationsList.length;b<c;b++){var d=this.animationsList[b];if(d.active){var e=d.duration/d.length;d.time+=d.direction*a;if(d.mirroredLoop){if(d.time>d.duration||0>d.time)d.direction*=-1,d.time>d.duration&&(d.time=d.duration,d.directionBackwards=!0),0>d.time&&(d.time=0,d.directionBackwards=!1)}else d.time%=d.duration,0>d.time&&(d.time+=d.duration);var f=d.startFrame+THREE.Math.clamp(Math.floor(d.time/e),0,d.length-1),g=d.weight;
 f!==d.currentFrame&&(this.morphTargetInfluences[d.lastFrame]=0,this.morphTargetInfluences[d.currentFrame]=1*g,this.morphTargetInfluences[f]=0,d.lastFrame=d.currentFrame,d.currentFrame=f);e=d.time%e/e;d.directionBackwards&&(e=1-e);this.morphTargetInfluences[d.currentFrame]=e*g;this.morphTargetInfluences[d.lastFrame]=(1-e)*g}}};module.exports=THREE;
 
-},{}],331:[function(require,module,exports){
+},{}],337:[function(require,module,exports){
 'use strict';
 
 var LightningVisualization = require('lightning-visualization');
@@ -75991,53 +76390,53 @@ var Scatter3 = LightningVisualization.extend({
 
 module.exports = Scatter3;
 
-},{"d3-color":311,"lightning-client-utils":312,"lightning-visualization":325,"lodash":388,"three-fly-controls":329,"three.js":330}],332:[function(require,module,exports){
+},{"d3-color":317,"lightning-client-utils":318,"lightning-visualization":331,"lodash":394,"three-fly-controls":335,"three.js":336}],338:[function(require,module,exports){
 arguments[4][6][0].apply(exports,arguments)
-},{"./src":356,"dup":6}],333:[function(require,module,exports){
+},{"./src":362,"dup":6}],339:[function(require,module,exports){
 arguments[4][6][0].apply(exports,arguments)
-},{"./src":355,"dup":6}],334:[function(require,module,exports){
-arguments[4][24][0].apply(exports,arguments)
-},{"./src":335,"dup":24}],335:[function(require,module,exports){
-arguments[4][25][0].apply(exports,arguments)
-},{"dup":25}],336:[function(require,module,exports){
+},{"./src":361,"dup":6}],340:[function(require,module,exports){
+arguments[4][30][0].apply(exports,arguments)
+},{"./src":341,"dup":30}],341:[function(require,module,exports){
+arguments[4][31][0].apply(exports,arguments)
+},{"dup":31}],342:[function(require,module,exports){
 arguments[4][9][0].apply(exports,arguments)
-},{"dup":9}],337:[function(require,module,exports){
+},{"dup":9}],343:[function(require,module,exports){
 arguments[4][10][0].apply(exports,arguments)
-},{"color":338,"colorbrewer":344,"d3-color":345,"d3-scale":346,"dup":10,"lodash":347,"superagent":348}],338:[function(require,module,exports){
+},{"color":344,"colorbrewer":350,"d3-color":351,"d3-scale":352,"dup":10,"lodash":353,"superagent":354}],344:[function(require,module,exports){
 arguments[4][11][0].apply(exports,arguments)
-},{"color-convert":340,"color-string":341,"dup":11}],339:[function(require,module,exports){
+},{"color-convert":346,"color-string":347,"dup":11}],345:[function(require,module,exports){
 arguments[4][12][0].apply(exports,arguments)
-},{"dup":12}],340:[function(require,module,exports){
+},{"dup":12}],346:[function(require,module,exports){
 arguments[4][13][0].apply(exports,arguments)
-},{"./conversions":339,"dup":13}],341:[function(require,module,exports){
+},{"./conversions":345,"dup":13}],347:[function(require,module,exports){
 arguments[4][14][0].apply(exports,arguments)
-},{"color-name":342,"dup":14}],342:[function(require,module,exports){
+},{"color-name":348,"dup":14}],348:[function(require,module,exports){
 arguments[4][15][0].apply(exports,arguments)
-},{"dup":15}],343:[function(require,module,exports){
+},{"dup":15}],349:[function(require,module,exports){
 arguments[4][7][0].apply(exports,arguments)
-},{"dup":7}],344:[function(require,module,exports){
+},{"dup":7}],350:[function(require,module,exports){
 arguments[4][8][0].apply(exports,arguments)
-},{"./colorbrewer.js":343,"dup":8}],345:[function(require,module,exports){
+},{"./colorbrewer.js":349,"dup":8}],351:[function(require,module,exports){
 arguments[4][16][0].apply(exports,arguments)
-},{"dup":16}],346:[function(require,module,exports){
+},{"dup":16}],352:[function(require,module,exports){
 arguments[4][17][0].apply(exports,arguments)
-},{"dup":17}],347:[function(require,module,exports){
+},{"dup":17}],353:[function(require,module,exports){
 arguments[4][18][0].apply(exports,arguments)
-},{"dup":18}],348:[function(require,module,exports){
+},{"dup":18}],354:[function(require,module,exports){
 arguments[4][19][0].apply(exports,arguments)
-},{"dup":19,"emitter":349,"reduce":350}],349:[function(require,module,exports){
+},{"dup":19,"emitter":355,"reduce":356}],355:[function(require,module,exports){
 arguments[4][20][0].apply(exports,arguments)
-},{"dup":20}],350:[function(require,module,exports){
+},{"dup":20}],356:[function(require,module,exports){
 arguments[4][21][0].apply(exports,arguments)
-},{"dup":21}],351:[function(require,module,exports){
-arguments[4][41][0].apply(exports,arguments)
-},{"dup":41,"events":5,"inherits":352,"insert-css":353,"lodash":388,"qwery":354}],352:[function(require,module,exports){
-arguments[4][42][0].apply(exports,arguments)
-},{"dup":42}],353:[function(require,module,exports){
-arguments[4][43][0].apply(exports,arguments)
-},{"dup":43}],354:[function(require,module,exports){
-arguments[4][44][0].apply(exports,arguments)
-},{"dup":44}],355:[function(require,module,exports){
+},{"dup":21}],357:[function(require,module,exports){
+arguments[4][23][0].apply(exports,arguments)
+},{"dup":23,"events":5,"inherits":358,"insert-css":359,"lodash":394,"qwery":360}],358:[function(require,module,exports){
+arguments[4][24][0].apply(exports,arguments)
+},{"dup":24}],359:[function(require,module,exports){
+arguments[4][25][0].apply(exports,arguments)
+},{"dup":25}],360:[function(require,module,exports){
+arguments[4][26][0].apply(exports,arguments)
+},{"dup":26}],361:[function(require,module,exports){
 (function (Buffer){
 'use strict';
 var d3 = require('d3');
@@ -76541,7 +76940,7 @@ var Visualization = LightningVisualization.extend({
 module.exports = Visualization;
 
 }).call(this,require("buffer").Buffer)
-},{"buffer":1,"d3":336,"d3-multiaxis-zoom":334,"lightning-client-utils":337,"lightning-visualization":351,"lodash":388}],356:[function(require,module,exports){
+},{"buffer":1,"d3":342,"d3-multiaxis-zoom":340,"lightning-client-utils":343,"lightning-visualization":357,"lodash":394}],362:[function(require,module,exports){
 'use strict';
 var Scatter = require('lightning-scatter');
 var _ = require('lodash');
@@ -76577,67 +76976,67 @@ var Visualization = Scatter.extend({
 
 module.exports = Visualization;
 
-},{"lightning-scatter":333,"lodash":388}],357:[function(require,module,exports){
+},{"lightning-scatter":339,"lodash":394}],363:[function(require,module,exports){
 arguments[4][6][0].apply(exports,arguments)
-},{"./src":379,"dup":6}],358:[function(require,module,exports){
-arguments[4][24][0].apply(exports,arguments)
-},{"./src":359,"dup":24}],359:[function(require,module,exports){
-arguments[4][25][0].apply(exports,arguments)
-},{"dup":25}],360:[function(require,module,exports){
+},{"./src":385,"dup":6}],364:[function(require,module,exports){
+arguments[4][30][0].apply(exports,arguments)
+},{"./src":365,"dup":30}],365:[function(require,module,exports){
+arguments[4][31][0].apply(exports,arguments)
+},{"dup":31}],366:[function(require,module,exports){
 arguments[4][9][0].apply(exports,arguments)
-},{"dup":9}],361:[function(require,module,exports){
+},{"dup":9}],367:[function(require,module,exports){
 arguments[4][10][0].apply(exports,arguments)
-},{"color":362,"colorbrewer":368,"d3-color":369,"d3-scale":370,"dup":10,"lodash":371,"superagent":372}],362:[function(require,module,exports){
+},{"color":368,"colorbrewer":374,"d3-color":375,"d3-scale":376,"dup":10,"lodash":377,"superagent":378}],368:[function(require,module,exports){
 arguments[4][11][0].apply(exports,arguments)
-},{"color-convert":364,"color-string":365,"dup":11}],363:[function(require,module,exports){
+},{"color-convert":370,"color-string":371,"dup":11}],369:[function(require,module,exports){
 arguments[4][12][0].apply(exports,arguments)
-},{"dup":12}],364:[function(require,module,exports){
+},{"dup":12}],370:[function(require,module,exports){
 arguments[4][13][0].apply(exports,arguments)
-},{"./conversions":363,"dup":13}],365:[function(require,module,exports){
+},{"./conversions":369,"dup":13}],371:[function(require,module,exports){
 arguments[4][14][0].apply(exports,arguments)
-},{"color-name":366,"dup":14}],366:[function(require,module,exports){
+},{"color-name":372,"dup":14}],372:[function(require,module,exports){
 arguments[4][15][0].apply(exports,arguments)
-},{"dup":15}],367:[function(require,module,exports){
+},{"dup":15}],373:[function(require,module,exports){
 arguments[4][7][0].apply(exports,arguments)
-},{"dup":7}],368:[function(require,module,exports){
+},{"dup":7}],374:[function(require,module,exports){
 arguments[4][8][0].apply(exports,arguments)
-},{"./colorbrewer.js":367,"dup":8}],369:[function(require,module,exports){
+},{"./colorbrewer.js":373,"dup":8}],375:[function(require,module,exports){
 arguments[4][16][0].apply(exports,arguments)
-},{"dup":16}],370:[function(require,module,exports){
+},{"dup":16}],376:[function(require,module,exports){
 arguments[4][17][0].apply(exports,arguments)
-},{"dup":17}],371:[function(require,module,exports){
+},{"dup":17}],377:[function(require,module,exports){
 arguments[4][18][0].apply(exports,arguments)
-},{"dup":18}],372:[function(require,module,exports){
+},{"dup":18}],378:[function(require,module,exports){
 arguments[4][19][0].apply(exports,arguments)
-},{"dup":19,"emitter":373,"reduce":374}],373:[function(require,module,exports){
+},{"dup":19,"emitter":379,"reduce":380}],379:[function(require,module,exports){
 arguments[4][20][0].apply(exports,arguments)
-},{"dup":20}],374:[function(require,module,exports){
+},{"dup":20}],380:[function(require,module,exports){
 arguments[4][21][0].apply(exports,arguments)
-},{"dup":21}],375:[function(require,module,exports){
-arguments[4][41][0].apply(exports,arguments)
-},{"dup":41,"events":5,"inherits":376,"insert-css":377,"lodash":388,"qwery":378}],376:[function(require,module,exports){
-arguments[4][42][0].apply(exports,arguments)
-},{"dup":42}],377:[function(require,module,exports){
-arguments[4][43][0].apply(exports,arguments)
-},{"dup":43}],378:[function(require,module,exports){
-arguments[4][44][0].apply(exports,arguments)
-},{"dup":44}],379:[function(require,module,exports){
-arguments[4][355][0].apply(exports,arguments)
-},{"buffer":1,"d3":360,"d3-multiaxis-zoom":358,"dup":355,"lightning-client-utils":361,"lightning-visualization":375,"lodash":388}],380:[function(require,module,exports){
+},{"dup":21}],381:[function(require,module,exports){
+arguments[4][23][0].apply(exports,arguments)
+},{"dup":23,"events":5,"inherits":382,"insert-css":383,"lodash":394,"qwery":384}],382:[function(require,module,exports){
+arguments[4][24][0].apply(exports,arguments)
+},{"dup":24}],383:[function(require,module,exports){
+arguments[4][25][0].apply(exports,arguments)
+},{"dup":25}],384:[function(require,module,exports){
+arguments[4][26][0].apply(exports,arguments)
+},{"dup":26}],385:[function(require,module,exports){
+arguments[4][361][0].apply(exports,arguments)
+},{"buffer":1,"d3":366,"d3-multiaxis-zoom":364,"dup":361,"lightning-client-utils":367,"lightning-visualization":381,"lodash":394}],386:[function(require,module,exports){
 arguments[4][6][0].apply(exports,arguments)
-},{"./src":387,"dup":6}],381:[function(require,module,exports){
-arguments[4][41][0].apply(exports,arguments)
-},{"dup":41,"events":5,"inherits":382,"insert-css":383,"lodash":388,"qwery":384}],382:[function(require,module,exports){
-arguments[4][42][0].apply(exports,arguments)
-},{"dup":42}],383:[function(require,module,exports){
-arguments[4][43][0].apply(exports,arguments)
-},{"dup":43}],384:[function(require,module,exports){
-arguments[4][44][0].apply(exports,arguments)
-},{"dup":44}],385:[function(require,module,exports){
-arguments[4][329][0].apply(exports,arguments)
-},{"dup":329}],386:[function(require,module,exports){
-arguments[4][330][0].apply(exports,arguments)
-},{"dup":330}],387:[function(require,module,exports){
+},{"./src":393,"dup":6}],387:[function(require,module,exports){
+arguments[4][23][0].apply(exports,arguments)
+},{"dup":23,"events":5,"inherits":388,"insert-css":389,"lodash":394,"qwery":390}],388:[function(require,module,exports){
+arguments[4][24][0].apply(exports,arguments)
+},{"dup":24}],389:[function(require,module,exports){
+arguments[4][25][0].apply(exports,arguments)
+},{"dup":25}],390:[function(require,module,exports){
+arguments[4][26][0].apply(exports,arguments)
+},{"dup":26}],391:[function(require,module,exports){
+arguments[4][335][0].apply(exports,arguments)
+},{"dup":335}],392:[function(require,module,exports){
+arguments[4][336][0].apply(exports,arguments)
+},{"dup":336}],393:[function(require,module,exports){
 'use strict';
 
 var LightningVisualization = require('lightning-visualization');
@@ -76746,7 +77145,7 @@ var Visualization = LightningVisualization.extend({
 
 module.exports = Visualization;
 
-},{"lightning-visualization":381,"lodash":388,"three-fly-controls":385,"three.js":386}],388:[function(require,module,exports){
+},{"lightning-visualization":387,"lodash":394,"three-fly-controls":391,"three.js":392}],394:[function(require,module,exports){
 (function (global){
 /**
  * @license
@@ -89101,7 +89500,7 @@ module.exports = Visualization;
 }.call(this));
 
 }).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{}],389:[function(require,module,exports){
+},{}],395:[function(require,module,exports){
 
 var jQueryURL = '//ajax.googleapis.com/ajax/libs/jquery/1.11.0/jquery.min.js';
 
@@ -89170,5 +89569,5 @@ if(!window.$) {
 window.lightning = window.lightning || {};
 window.lightning.initVisualizations = init;
 
-},{"lightning-adjacency":6,"lightning-circle":23,"lightning-force":48,"lightning-gallery":73,"lightning-graph":137,"lightning-graph-bundled":112,"lightning-image":195,"lightning-image-poly":160,"lightning-line":242,"lightning-line-streaming":217,"lightning-map":265,"lightning-matrix":289,"lightning-scatter":357,"lightning-scatter-3":310,"lightning-scatter-streaming":332,"lightning-volume":380}]},{},[389]);
+},{"lightning-adjacency":6,"lightning-circle":29,"lightning-force":54,"lightning-gallery":79,"lightning-graph":143,"lightning-graph-bundled":118,"lightning-image":201,"lightning-image-poly":166,"lightning-line":248,"lightning-line-streaming":223,"lightning-map":271,"lightning-matrix":295,"lightning-scatter":363,"lightning-scatter-3":316,"lightning-scatter-streaming":338,"lightning-volume":386}]},{},[395]);
 ;window.define = window._define;window.require = window._require;
