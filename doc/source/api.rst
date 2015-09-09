@@ -29,23 +29,14 @@ Plots
 
 	scatter
 	line
-	linestacked
 	force
 	graph
 	graphbundled
 	matrix
 	adjacency
 	map
-
-Linked
-------
-
-.. currentmodule:: lightning.Lightning
-
-.. autosummary::
-	:toctree: generated/
-
-	scatterline
+	circle
+	histogram
 
 Images
 ------
@@ -56,6 +47,7 @@ Images
 	:toctree: generated/
 
 	image
+	imagepoly
 	gallery
 
 3D
