@@ -16,14 +16,14 @@ class LineStreaming(Base):
     )
 
     @staticmethod
-    def clean(series, index=None, color=None, label=None, size=None, xaxis=None, yaxis=None):
+    def clean(series, index=None, color=None, group=None, size=None, xaxis=None, yaxis=None):
         """
         Plot streaming one-dimensional series data as updating lines.
 
         Plotting once returns a visualization on which 'append' can be called
         to add new data in a streaming fashion. New lines will appear on the right.
 
-        .. image:: line.png
+        .. image:: line-streaming.png
 
         Parameters
         ----------
@@ -37,8 +37,8 @@ class LineStreaming(Base):
         color : array-like, optional, singleton or (n,3)
             Single rgb value or array to set line colors
 
-        label : array-like, optional, singleton or (n,)
-            Single integer or array to set line colors via group labels
+        group : array-like, optional, singleton or (n,)
+            Single integer or array to set line colors via group assignment
 
         size : array-like, optional, singleton or (n,)
             Single size or array to set line thickness
@@ -48,6 +48,9 @@ class LineStreaming(Base):
 
         yaxis : str, optional, default = None
             Label for y-axis
+
+        max_width : int, optional, default = 50
+            The maximum number of time points to show before plot shifts.
         """
 
         series = array_to_lines(series)
@@ -55,7 +58,7 @@ class LineStreaming(Base):
 
         outdict = add_property(outdict, color, 'color')
         outdict = add_property(outdict, size, 'size')
-        outdict = add_property(outdict, label, 'label')
+        outdict = add_property(outdict, group, 'group')
         outdict = add_property(outdict, index, 'index')
         outdict = add_property(outdict, xaxis, 'xaxis')
         outdict = add_property(outdict, yaxis, 'yaxis')
@@ -85,7 +88,7 @@ class ScatterStreaming(Base):
         in a streaming fashion. The opacity of old and new data is automatically set
         to highlight the most recent data and fade old data away.
 
-        .. image:: scatter.png
+        .. image:: scatter-streaming.png
 
         Parameters
         ----------
