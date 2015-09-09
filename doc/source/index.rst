@@ -1,4 +1,7 @@
+.. raw:: html
 
+  <br>
+  
 Lightning: interactive data visualization 
 =========================================
 
@@ -40,6 +43,7 @@ Lightning: interactive data visualization
     </div>
   </div>
   <br>
+  <br>
 
 
 Lightning is a framework for data visualization providing API-based access to reproducible, web-based, interactive visualizations. It includes a core set of visualization types, but is built for extendability and customization. Lightning supports modern web libraries like d3.js and three.js and the npm ecosystem, and is designed for interactivity and continuously updating data streams.
@@ -55,10 +59,12 @@ This is the API documentation for the official Lightning Python client, which ma
 .. raw:: html
 
 	<br>
+	<br>
 	<a class='button' href='api.html'>API reference</a>
 	<a class='button' href='http://lightning-viz.org'>Project page</a>
   <a class='button' href='http://nbviewer.ipython.org/github/lightning-viz/lightning-example-notebooks/tree/master/index.ipynb'>Notebooks</a>
   <a class='button' href='https://github.com/lightning-viz'>Github</a>
+	<br>
 	<br>
 	<br>
 	<br>

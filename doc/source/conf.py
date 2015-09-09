@@ -123,6 +123,9 @@ html_theme = 'bootstrap'
 
 html_favicon = "favicon.ico"
 
+html_show_copyright = False
+html_show_sphinx = False
+
 
 # Theme options are theme-specific and customize the look and feel of a theme
 # further.  For a list of options available for each theme, see the
@@ -133,7 +136,7 @@ html_theme_options = {
   'bootstrap_version': "3",
   'bootswatch_theme': "readable",
   'navbar_sidebarrel': False,
-  'navbar_pagenav': False,
+  'navbar_pagenav': False
 }
 
 # Add any paths that contain custom themes here, relative to this directory.

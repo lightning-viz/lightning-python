@@ -3,8 +3,8 @@
 API Reference
 =============
 
-Set up
---------
+Setup
+-----
 
 .. currentmodule:: lightning.Lightning
 
