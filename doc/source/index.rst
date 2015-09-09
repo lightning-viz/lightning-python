@@ -42,7 +42,7 @@ Lightning: interactive data visualization
   <br>
 
 
-Lightning is a data-visualization server providing API-based access to reproducible, web-based, interactive visualizations. It includes a core set of visualization types, but is built for extendability and customization. Lightning supports modern libraries like d3.js, three.js, and leaflet, and is designed for interactivity over large data sets and continuously updating data streams.
+Lightning is a framework for data visualization providing API-based access to reproducible, web-based, interactive visualizations. It includes a core set of visualization types, but is built for extendability and customization. Lightning supports modern web libraries like d3.js and three.js and the npm ecosystem, and is designed for interactivity and continuously updating data streams.
 
 This is the API documentation for the official Lightning Python client, which makes it easy to generate interactive visualizations from Python, including from an iPython notebook. Check out the `example notebooks`_, and also read Lightning's guide to `getting started`_.
 

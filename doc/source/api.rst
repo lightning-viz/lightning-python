@@ -17,6 +17,10 @@ Set up
 	set_host
 	enable_ipython
 	disable_ipython
+	enable_local
+	disable_local
+	set_size
+
 
 
 Plots
