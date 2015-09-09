@@ -60,7 +60,7 @@ class ImagePoly(Base):
 
         imgs = [array_to_im(imagedata)]
         outdict = {'images': imgs}
-        outdict = add_property(outdict, polygons, 'polygons', xy=xy)
+        outdict = add_property(outdict, polygons, 'coordinates', xy=xy)
 
         return outdict
 
