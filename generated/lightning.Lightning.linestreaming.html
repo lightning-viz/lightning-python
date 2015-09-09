@@ -6,18 +6,18 @@
   <head>
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
     
-    <title>lightning.Lightning.linestreaming &mdash; Lightning 1.0.6 documentation</title>
+    <title>lightning.Lightning.linestreaming &mdash; Lightning 1.1.1 documentation</title>
     
     <link rel="stylesheet" href="../_static/basic.css" type="text/css" />
     <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
-    <link rel="stylesheet" href="../_static/bootswatch-3.1.0/readable/bootstrap.min.css" type="text/css" />
+    <link rel="stylesheet" href="../_static/bootswatch-3.3.4/readable/bootstrap.min.css" type="text/css" />
     <link rel="stylesheet" href="../_static/bootstrap-sphinx.css" type="text/css" />
     <link rel="stylesheet" href="../_static/styles.css" type="text/css" />
     
     <script type="text/javascript">
       var DOCUMENTATION_OPTIONS = {
         URL_ROOT:    '../',
-        VERSION:     '1.0.6',
+        VERSION:     '1.1.1',
         COLLAPSE_INDEX: false,
         FILE_SUFFIX: '.html',
         HAS_SOURCE:  true
@@ -29,10 +29,10 @@
     <script type="text/javascript" src="http://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
     <script type="text/javascript" src="../_static/js/jquery-1.11.0.min.js"></script>
     <script type="text/javascript" src="../_static/js/jquery-fix.js"></script>
-    <script type="text/javascript" src="../_static/bootstrap-3.1.0/js/bootstrap.min.js"></script>
+    <script type="text/javascript" src="../_static/bootstrap-3.3.4/js/bootstrap.min.js"></script>
     <script type="text/javascript" src="../_static/bootstrap-sphinx.js"></script>
     <link rel="shortcut icon" href="../_static/favicon.ico"/>
-    <link rel="top" title="Lightning 1.0.6 documentation" href="../index.html" />
+    <link rel="top" title="Lightning 1.1.1 documentation" href="../index.html" />
 <meta charset='utf-8'>
 <meta http-equiv='X-UA-Compatible' content='IE=edge,chrome=1'>
 <meta name='viewport' content='width=device-width, initial-scale=1.0, maximum-scale=1'>
@@ -52,12 +52,11 @@
         </button>
         <a class="navbar-brand" href="../index.html"><img src="../_static/lightning_logo.png">
            </a>
-        <span class="navbar-text navbar-version pull-left"><b>1.0.6</b></span>
+        <span class="navbar-text navbar-version pull-left"><b>1.1.1</b></span>
       </div>
 
         <div class="collapse navbar-collapse nav-collapse">
           <ul class="nav navbar-nav">
-            <li class="divider-vertical"></li>
             
             
               <li class="dropdown globaltoc-container">
@@ -102,11 +101,11 @@
 <h1>lightning.Lightning.linestreaming<a class="headerlink" href="#lightning-lightning-linestreaming" title="Permalink to this headline">¶</a></h1>
 <dl class="method">
 <dt id="lightning.Lightning.linestreaming">
-<tt class="descclassname">Lightning.</tt><tt class="descname">linestreaming</tt><big>(</big><em>series</em>, <em>index=None</em>, <em>color=None</em>, <em>label=None</em>, <em>size=None</em>, <em>xaxis=None</em>, <em>yaxis=None</em><big>)</big><a class="headerlink" href="#lightning.Lightning.linestreaming" title="Permalink to this definition">¶</a></dt>
+<tt class="descclassname">Lightning.</tt><tt class="descname">linestreaming</tt><big>(</big><em>series</em>, <em>index=None</em>, <em>color=None</em>, <em>group=None</em>, <em>size=None</em>, <em>xaxis=None</em>, <em>yaxis=None</em>, <em>width=None</em>, <em>zoom=False</em>, <em>description=None</em>, <em>max_width=50</em>, <em>height=None</em><big>)</big><a class="headerlink" href="#lightning.Lightning.linestreaming" title="Permalink to this definition">¶</a></dt>
 <dd><p>Plot streaming one-dimensional series data as updating lines.</p>
 <p>Plotting once returns a visualization on which &#8216;append&#8217; can be called
 to add new data in a streaming fashion. New lines will appear on the right.</p>
-<img alt="generated/line.png" src="generated/line.png" />
+<img alt="generated/line-streaming.png" src="generated/line-streaming.png" />
 <table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
 <col class="field-body" />
@@ -124,9 +123,9 @@ Can also pass a list where each individual series is of a different length.</p>
 <blockquote>
 <div><p>Single rgb value or array to set line colors</p>
 </div></blockquote>
-<p><strong>label</strong> : array-like, optional, singleton or (n,)</p>
+<p><strong>group</strong> : array-like, optional, singleton or (n,)</p>
 <blockquote>
-<div><p>Single integer or array to set line colors via group labels</p>
+<div><p>Single integer or array to set line colors via group assignment</p>
 </div></blockquote>
 <p><strong>size</strong> : array-like, optional, singleton or (n,)</p>
 <blockquote>
@@ -137,8 +136,25 @@ Can also pass a list where each individual series is of a different length.</p>
 <div><p>Label for x-axis</p>
 </div></blockquote>
 <p><strong>yaxis</strong> : str, optional, default = None</p>
-<blockquote class="last">
+<blockquote>
 <div><p>Label for y-axis</p>
+</div></blockquote>
+<p><strong>max_width</strong> : int, optional, default = 50</p>
+<blockquote>
+<div><p>The maximum number of time points to show before plot shifts.</p>
+</div></blockquote>
+<p><strong>width</strong> : int, optional, default=None</p>
+<blockquote>
+<div><p>Width of visualization in pixels.</p>
+</div></blockquote>
+<p><strong>height</strong> : int, optional, default=None</p>
+<blockquote>
+<div><p>Height of visualization in pixels.</p>
+</div></blockquote>
+<p><strong>description</strong> : str, optional, default=None</p>
+<blockquote class="last">
+<div><p>Markdown formatted text to show with visualization
+when displayed in a Lightning server.</p>
 </div></blockquote>
 </td>
 </tr>
@@ -160,8 +176,6 @@ Can also pass a list where each individual series is of a different length.</p>
       
     </p>
     <p>
-        &copy; Copyright 2014, Matthew Conlen and Jeremy Freeman.<br/>
-      Created using <a href="http://sphinx.pocoo.org/">Sphinx</a> 1.2.3.<br/>
     </p>
   </div>
 </footer>

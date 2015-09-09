@@ -1,0 +1,6 @@
+lightning.Lightning.disable_local
+=================================
+
+.. currentmodule:: lightning
+
+.. automethod:: Lightning.disable_local

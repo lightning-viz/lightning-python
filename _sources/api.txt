@@ -3,8 +3,8 @@
 API Reference
 =============
 
-Set up
---------
+Setup
+-----
 
 .. currentmodule:: lightning.Lightning
 
@@ -17,6 +17,10 @@ Set up
 	set_host
 	enable_ipython
 	disable_ipython
+	enable_local
+	disable_local
+	set_size
+
 
 
 Plots
@@ -29,23 +33,14 @@ Plots
 
 	scatter
 	line
-	linestacked
 	force
 	graph
 	graphbundled
 	matrix
 	adjacency
 	map
-
-Linked
-------
-
-.. currentmodule:: lightning.Lightning
-
-.. autosummary::
-	:toctree: generated/
-
-	scatterline
+	circle
+	histogram
 
 Images
 ------
@@ -56,6 +51,7 @@ Images
 	:toctree: generated/
 
 	image
+	imagepoly
 	gallery
 
 3D

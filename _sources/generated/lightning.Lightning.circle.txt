@@ -1,0 +1,6 @@
+lightning.Lightning.circle
+==========================
+
+.. currentmodule:: lightning
+
+.. automethod:: Lightning.circle

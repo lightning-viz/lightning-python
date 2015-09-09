@@ -1,6 +1,0 @@
-lightning.Lightning.linestacked
-===============================
-
-.. currentmodule:: lightning
-
-.. automethod:: Lightning.linestacked

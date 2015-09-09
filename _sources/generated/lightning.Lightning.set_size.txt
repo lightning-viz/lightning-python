@@ -1,0 +1,6 @@
+lightning.Lightning.set_size
+============================
+
+.. currentmodule:: lightning
+
+.. automethod:: Lightning.set_size

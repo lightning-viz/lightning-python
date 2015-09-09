@@ -14,22 +14,21 @@
 }
 
 .button {
-  padding-left: 40px;
-  padding-right: 40px;
+  padding-left: 20px;
+  padding-right: 20px;
   padding-top: 10px;
   padding-bottom: 10px;
   margin-right: 20px;
-  border: 1px solid #B8C6D3;
-  box-shadow: inset 0px 1px 0px 0px rgba(255,255,255,0.30);
-  border-radius: 3px;
+  border: dotted 2px #9175f0;
+  border-radius: 5px;
   font-size: 24px;
   color: #8F7BD9;
   line-height: 26px;
 }
 
 .button:hover {
-  color: #A997EB;
-  background-color: rgb(240,240,240);
+  color: white;
+  background-color: #9175f0;
 
 }
 
@@ -116,6 +115,11 @@ a {
 a:hover {
 	color: #A997EB;
 	text-decoration: none;
+}
+
+a:focus {
+  color: #A997EB;
+  text-decoration: none;
 }
 
 a:active {

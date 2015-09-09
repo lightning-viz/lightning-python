@@ -1,0 +1,6 @@
+lightning.Lightning.histogram
+=============================
+
+.. currentmodule:: lightning
+
+.. automethod:: Lightning.histogram

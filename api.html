@@ -6,18 +6,18 @@
   <head>
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
     
-    <title>API Reference &mdash; Lightning 1.0.6 documentation</title>
+    <title>API Reference &mdash; Lightning 1.1.1 documentation</title>
     
     <link rel="stylesheet" href="_static/basic.css" type="text/css" />
     <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
-    <link rel="stylesheet" href="_static/bootswatch-3.1.0/readable/bootstrap.min.css" type="text/css" />
+    <link rel="stylesheet" href="_static/bootswatch-3.3.4/readable/bootstrap.min.css" type="text/css" />
     <link rel="stylesheet" href="_static/bootstrap-sphinx.css" type="text/css" />
     <link rel="stylesheet" href="_static/styles.css" type="text/css" />
     
     <script type="text/javascript">
       var DOCUMENTATION_OPTIONS = {
         URL_ROOT:    './',
-        VERSION:     '1.0.6',
+        VERSION:     '1.1.1',
         COLLAPSE_INDEX: false,
         FILE_SUFFIX: '.html',
         HAS_SOURCE:  true
@@ -29,10 +29,10 @@
     <script type="text/javascript" src="http://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
     <script type="text/javascript" src="_static/js/jquery-1.11.0.min.js"></script>
     <script type="text/javascript" src="_static/js/jquery-fix.js"></script>
-    <script type="text/javascript" src="_static/bootstrap-3.1.0/js/bootstrap.min.js"></script>
+    <script type="text/javascript" src="_static/bootstrap-3.3.4/js/bootstrap.min.js"></script>
     <script type="text/javascript" src="_static/bootstrap-sphinx.js"></script>
     <link rel="shortcut icon" href="_static/favicon.ico"/>
-    <link rel="top" title="Lightning 1.0.6 documentation" href="index.html" />
+    <link rel="top" title="Lightning 1.1.1 documentation" href="index.html" />
 <meta charset='utf-8'>
 <meta http-equiv='X-UA-Compatible' content='IE=edge,chrome=1'>
 <meta name='viewport' content='width=device-width, initial-scale=1.0, maximum-scale=1'>
@@ -52,12 +52,11 @@
         </button>
         <a class="navbar-brand" href="index.html"><img src="_static/lightning_logo.png">
            </a>
-        <span class="navbar-text navbar-version pull-left"><b>1.0.6</b></span>
+        <span class="navbar-text navbar-version pull-left"><b>1.1.1</b></span>
       </div>
 
         <div class="collapse navbar-collapse nav-collapse">
           <ul class="nav navbar-nav">
-            <li class="divider-vertical"></li>
             
             
               <li class="dropdown globaltoc-container">
@@ -100,8 +99,8 @@
       
   <div class="section" id="api-reference">
 <span id="api-ref"></span><h1>API Reference<a class="headerlink" href="#api-reference" title="Permalink to this headline">¶</a></h1>
-<div class="section" id="set-up">
-<h2>Set up<a class="headerlink" href="#set-up" title="Permalink to this headline">¶</a></h2>
+<div class="section" id="setup">
+<h2>Setup<a class="headerlink" href="#setup" title="Permalink to this headline">¶</a></h2>
 <table border="1" class="longtable docutils">
 <colgroup>
 <col width="10%" />
@@ -126,6 +125,15 @@
 <tr class="row-even"><td><a class="reference internal" href="generated/lightning.Lightning.disable_ipython.html#lightning.Lightning.disable_ipython" title="lightning.Lightning.disable_ipython"><tt class="xref py py-obj docutils literal"><span class="pre">disable_ipython</span></tt></a>()</td>
 <td>Disable plotting in the iPython notebook.</td>
 </tr>
+<tr class="row-odd"><td><a class="reference internal" href="generated/lightning.Lightning.enable_local.html#lightning.Lightning.enable_local" title="lightning.Lightning.enable_local"><tt class="xref py py-obj docutils literal"><span class="pre">enable_local</span></tt></a>()</td>
+<td>Enable a local mode.</td>
+</tr>
+<tr class="row-even"><td><a class="reference internal" href="generated/lightning.Lightning.disable_local.html#lightning.Lightning.disable_local" title="lightning.Lightning.disable_local"><tt class="xref py py-obj docutils literal"><span class="pre">disable_local</span></tt></a>()</td>
+<td>Disable local mode.</td>
+</tr>
+<tr class="row-odd"><td><a class="reference internal" href="generated/lightning.Lightning.set_size.html#lightning.Lightning.set_size" title="lightning.Lightning.set_size"><tt class="xref py py-obj docutils literal"><span class="pre">set_size</span></tt></a>([size])</td>
+<td>Set a figure size using one of four options.</td>
+</tr>
 </tbody>
 </table>
 </div>
@@ -137,46 +145,35 @@
 <col width="90%" />
 </colgroup>
 <tbody valign="top">
-<tr class="row-odd"><td><a class="reference internal" href="generated/lightning.Lightning.scatter.html#lightning.Lightning.scatter" title="lightning.Lightning.scatter"><tt class="xref py py-obj docutils literal"><span class="pre">scatter</span></tt></a>(x,&nbsp;y[,&nbsp;color,&nbsp;label,&nbsp;size,&nbsp;alpha,&nbsp;...])</td>
+<tr class="row-odd"><td><a class="reference internal" href="generated/lightning.Lightning.scatter.html#lightning.Lightning.scatter" title="lightning.Lightning.scatter"><tt class="xref py py-obj docutils literal"><span class="pre">scatter</span></tt></a>(x,&nbsp;y[,&nbsp;labels,&nbsp;values,&nbsp;color,&nbsp;...])</td>
 <td>Plot two-dimensional data as points.</td>
 </tr>
-<tr class="row-even"><td><a class="reference internal" href="generated/lightning.Lightning.line.html#lightning.Lightning.line" title="lightning.Lightning.line"><tt class="xref py py-obj docutils literal"><span class="pre">line</span></tt></a>(series[,&nbsp;index,&nbsp;color,&nbsp;label,&nbsp;size,&nbsp;...])</td>
+<tr class="row-even"><td><a class="reference internal" href="generated/lightning.Lightning.line.html#lightning.Lightning.line" title="lightning.Lightning.line"><tt class="xref py py-obj docutils literal"><span class="pre">line</span></tt></a>(series[,&nbsp;index,&nbsp;color,&nbsp;group,&nbsp;...])</td>
 <td>Plot one-dimensional series data as lines.</td>
 </tr>
-<tr class="row-odd"><td><a class="reference internal" href="generated/lightning.Lightning.linestacked.html#lightning.Lightning.linestacked" title="lightning.Lightning.linestacked"><tt class="xref py py-obj docutils literal"><span class="pre">linestacked</span></tt></a>(series[,&nbsp;color,&nbsp;label,&nbsp;size])</td>
-<td>Create a browsable array of line plots.</td>
+<tr class="row-odd"><td><a class="reference internal" href="generated/lightning.Lightning.force.html#lightning.Lightning.force" title="lightning.Lightning.force"><tt class="xref py py-obj docutils literal"><span class="pre">force</span></tt></a>(conn[,&nbsp;values,&nbsp;labels,&nbsp;color,&nbsp;group,&nbsp;...])</td>
+<td>Create a force-directed network from connectivity.</td>
 </tr>
-<tr class="row-even"><td><a class="reference internal" href="generated/lightning.Lightning.force.html#lightning.Lightning.force" title="lightning.Lightning.force"><tt class="xref py py-obj docutils literal"><span class="pre">force</span></tt></a>(matrix[,&nbsp;color,&nbsp;label,&nbsp;size])</td>
-<td>Create a force-directed network from a connectivity matrix.</td>
+<tr class="row-even"><td><a class="reference internal" href="generated/lightning.Lightning.graph.html#lightning.Lightning.graph" title="lightning.Lightning.graph"><tt class="xref py py-obj docutils literal"><span class="pre">graph</span></tt></a>(x,&nbsp;y,&nbsp;conn[,&nbsp;values,&nbsp;labels,&nbsp;color,&nbsp;...])</td>
+<td>Create a node-link graph from spatial points and their connectivity.</td>
 </tr>
-<tr class="row-odd"><td><a class="reference internal" href="generated/lightning.Lightning.graph.html#lightning.Lightning.graph" title="lightning.Lightning.graph"><tt class="xref py py-obj docutils literal"><span class="pre">graph</span></tt></a>(x,&nbsp;y,&nbsp;matrix[,&nbsp;color,&nbsp;label,&nbsp;size,&nbsp;...])</td>
-<td>Create a node-link graph from spatial points and their connectivity matrix.</td>
+<tr class="row-odd"><td><a class="reference internal" href="generated/lightning.Lightning.graphbundled.html#lightning.Lightning.graphbundled" title="lightning.Lightning.graphbundled"><tt class="xref py py-obj docutils literal"><span class="pre">graphbundled</span></tt></a>(x,&nbsp;y,&nbsp;conn[,&nbsp;labels,&nbsp;values,&nbsp;...])</td>
+<td>Create a bundled node-link graph from spatial points and their connectivity.</td>
 </tr>
-<tr class="row-even"><td><a class="reference internal" href="generated/lightning.Lightning.graphbundled.html#lightning.Lightning.graphbundled" title="lightning.Lightning.graphbundled"><tt class="xref py py-obj docutils literal"><span class="pre">graphbundled</span></tt></a>(x,&nbsp;y,&nbsp;matrix[,&nbsp;color,&nbsp;label,&nbsp;...])</td>
-<td>Create a node-link graph with bundled edges.</td>
-</tr>
-<tr class="row-odd"><td><a class="reference internal" href="generated/lightning.Lightning.matrix.html#lightning.Lightning.matrix" title="lightning.Lightning.matrix"><tt class="xref py py-obj docutils literal"><span class="pre">matrix</span></tt></a>(matrix[,&nbsp;colormap])</td>
+<tr class="row-even"><td><a class="reference internal" href="generated/lightning.Lightning.matrix.html#lightning.Lightning.matrix" title="lightning.Lightning.matrix"><tt class="xref py py-obj docutils literal"><span class="pre">matrix</span></tt></a>(matrix[,&nbsp;colormap,&nbsp;row_labels,&nbsp;...])</td>
 <td>Visualize a dense matrix or table as a heat map.</td>
 </tr>
-<tr class="row-even"><td><a class="reference internal" href="generated/lightning.Lightning.adjacency.html#lightning.Lightning.adjacency" title="lightning.Lightning.adjacency"><tt class="xref py py-obj docutils literal"><span class="pre">adjacency</span></tt></a>(matrix[,&nbsp;label])</td>
+<tr class="row-odd"><td><a class="reference internal" href="generated/lightning.Lightning.adjacency.html#lightning.Lightning.adjacency" title="lightning.Lightning.adjacency"><tt class="xref py py-obj docutils literal"><span class="pre">adjacency</span></tt></a>(conn[,&nbsp;labels,&nbsp;group,&nbsp;symmetric,&nbsp;...])</td>
 <td>Visualize a sparse adjacency matrix.</td>
 </tr>
-<tr class="row-odd"><td><a class="reference internal" href="generated/lightning.Lightning.map.html#lightning.Lightning.map" title="lightning.Lightning.map"><tt class="xref py py-obj docutils literal"><span class="pre">map</span></tt></a>(regions,&nbsp;values[,&nbsp;colormap])</td>
+<tr class="row-even"><td><a class="reference internal" href="generated/lightning.Lightning.map.html#lightning.Lightning.map" title="lightning.Lightning.map"><tt class="xref py py-obj docutils literal"><span class="pre">map</span></tt></a>(regions,&nbsp;values[,&nbsp;colormap,&nbsp;width,&nbsp;...])</td>
 <td>Create a chloropleth map of the world or united states.</td>
 </tr>
-</tbody>
-</table>
-</div>
-<div class="section" id="linked">
-<h2>Linked<a class="headerlink" href="#linked" title="Permalink to this headline">¶</a></h2>
-<table border="1" class="longtable docutils">
-<colgroup>
-<col width="10%" />
-<col width="90%" />
-</colgroup>
-<tbody valign="top">
-<tr class="row-odd"><td><a class="reference internal" href="generated/lightning.Lightning.scatterline.html#lightning.Lightning.scatterline" title="lightning.Lightning.scatterline"><tt class="xref py py-obj docutils literal"><span class="pre">scatterline</span></tt></a>(x,&nbsp;y,&nbsp;series[,&nbsp;color,&nbsp;label,&nbsp;...])</td>
-<td>Create a joint scatter / line plot.</td>
+<tr class="row-odd"><td><a class="reference internal" href="generated/lightning.Lightning.circle.html#lightning.Lightning.circle" title="lightning.Lightning.circle"><tt class="xref py py-obj docutils literal"><span class="pre">circle</span></tt></a>(conn[,&nbsp;group,&nbsp;color,&nbsp;labels,&nbsp;width,&nbsp;...])</td>
+<td>Create a circular graph from connectivity data.</td>
+</tr>
+<tr class="row-even"><td><a class="reference internal" href="generated/lightning.Lightning.histogram.html#lightning.Lightning.histogram" title="lightning.Lightning.histogram"><tt class="xref py py-obj docutils literal"><span class="pre">histogram</span></tt></a>(values[,&nbsp;bins,&nbsp;width,&nbsp;zoom,&nbsp;...])</td>
+<td>Create a histogram.</td>
 </tr>
 </tbody>
 </table>
@@ -189,10 +186,13 @@
 <col width="90%" />
 </colgroup>
 <tbody valign="top">
-<tr class="row-odd"><td><a class="reference internal" href="generated/lightning.Lightning.image.html#lightning.Lightning.image" title="lightning.Lightning.image"><tt class="xref py py-obj docutils literal"><span class="pre">image</span></tt></a>(imagedata)</td>
+<tr class="row-odd"><td><a class="reference internal" href="generated/lightning.Lightning.image.html#lightning.Lightning.image" title="lightning.Lightning.image"><tt class="xref py py-obj docutils literal"><span class="pre">image</span></tt></a>(imagedata[,&nbsp;width,&nbsp;description,&nbsp;height])</td>
 <td>Display an array as an image.</td>
 </tr>
-<tr class="row-even"><td><a class="reference internal" href="generated/lightning.Lightning.gallery.html#lightning.Lightning.gallery" title="lightning.Lightning.gallery"><tt class="xref py py-obj docutils literal"><span class="pre">gallery</span></tt></a>(imagedata)</td>
+<tr class="row-even"><td><a class="reference internal" href="generated/lightning.Lightning.imagepoly.html#lightning.Lightning.imagepoly" title="lightning.Lightning.imagepoly"><tt class="xref py py-obj docutils literal"><span class="pre">imagepoly</span></tt></a>(imagedata[,&nbsp;polygons,&nbsp;xy,&nbsp;width,&nbsp;...])</td>
+<td>Display an array as an image with polygonal regions and region drawing.</td>
+</tr>
+<tr class="row-odd"><td><a class="reference internal" href="generated/lightning.Lightning.gallery.html#lightning.Lightning.gallery" title="lightning.Lightning.gallery"><tt class="xref py py-obj docutils literal"><span class="pre">gallery</span></tt></a>(imagedata[,&nbsp;width,&nbsp;description,&nbsp;height])</td>
 <td>Display a collection of arrays as browsable images with thumbnails.</td>
 </tr>
 </tbody>
@@ -206,10 +206,10 @@
 <col width="90%" />
 </colgroup>
 <tbody valign="top">
-<tr class="row-odd"><td><a class="reference internal" href="generated/lightning.Lightning.scatter3.html#lightning.Lightning.scatter3" title="lightning.Lightning.scatter3"><tt class="xref py py-obj docutils literal"><span class="pre">scatter3</span></tt></a>(x,&nbsp;y,&nbsp;z[,&nbsp;color,&nbsp;label,&nbsp;alpha,&nbsp;size])</td>
+<tr class="row-odd"><td><a class="reference internal" href="generated/lightning.Lightning.scatter3.html#lightning.Lightning.scatter3" title="lightning.Lightning.scatter3"><tt class="xref py py-obj docutils literal"><span class="pre">scatter3</span></tt></a>(x,&nbsp;y,&nbsp;z[,&nbsp;color,&nbsp;group,&nbsp;alpha,&nbsp;...])</td>
 <td>Plot three-dimensional data as points.</td>
 </tr>
-<tr class="row-even"><td><a class="reference internal" href="generated/lightning.Lightning.volume.html#lightning.Lightning.volume" title="lightning.Lightning.volume"><tt class="xref py py-obj docutils literal"><span class="pre">volume</span></tt></a>(imagedata)</td>
+<tr class="row-even"><td><a class="reference internal" href="generated/lightning.Lightning.volume.html#lightning.Lightning.volume" title="lightning.Lightning.volume"><tt class="xref py py-obj docutils literal"><span class="pre">volume</span></tt></a>(imagedata[,&nbsp;width,&nbsp;description,&nbsp;height])</td>
 <td>Display a collection of images as a three-dimensional volume.</td>
 </tr>
 </tbody>
@@ -223,10 +223,10 @@
 <col width="90%" />
 </colgroup>
 <tbody valign="top">
-<tr class="row-odd"><td><a class="reference internal" href="generated/lightning.Lightning.scatterstreaming.html#lightning.Lightning.scatterstreaming" title="lightning.Lightning.scatterstreaming"><tt class="xref py py-obj docutils literal"><span class="pre">scatterstreaming</span></tt></a>(x,&nbsp;y[,&nbsp;color,&nbsp;label,&nbsp;size,&nbsp;...])</td>
+<tr class="row-odd"><td><a class="reference internal" href="generated/lightning.Lightning.scatterstreaming.html#lightning.Lightning.scatterstreaming" title="lightning.Lightning.scatterstreaming"><tt class="xref py py-obj docutils literal"><span class="pre">scatterstreaming</span></tt></a>(x,&nbsp;y[,&nbsp;values,&nbsp;labels,&nbsp;...])</td>
 <td>Create a streaming scatter plot of x and y.</td>
 </tr>
-<tr class="row-even"><td><a class="reference internal" href="generated/lightning.Lightning.linestreaming.html#lightning.Lightning.linestreaming" title="lightning.Lightning.linestreaming"><tt class="xref py py-obj docutils literal"><span class="pre">linestreaming</span></tt></a>(series[,&nbsp;index,&nbsp;color,&nbsp;label,&nbsp;...])</td>
+<tr class="row-even"><td><a class="reference internal" href="generated/lightning.Lightning.linestreaming.html#lightning.Lightning.linestreaming" title="lightning.Lightning.linestreaming"><tt class="xref py py-obj docutils literal"><span class="pre">linestreaming</span></tt></a>(series[,&nbsp;index,&nbsp;color,&nbsp;group,&nbsp;...])</td>
 <td>Plot streaming one-dimensional series data as updating lines.</td>
 </tr>
 </tbody>
@@ -246,8 +246,6 @@
       
     </p>
     <p>
-        &copy; Copyright 2014, Matthew Conlen and Jeremy Freeman.<br/>
-      Created using <a href="http://sphinx.pocoo.org/">Sphinx</a> 1.2.3.<br/>
     </p>
   </div>
 </footer>

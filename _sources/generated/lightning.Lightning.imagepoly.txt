@@ -1,0 +1,6 @@
+lightning.Lightning.imagepoly
+=============================
+
+.. currentmodule:: lightning
+
+.. automethod:: Lightning.imagepoly

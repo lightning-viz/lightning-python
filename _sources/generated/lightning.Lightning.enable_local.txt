@@ -1,0 +1,6 @@
+lightning.Lightning.enable_local
+================================
+
+.. currentmodule:: lightning
+
+.. automethod:: Lightning.enable_local
