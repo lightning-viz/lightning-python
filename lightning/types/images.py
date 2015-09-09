@@ -36,7 +36,7 @@ class ImagePoly(Base):
     _local = False
     
     @staticmethod
-    def clean(imagedata, coordinates=None, xy=None):
+    def clean(imagedata, polygons=None, xy=None):
         """
         Display an array as an image with polygonal regions and region drawing.
 
@@ -47,10 +47,10 @@ class ImagePoly(Base):
         imagedata : array-like
             Image as a two dimensional (grayscale) or three dimensional (RGB) array.
 
-        coordinates : array-like
-            List of coordinates or list of list of coordinates. Assumes array indexing
-            (i.e. row/column), in the form [[r,c],[r,c]] for one region or
-            [[[r0,c0],[r0,c0]], [[r1,c1],[r1,c1]]] for multiple regions
+        polygons : array-like
+            List of coordinates or list of list of coordinates of polygonal regions.
+            Assumes array indexing (i.e. row/column), in the form [[r,c],[r,c]]
+            for one polygon or [[[r0,c0],[r0,c0]], [[r1,c1],[r1,c1]]] for multiple regions.
 
         xy : boolean, optional, default = None
             Only if True treat coordinates as x/y positions instead of row/column indices
@@ -60,7 +60,7 @@ class ImagePoly(Base):
 
         imgs = [array_to_im(imagedata)]
         outdict = {'images': imgs}
-        outdict = add_property(outdict, coordinates, 'coordinates', xy=xy)
+        outdict = add_property(outdict, polygons, 'polygons', xy=xy)
 
         return outdict
 

@@ -23,7 +23,7 @@ def check_property(prop, name, **kwargs):
         'alpha': check_alpha,
         'size': check_size,
         'index': check_index,
-        'coordinates': check_coordinates,
+        'polygons': check_polygons,
         'colormap': check_colormap,
         'bins': check_bins
     }
@@ -36,7 +36,7 @@ def check_property(prop, name, **kwargs):
         return prop
 
 
-def check_coordinates(co, xy=None):
+def check_polygons(co, xy=None):
     """
     Check and parse coordinates as either a single coordinate list [[r,c],[r,c]] or a
     list of coordinates for multiple regions [[[r0,c0],[r0,c0]], [[r1,c1],[r1,c1]]]
