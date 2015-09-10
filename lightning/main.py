@@ -187,14 +187,17 @@ class Lightning(object):
     def startup_message_ipython(self):
         import os
         import base64
-        from IPython.display import display, HTML
-        icon = os.path.join(os.path.dirname(__file__), 'lib/icon.png')
-        with open(icon, "rb") as imfile:
-            im = 'data:image/png;base64,' + base64.b64encode(imfile.read())
-        t = "<div style='margin-top:8px'><img src='%s' width='30px' height='35px' " \
-            "style='display: inline-block; padding-right: 10px'>" \
-            "</img><span>Lightning initialized</span></div>" % im
-        display(HTML(t))
+        try:
+            from IPython.display import display, HTML
+            icon = os.path.join(os.path.dirname(__file__), 'lib/icon.png')
+            with open(icon, "rb") as imfile:
+                im = b"".join([b'data:image/png;base64,', base64.b64encode(imfile.read())]).decode("utf-8")
+            t = "<div style='margin-top:8px'><img src='%s' width='30px' height='35px' " \
+                "style='display: inline-block; padding-right: 10px'>" \
+                "</img><span>Lightning initialized</span></div>" % im
+            display(HTML(t))
+        except:
+            print("Lightning initialized")
 
     def startup_message(self):
         print("Lightning initialized")
