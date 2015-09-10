@@ -63,9 +63,8 @@ class Lightning(object):
         from IPython.display import display, Javascript, HTML
 
         self.ipython_enabled = True
-        if not hasattr(self, 'size'):
-            self.set_size('medium')
-            
+        self.set_size('medium')
+
         ip = get_ipython()
         formatter = ip.display_formatter.formatters['text/html']
 
