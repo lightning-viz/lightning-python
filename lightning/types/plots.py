@@ -627,3 +627,17 @@ class Histogram(Base):
         outdict = add_property(outdict, bins, 'bins')
 
         return outdict
+
+
+@viztype
+class VegaLite(Base):
+
+    _name = 'vega-lite'
+    _func = 'vega_lite'
+
+    @staticmethod
+    def clean(spec):
+        outdict = {
+            'spec': spec
+        }
+        return outdict
