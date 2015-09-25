@@ -637,6 +637,18 @@ class VegaLite(Base):
 
     @staticmethod
     def clean(spec):
+        """
+        Create a visualization from a vega-lite spec.
+
+        .. image:: vega-lite.png
+
+        Parameters
+        ----------
+        values : spec
+            Vega-lite spec. Can be a dictionary, string, or Altiar object
+
+        """
+
         outdict = {}
         outdict = add_property(outdict, spec, 'spec')
         return outdict
