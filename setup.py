@@ -3,7 +3,7 @@
 """The setup and build script for the lightning-python library."""
 
 __author__ = 'github@mathisonian.com'
-__version__ = '1.1.1'
+__version__ = '1.2.1'
 
 # The base package metadata to be used by both distutils and setuptools
 METADATA = dict(
