@@ -1,6 +1,7 @@
 from numpy import asarray, array, ndarray, vstack, newaxis, nonzero, concatenate, \
     transpose, atleast_2d, size, isscalar, meshgrid, where, zeros, ones
 from matplotlib.path import Path
+import ast
 
 
 def add_property(d, prop, name, **kwargs):
@@ -26,7 +27,8 @@ def check_property(prop, name, **kwargs):
         'index': check_index,
         'coordinates': check_coordinates,
         'colormap': check_colormap,
-        'bins': check_bins
+        'bins': check_bins,
+        'spec': check_spec
     }
 
     if name in checkers:
@@ -145,6 +147,20 @@ def check_1d(x, name):
     x = x.flatten()
 
     return x
+
+def check_spec(spec):
+    try:
+        import altair
+        if type(spec) == altair.api.Viz:
+            spec = spec.to_dict()
+    except ImportError:
+        pass
+
+    if type(spec) == str:
+        import ast
+        spec = ast.literal_eval(spec)
+
+    return spec
 
 
 def array_to_lines(data):

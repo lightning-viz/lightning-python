@@ -637,7 +637,6 @@ class VegaLite(Base):
 
     @staticmethod
     def clean(spec):
-        outdict = {
-            'spec': spec
-        }
+        outdict = {}
+        outdict = add_property(outdict, spec, 'spec')
         return outdict
