@@ -5,12 +5,14 @@ from .visualization import Visualization, VisualizationLocal
 
 class Lightning(object):
 
-    def __init__(self, host="http://localhost:3000", local=False, ipython=False, auth=None, size='medium'):
+    def __init__(self, host="http://localhost:3000", local=False, ipython=False, auth=None, size='medium', quiet=False):
+        self.quiet = quiet
 
-        if ipython:
-            self.startup_message_ipython()
-        else:
-            self.startup_message()
+        if not self.quiet:
+            if ipython:
+                self.startup_message_ipython()
+            else:
+                self.startup_message()
 
         if local:
             self.enable_local()
@@ -72,7 +74,8 @@ class Lightning(object):
             from lightning.visualization import VisualizationLocal
             js = VisualizationLocal.load_embed()
             display(HTML("<script>" + js + "</script>"))
-            print('Running local mode, some functionality limited.\n')
+            if not self.quiet:
+                print('Running local mode, some functionality limited.\n')
             formatter.for_type(VisualizationLocal, lambda viz, kwds=kwargs: viz.get_html())
         else:
             formatter.for_type(Visualization, lambda viz, kwds=kwargs: viz.get_html())
