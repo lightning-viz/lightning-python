@@ -651,4 +651,5 @@ class VegaLite(Base):
 
         outdict = {}
         outdict = add_property(outdict, spec, 'spec')
+
         return outdict

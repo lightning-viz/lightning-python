@@ -107,7 +107,7 @@ class Visualization(object):
             if description:
                 payload['description'] = description
             headers = {'Content-type': 'application/json', 'Accept': 'text/plain'}
-            r = requests.post(url, data=json.dumps(payload), headers=headers, auth=session.auth)
+            r = requests.post(url, data=json.dumps(payload, allow_nan=False), headers=headers, auth=session.auth)
             if r.status_code == 404:
                 raise Exception(r.text)
             elif not r.status_code == requests.codes.ok:
