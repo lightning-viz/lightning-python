@@ -13,7 +13,7 @@ class Visualization(object):
         self.auth = auth
 
         if self.session.lgn.ipython_enabled:
-            from IPython.kernel.comm import Comm
+            from ipykernel.comm import Comm
             self.comm = Comm('lightning', {'id': self.id})
             self.comm_handlers = {}
             self.comm.on_msg(self._handle_comm_message)
